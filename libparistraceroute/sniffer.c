@@ -372,11 +372,13 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
 		//writebe16(recv_bytes, 2, ip_len);
         printf("sniffer_process_packets: something unclear here\n");
 #endif
-		if (sniffer->recv_callback != NULL) {
-            packet = packet_create_from_bytes(recv_bytes, num_bytes);
+	if (sniffer->recv_callback != NULL) {
+            	packet = packet_create_from_bytes(recv_bytes, num_bytes);
+		packet_dump(packet);
+           	puts("");
 
-			if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
-                fprintf(stderr, "Error in sniffer's callback\n");
+		if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
+                	fprintf(stderr, "Error in sniffer's callback\n");
             }
         }
 	}
