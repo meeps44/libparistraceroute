@@ -5,6 +5,21 @@
 #include <errno.h>
 #include <string.h>
 #include "ext.h"
+#include <openssl/sha.h> // SHA1
+
+int hashPath(parsed_packet *p)
+{
+    // Creates a hash of all the hops in a path and returns the result
+    // We define a path as an ordered, indexed set of hops to a destination.
+
+    // The data to be hashed
+    char data[] = "Hello, world!";
+    size_t length = strlen(data);
+
+    unsigned char hash[SHA_DIGEST_LENGTH];
+    SHA1(data, length, hash);
+    // hash now contains the 20-byte SHA-1 hash
+}
 
 int asnLookup(char *routeViewsFilePath, address ipv6_address)
 {
