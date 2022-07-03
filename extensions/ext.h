@@ -76,3 +76,10 @@ void printTraceroute(traceroute *t);
  * @return char* 
  */
 char *tracerouteToJSON(traceroute *t);
+
+/**
+ * @brief Gets the current time (GMT)
+ * 
+ * @return A struct representation of the current time in GMT 
+ */
+struct tm *getCurrentTime(void);
