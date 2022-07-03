@@ -7,6 +7,7 @@
 #include "ext.h"
 #include <openssl/sha.h> // SHA1
 #include <time.h>
+#include <stdbool.h>
 
 int hashPath(parsed_packet *p)
 {
@@ -45,8 +46,7 @@ void fWriteTraceroute(traceroute *t, char *fileName)
         .a = 52,
         .b = 1,
         .c = 96,
-        .d = 8765
-    };
+        .d = 8765};
     char my_str[50] = "Hello from process 1!\n";
 
     // opens a file for reading and appending
@@ -62,7 +62,7 @@ void fWriteTraceroute(traceroute *t, char *fileName)
         exit(EXIT_FAILURE);
     }
 
-    fwrite(&my_struct, sizeof(int), sizeof(my_struct)/sizeof(int), f);
+    fwrite(&my_struct, sizeof(int), sizeof(my_struct) / sizeof(int), f);
     // fwrite(my_str, sizeof(char), sizeof(my_str), f);
 
     flock(fileno(f), LOCK_UN); // unlock file
@@ -82,7 +82,14 @@ char *getFileName(struct tm *currentTime)
 
 struct tm getCurrentTime()
 {
-  time_t t = time(NULL);
-  struct tm tm = *localtime(&t);
-  printf("now: %d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    //time_t t = time(NULL);
+    //struct tm tm = *localtime(&t);
+    //printf("now: %d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    time_t t = time(NULL);
+    struct tm *now = gmtime(&t);
+    // Output timestamp in format "YYYY-MM-DD hh:mm:ss : "
+    printf("%04d-%02d-%02d %02d:%02d:%02d : ",
+           now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
+           now->tm_hour, now->tm_min, now->tm_sec);
 }
