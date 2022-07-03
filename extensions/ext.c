@@ -38,7 +38,7 @@ int getFlowLabel(parsed_packet *p);
 void fWriteTraceroute(traceroute *t, char *fileName)
 {
     FILE *f;
-    char *filedir = "/home/erlend/C-programming/library-test/write_test.txt";
+    char *filename = "/home/erlend/C-programming/library-test/write_test.txt";
     size_t numb_elements = 1;
     int my_int = 42;
     address my_struct = {
@@ -50,17 +50,15 @@ void fWriteTraceroute(traceroute *t, char *fileName)
     char my_str[50] = "Hello from process 1!\n";
 
     // opens a file for reading and appending
-    if ((f = fopen(filedir, "a+")) == NULL)
+    if ((f = fopen(filename, "a+")) == NULL)
     {
-        fprintf(stderr, "Error opening file\n");
-        printf("Oh dear, something went wrong ! %s\n", strerror(errno));
+        fprintf(stderr, "Error opening file:\t%s\nErrno:\t%s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     if (flock(fileno(f), LOCK_EX) == -1) // exclusive lock - only 1 file may operate on it at a time
     {
-        fprintf(stderr, "Error locking file\n");
-        printf("Oh dear, something went wrong ! %s\n", strerror(errno));
+        fprintf(stderr, "Error locking file:\t%s\nErrno:\t%s\n", filename, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
