@@ -6,6 +6,7 @@
 #include <string.h>
 #include "ext.h"
 #include <openssl/sha.h> // SHA1
+#include <time.h>
 
 int hashPath(parsed_packet *p)
 {
@@ -73,3 +74,17 @@ void fWriteTraceroute(traceroute *t, char *fileName)
 void printTraceroute(traceroute *t);
 
 char *tracerouteToJSON(traceroute *t);
+
+char *getFileName(struct tm *currentTime)
+{
+    char *fileName;
+
+    return fileName;
+}
+
+struct tm getCurrentTime()
+{
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+  printf("now: %d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
