@@ -9,6 +9,8 @@
 #include <time.h>
 #include <stdbool.h>
 
+#define DEBUG_ON 1
+
 int hashPath(parsed_packet *p)
 {
     // Creates a hash of all the hops in a path and returns the result
@@ -27,11 +29,17 @@ int asnLookup(char *routeViewsFile, address ipv6_address)
 {
     int ASN;
     FILE *fp;
-    char input_buffer[1024];
+    char input_buffer[1024], open_string_buffer[1024];
     int num;
     int i = 1;
 
-    fp = popen("python3 main.py", "r");
+    sprintf(open_string_buffer, "python3 main.py %d", ipv6_address);
+
+    #if DEBUG_ON == 1
+        printf("DEBUG:\tvalue of open_string_buffer:\t%s\n", open_string_buffer);
+    #endif
+
+    fp = popen(open_string_buffer, "r");
     if (fp == NULL)
     {
         perror("Failed to create file pointer\n");
