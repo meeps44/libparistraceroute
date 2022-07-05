@@ -23,10 +23,29 @@ int hashPath(parsed_packet *p)
     // hash now contains the 20-byte SHA-1 hash
 }
 
-int asnLookup(char *routeViewsFilePath, address ipv6_address)
+int asnLookup(char *routeViewsFile, address ipv6_address)
 {
     int ASN;
+    FILE *fp;
+    char input_buffer[1024];
+    int num;
+    int i = 1;
 
+    fp = popen("python3 main.py", "r");
+    if (fp == NULL)
+    {
+        perror("Failed to create file pointer\n");
+        fprintf(stderr, "Errno:\t%s\n", strerror(errno));
+        exit(1);
+    }
+
+    while (fgets(input_buffer, sizeof(input_buffer), fp) != NULL)
+    {
+        printf("Read line:\t%d\n", i++);
+        num = atoi(input_buffer);
+        printf("Num = %d\n", num);
+    }
+    pclose(fp);
     return ASN;
 }
 
@@ -82,9 +101,9 @@ char *getFileName(struct tm *currentTime)
 
 struct tm *getCurrentTime(void)
 {
-    //time_t t = time(NULL);
-    //struct tm tm = *localtime(&t);
-    //printf("now: %d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+    // time_t t = time(NULL);
+    // struct tm tm = *localtime(&t);
+    // printf("now: %d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
     time_t t = time(NULL);
     struct tm *now = gmtime(&t);
