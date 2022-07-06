@@ -13,6 +13,27 @@
 #include "packet.h"  // packet_t
 #include "use.h"
 
+// ERLEND //
+
+typedef struct my_ipv6_address  {
+    int my_address[4];
+} address;
+
+typedef struct my_ipv6_header {
+    unsigned char version:4;
+    int flow_label:20;
+    char traffic_class;
+    short payload_length;
+    char next_header,
+        hop_limit;
+    address source,
+        destination;
+} header;
+
+void parse_packet(const packet_t *p);
+
+// END ERLEND //
+
 /**
  * \struct sniffer_t
  * \brief Structure representing a packet sniffer. The sniffer calls
