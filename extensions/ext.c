@@ -25,7 +25,19 @@ int hashPath(parsed_packet *p)
     // hash now contains the 20-byte SHA-1 hash
 }
 
-int asnLookup(char *routeViewsFile, address ipv6_address)
+/**
+ * @brief Takes an address object and converts it to an integer
+ * (This function may be better placed in a separate utils file)
+ * 
+ */
+int addressToInt(address ipv6_address)
+{
+    int adr;
+
+    return adr;
+}
+
+int asnLookup(address ipv6_address)
 {
     int ASN;
     FILE *fp;

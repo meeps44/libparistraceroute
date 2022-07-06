@@ -384,3 +384,38 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
 	}
 }
 
+
+typedef struct my_ipv6_address  {
+    int my_address[4];
+} address;
+
+typedef struct my_ipv6_header {
+    unsigned char version:4;
+    int flow_label:20;
+    char traffic_class;
+    short payload_length;
+    char next_header,
+        hop_limit;
+    address source,
+        destination;
+} header;
+
+// erlend
+void parse_packet(const packet_t *p)
+{
+    // Init header struct
+    header *h = malloc(sizeof(header));
+
+    // First print packet content:
+    packet_fprintf(stdout, p);
+
+    // Get pointer to the beginning of bytes managed by packet_t instance
+    uint8_t *first_byte = packet_get_bytes(p);
+
+    // Start parsing the packet
+    h->version = ntohs(*first_byte) & 0xFF00; // mask out the unneeded values
+
+    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
+
+}
+
