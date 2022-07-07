@@ -351,7 +351,7 @@ void parse_packet(const packet_t *p)
 
     // Get pointer to the beginning of bytes managed by packet_t instance
     uint8_t *first_byte = packet_get_bytes(p);
-    printf("First byte:\t%d\n", (int) *first_byte);
+    printf("\nFirst byte:\t%d\n", (int) *first_byte);
 
     h->version = (*first_byte >> 4); // mask out the unneeded values
     printf("Version:\t%d\n", h->version); // hopefully this prints out 6
@@ -370,10 +370,16 @@ void parse_packet(const packet_t *p)
     //memcpy(src_addr, packet_get_bytes(p) + 8, 16);
     uint32_t tst[4];
     memcpy(&tst[0], (packet_get_bytes(p) + 8), 4);
+    printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
+    printf("Packet_get_bytes + 12:\t%x\n", *(packet_get_bytes(p) + 12));
     memcpy(&tst[1], (packet_get_bytes(p) + 12), 4);
     memcpy(&tst[2], (packet_get_bytes(p) + 16), 4);
     memcpy(&tst[3], (packet_get_bytes(p) + 20), 4);
-    printf("Source address hex:\t%x %x %x %c\n", tst[0], tst[1], tst[2], tst[3]);
+    printf("1:\t%x\n", tst[0]);
+    printf("2:\t%x\n", tst[1]);
+    printf("3:\t%x\n", tst[2]);
+    printf("4:\t%x\n", tst[3]);
+    printf("Source address hex:\t%x %x %x %x\n", tst[0], tst[1], tst[2], tst[3]);
     //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
     //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
     //printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
