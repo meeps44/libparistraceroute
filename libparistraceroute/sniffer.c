@@ -346,13 +346,15 @@ void parse_packet(const packet_t *p)
     header *h = malloc(sizeof(header));
 
     // First print packet content:
+    fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()");
     packet_fprintf(stdout, p);
 
     // Get pointer to the beginning of bytes managed by packet_t instance
     uint8_t *first_byte = packet_get_bytes(p);
 
     // Start parsing the packet
-    h->version = ntohs(*first_byte) & 0xFF00; // mask out the unneeded values
+    //h->version = ntohs(*first_byte) & 0xFF00; // mask out the unneeded values
+    h->version = *first_byte & 0xFF00; // mask out the unneeded values
 
     printf("Version:\t%d\n", h->version); // hopefully this prints out 6
 
@@ -399,7 +401,7 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
             fprintf(stderr, "DEBUG: Calling parse_packet()");
             parse_packet(packet);
             fprintf(stderr, "DEBUG: Returned from parse_packet()");
-            packet_dump(packet);
+            //packet_dump(packet);
             puts("");
 
 			if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
