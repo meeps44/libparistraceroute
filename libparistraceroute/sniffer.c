@@ -351,7 +351,6 @@ void parse_packet(const packet_t *p)
 
     // Get pointer to the beginning of bytes managed by packet_t instance
     uint8_t *first_byte = packet_get_bytes(p);
-    uint8_t *fb_copy = first_byte;
     printf("First byte:\t%d\n", (int) *first_byte);
 
     h->version = (*first_byte >> 4); // mask out the unneeded values
