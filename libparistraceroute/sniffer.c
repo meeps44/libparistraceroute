@@ -368,8 +368,8 @@ void parse_packet(const packet_t *p)
     //printf("Hop limit:\t%d\n", h->version); // hopefully this prints out 6
     //address *src_addr = malloc(sizeof(address));
     //memcpy(src_addr, packet_get_bytes(p) + 8, 16);
-    uint32_t tst[4];
-    memcpy(&tst[0], (packet_get_bytes(p) + 8), 4);
+    uint16_t tst[8];
+    memcpy(&tst[0], (packet_get_bytes(p) + 8), 2);
     printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
     printf("Packet_get_bytes + 9:\t%x\n", *(packet_get_bytes(p) + 9));
     printf("Packet_get_bytes + 10:\t%x\n", *(packet_get_bytes(p) + 10));
@@ -380,14 +380,23 @@ void parse_packet(const packet_t *p)
     printf("Packet_get_bytes + 15:\t%x\n", *(packet_get_bytes(p) + 15));
     printf("Packet_get_bytes + 16:\t%x\n", *(packet_get_bytes(p) + 16));
     printf("Packet_get_bytes + 17:\t%x\n", *(packet_get_bytes(p) + 17));
-    memcpy(&tst[1], (packet_get_bytes(p) + 12), 4);
-    memcpy(&tst[2], (packet_get_bytes(p) + 16), 4);
-    memcpy(&tst[3], (packet_get_bytes(p) + 20), 4);
+    memcpy(&tst[1], (packet_get_bytes(p) + 10), 2);
+    memcpy(&tst[2], (packet_get_bytes(p) + 12), 2);
+    memcpy(&tst[3], (packet_get_bytes(p) + 14), 2);
+    memcpy(&tst[4], (packet_get_bytes(p) + 16), 2);
+    memcpy(&tst[5], (packet_get_bytes(p) + 18), 2);
+    memcpy(&tst[6], (packet_get_bytes(p) + 20), 2);
+    memcpy(&tst[7], (packet_get_bytes(p) + 22), 2);
+    printf("Source address hex:\t%x %x %x %x\n", tst[0], tst[1], tst[2], tst[3]);
     printf("1:\t%x\n", tst[0]);
     printf("2:\t%x\n", tst[1]);
     printf("3:\t%x\n", tst[2]);
     printf("4:\t%x\n", tst[3]);
-    printf("Source address hex:\t%x %x %x %x\n", tst[0], tst[1], tst[2], tst[3]);
+    printf("5:\t%x\n", tst[4]);
+    printf("6:\t%x\n", tst[5]);
+    printf("7:\t%x\n", tst[6]);
+    printf("8:\t%x\n", tst[7]);
+    printf("Source address hex:\t%x %x %x %x\n", tst[4], tst[5], tst[6], tst[7]);
     //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
     //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
     //printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
