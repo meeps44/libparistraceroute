@@ -369,8 +369,10 @@ void parse_packet(const packet_t *p)
     //printf("Hop limit:\t%d\n", h->version); // hopefully this prints out 6
     address *src_addr = malloc(sizeof(address));
     memcpy(src_addr, packet_get_bytes(p) + 8, 16);
-    printf("Source address:\t%d %d %d %d\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
-    printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
+    printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
+    //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
+    //printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
+    printf("Source address hex:\t%x %x %x %c\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
     //src_addr = packet_get_bytes(p) + 8;
     //h->source = src_addr;
     //printf("Source:\t%d\n", h->version); // hopefully this prints out 6
