@@ -359,10 +359,10 @@ void parse_packet(const packet_t *p)
     printf("Version 1:\t%d\n", h->version); // hopefully this prints out 6
 
     //h->version = *first_byte & 0xFF00; // mask out the unneeded values
-    h->version = *first_byte & 0xF0; // mask out the unneeded values
+    h->version = (*first_byte & 0xF0); // mask out the unneeded values
     printf("Version 2:\t%d\n", h->version); // hopefully this prints out 6
 
-    h->version = *first_byte >> 4; // mask out the unneeded values
+    h->version = (*first_byte >> 4); // mask out the unneeded values
     printf("Version 3:\t%d\n", h->version); // hopefully this prints out 6
 
     memcpy(h, p, 1);
