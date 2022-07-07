@@ -351,12 +351,16 @@ void parse_packet(const packet_t *p)
 
     // Get pointer to the beginning of bytes managed by packet_t instance
     uint8_t *first_byte = packet_get_bytes(p);
+    printf("First byte:\t%u\n", (int) *first_byte);
 
     // Start parsing the packet
     //h->version = ntohs(*first_byte) & 0xFF00; // mask out the unneeded values
-    h->version = *first_byte & 0xFF00; // mask out the unneeded values
+    h->version = (uint8_t) (*first_byte); // mask out the unneeded values
+    printf("Version 1:\t%d\n", h->version); // hopefully this prints out 6
 
-    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
+    //h->version = *first_byte & 0xFF00; // mask out the unneeded values
+    h->version = (uint8_t) (*first_byte & 0xFF00); // mask out the unneeded values
+    printf("Version 2:\t%d\n", h->version); // hopefully this prints out 6
 
     free(h);
 }
