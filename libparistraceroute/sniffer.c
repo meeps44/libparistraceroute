@@ -371,7 +371,15 @@ void parse_packet(const packet_t *p)
     uint32_t tst[4];
     memcpy(&tst[0], (packet_get_bytes(p) + 8), 4);
     printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
+    printf("Packet_get_bytes + 9:\t%x\n", *(packet_get_bytes(p) + 9));
+    printf("Packet_get_bytes + 10:\t%x\n", *(packet_get_bytes(p) + 10));
+    printf("Packet_get_bytes + 11:\t%x\n", *(packet_get_bytes(p) + 11));
     printf("Packet_get_bytes + 12:\t%x\n", *(packet_get_bytes(p) + 12));
+    printf("Packet_get_bytes + 13:\t%x\n", *(packet_get_bytes(p) + 13));
+    printf("Packet_get_bytes + 14:\t%x\n", *(packet_get_bytes(p) + 14));
+    printf("Packet_get_bytes + 15:\t%x\n", *(packet_get_bytes(p) + 15));
+    printf("Packet_get_bytes + 16:\t%x\n", *(packet_get_bytes(p) + 16));
+    printf("Packet_get_bytes + 17:\t%x\n", *(packet_get_bytes(p) + 17));
     memcpy(&tst[1], (packet_get_bytes(p) + 12), 4);
     memcpy(&tst[2], (packet_get_bytes(p) + 16), 4);
     memcpy(&tst[3], (packet_get_bytes(p) + 20), 4);
