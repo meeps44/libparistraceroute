@@ -346,29 +346,42 @@ void parse_packet(const packet_t *p)
     header *h = malloc(sizeof(header));
 
     // First print packet content:
-    fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()");
+    fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
     packet_fprintf(stdout, p);
 
     // Get pointer to the beginning of bytes managed by packet_t instance
     uint8_t *first_byte = packet_get_bytes(p);
+    uint8_t *fb_copy = first_byte;
     printf("First byte:\t%d\n", (int) *first_byte);
 
-    // Start parsing the packet
-    //h->version = ntohs(*first_byte) & 0xFF00; // mask out the unneeded values
-    h->version = *first_byte; // mask out the unneeded values
-    printf("Version 1:\t%d\n", h->version); // hopefully this prints out 6
+    h->version = (*first_byte >> 4); // mask out the unneeded values
+    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
+    //h->traffic_class =  (*(++first_byte) << 4) + (*first_byte << 4);
+
+    //printf("Traffic class:\t%d\n", h->flow_label); // hopefully this prints out 6
+    //h->flow_label;
+    //printf("Flow label:\t%d\n", h->version); // hopefully this prints out 6
+    //h->payload_length;
+    //printf("Payload length:\t%d\n", h->version); // hopefully this prints out 6
+    //h->next_header;
+    //printf("Next header:\t%d\n", h->version); // hopefully this prints out 6
+    //h->hop_limit;
+    //printf("Hop limit:\t%d\n", h->version); // hopefully this prints out 6
+    address *src_addr = malloc(sizeof(address));
+    memcpy(src_addr, packet_get_bytes(p) + 8, 16);
+    printf("Source address:\t%d %d %d %d\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
+    printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
+    //src_addr = packet_get_bytes(p) + 8;
+    //h->source = src_addr;
+    //printf("Source:\t%d\n", h->version); // hopefully this prints out 6
+    //h->destination;
+    //printf("Destination:\t%d\n", h->version); // hopefully this prints out 6
+
 
     //memcpy(h, p, 1);
-    //h->version = *first_byte & 0xFF00; // mask out the unneeded values
-    ////h->version = (*first_byte & 0xF0); // mask out the unneeded values
-    //printf("Version 2:\t%d\n", h->version); // hopefully this prints out 6
+    //printf("Version 4:\t%d\n", h->version); // hopefully this prints out 6
 
-    h->version = (*first_byte >> 4); // mask out the unneeded values
-    printf("Version 3:\t%d\n", h->version); // hopefully this prints out 6
-
-    memcpy(h, p, 1);
-    printf("Version 4:\t%d\n", h->version); // hopefully this prints out 6
-
+    free(src_addr);
     free(h);
 }
 // END ERLEND //
