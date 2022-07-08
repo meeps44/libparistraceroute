@@ -343,7 +343,7 @@ ERR_RECVMSG:
 void parse_packet(const packet_t *p)
 {
     // Init header struct
-    header *h = malloc(sizeof(header));
+    header *h = calloc(1, sizeof(header));
 
     // First print packet content:
     fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
@@ -368,7 +368,7 @@ void parse_packet(const packet_t *p)
     //printf("Hop limit:\t%d\n", h->version); // hopefully this prints out 6
     //address *src_addr = malloc(sizeof(address));
     //memcpy(src_addr, packet_get_bytes(p) + 8, 16);
-    uint16_t tst[8];
+    uint16_t tst[8] = {0};
     memcpy(&tst[0], (packet_get_bytes(p) + 8), 2);
     printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
     printf("Packet_get_bytes + 9:\t%x\n", *(packet_get_bytes(p) + 9));
