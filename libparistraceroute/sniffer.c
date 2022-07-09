@@ -361,12 +361,12 @@ void parse_packet(const packet_t *p)
     uint8_t tmp5 = *(first_byte+2);
     uint8_t tmp6 = *(first_byte+3);
     uint32_t tmp7 = ((uint32_t) tmp4 << 16) | ((uint32_t) tmp5 << 8) | tmp6;
-    h->flow_label = ntohl(tmp7);
-    h->payload_length = ntohs((((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5));
+    h->flow_label = tmp7;
+    h->payload_length = (((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5);
     printf("Payload length:\t%x\n", h->payload_length);
-    h->next_header = (uint8_t) ntohs(*(first_byte+6));
+    h->next_header = *(first_byte+6);
     printf("Next header:\t%x\n", h->next_header);
-    h->hop_limit = (uint8_t) ntohs(*(first_byte+7));
+    h->hop_limit = *(first_byte+7);
     printf("Hop limit:\t%x\n", h->hop_limit);
     
     // Set source and destination
