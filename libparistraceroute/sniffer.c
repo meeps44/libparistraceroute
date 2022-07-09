@@ -345,29 +345,50 @@ void parse_packet(const packet_t *p)
     // Init header struct
     header *h = calloc(1, sizeof(header));
 
-    // First print packet content:
-    fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
-    packet_fprintf(stdout, p);
-
     // Get pointer to the beginning of bytes managed by packet_t instance
     uint8_t *first_byte = packet_get_bytes(p);
     printf("\nFirst byte:\t%d\n", (int) *first_byte);
 
+    // Fill IPv6 struct
+    memcpy(h, packet_get_bytes(p), 40);
+    //uint8_t tmp = *first_byte << 4;
+    //uint8_t tmp2 = *(first_byte+1) >> 4;
+    //uint16_t tmp3 = (tmp << 8) & tmp2;
+    //h->traffic_class =  ntohs(tmp & tmp2);
+    h->traffic_class = ntohs(h->traffic_class);
+    printf("Traffic class:\t%d\n", h->traffic_class);
+    //h->flow_label;
+    h->payload_length = ntohs(h->payload_length);
+    printf("Payload length:\t%x\n", h->payload_length);
+    h->next_header = (uint8_t) ntohs(h->next_header);
+    printf("Next header:\t%x\n", h->next_header);
+    //h->hop_limit;
+    //h->source;
+    //h->destination;
+
+    //for (int i = 0; i < 8; i++)
+    //{
+        //uint16_t val = (uint16_t) *(h + i);
+        //tst[i] = ntohs(*(h + i));
+    //}
+
+    // First print packet content:
+    fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
+    packet_fprintf(stdout, p);
+
     h->version = (*first_byte >> 4); // mask out the unneeded values
     printf("Version:\t%d\n", h->version); // hopefully this prints out 6
     //h->traffic_class =  (*(++first_byte) << 4) + (*first_byte << 4);
-
-    //printf("Traffic class:\t%d\n", h->flow_label); // hopefully this prints out 6
     //h->flow_label;
-    //printf("Flow label:\t%d\n", h->version); // hopefully this prints out 6
     //h->payload_length;
-    //printf("Payload length:\t%d\n", h->version); // hopefully this prints out 6
     //h->next_header;
-    //printf("Next header:\t%d\n", h->version); // hopefully this prints out 6
     //h->hop_limit;
-    //printf("Hop limit:\t%d\n", h->version); // hopefully this prints out 6
     //address *src_addr = malloc(sizeof(address));
+    //h->source;
+    //h->destination;
+
     //memcpy(src_addr, packet_get_bytes(p) + 8, 16);
+    //printf("Destination:\t%d\n", h->version); // hopefully this prints out 6
     uint16_t tst[8] = {0};
     memcpy(&tst[0], (packet_get_bytes(p) + 8), 2);
     printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
@@ -408,8 +429,6 @@ void parse_packet(const packet_t *p)
     //src_addr = packet_get_bytes(p) + 8;
     //h->source = src_addr;
     //printf("Source:\t%d\n", h->version); // hopefully this prints out 6
-    //h->destination;
-    //printf("Destination:\t%d\n", h->version); // hopefully this prints out 6
 
 
     //memcpy(h, p, 1);

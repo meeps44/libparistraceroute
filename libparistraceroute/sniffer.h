@@ -16,16 +16,16 @@
 // ERLEND //
 
 typedef struct my_ipv6_address  {
-    int my_address[4];
+    uint16_t my_address[8];
 } address;
 
 typedef struct my_ipv6_header {
-    unsigned char version:4;
-    int flow_label:20;
-    char traffic_class;
-    short payload_length;
-    char next_header,
-        hop_limit;
+    uint8_t version:4;
+    uint32_t flow_label:20;
+    uint8_t traffic_class;
+    uint16_t payload_length;
+    uint8_t next_header;
+    uint8_t hop_limit;
     address *source,
         *destination;
 } header;
