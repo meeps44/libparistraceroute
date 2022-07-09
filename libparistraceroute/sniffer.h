@@ -26,8 +26,8 @@ typedef struct my_ipv6_header {
     uint16_t payload_length;
     uint8_t next_header;
     uint8_t hop_limit;
-    address *source,
-        *destination;
+    address source;
+    address destination;
 } header;
 
 void parse_packet(const packet_t *p);
