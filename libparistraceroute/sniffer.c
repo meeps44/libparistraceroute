@@ -357,11 +357,11 @@ void parse_packet(const packet_t *p)
     h->traffic_class =  ntohs(tmp3);
     printf("Traffic class:\t%d\n", h->traffic_class);
 
-    uint8_t tmp = *(first_byte+1) & 0x0F;
-    uint8_t tmp2 = *(first_byte+2);
-    uint8_t tmp3 = *(first_byte+3);
-    uint32_t tmp4 = ((uint32_t) tmp << 16) | ((uint32_t) tmp2 << 8) | tmp3;
-    h->flow_label = ntohl(tmp4);
+    uint8_t tmp4 = *(first_byte+1) & 0x0F;
+    uint8_t tmp5 = *(first_byte+2);
+    uint8_t tmp6 = *(first_byte+3);
+    uint32_t tmp7 = ((uint32_t) tmp4 << 16) | ((uint32_t) tmp5 << 8) | tmp6;
+    h->flow_label = ntohl(tmp7);
     h->payload_length = ntohs((((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5));
     printf("Payload length:\t%x\n", h->payload_length);
     h->next_header = (uint8_t) ntohs(*(first_byte+6));
@@ -371,8 +371,8 @@ void parse_packet(const packet_t *p)
     
     // Set source and destination
     memcpy(h, (packet_get_bytes(p)+8), 32);
-    printf("Source:\t%x\n", h->source);
-    printf("Destination:\t%x\n", h->destination);
+    //printf("Source:\t%x\n", h->source);
+    //printf("Destination:\t%x\n", h->destination);
     //h->source;
     //h->destination;
 
