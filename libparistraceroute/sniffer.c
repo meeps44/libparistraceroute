@@ -374,16 +374,16 @@ void parse_packet(const packet_t *p)
     // Set source and destination
     memcpy(h, (packet_get_bytes(p)+8), 32);
     printf("Source:\t\n");
-    for (int i = 0; i < 8; i++)
+    for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
-        h->source.address_short[i] = (((uint16_t) *(first_byte+8+i)) << 8) | *(first_byte+9+i);
+        h->source.address_short[i] = (((uint16_t) *(first_byte+8+k)) << 8) | *(first_byte+8+i+1);
         printf("%x ", h->source.address_short[i]);
     }
     puts("");
     printf("Destination:\t\n");
-    for (int i = 0; i < 8; i++)
+    for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
-        h->destination.address_short[i] = (((uint16_t) *(first_byte+24+i)) << 8) | *(first_byte+25+i);
+        h->destination.address_short[i] = (((uint16_t) *(first_byte+24+k)) << 8) | *(first_byte+24+k+1);
         printf("%x ", h->destination.address_short[i]);
     }
     puts("");
