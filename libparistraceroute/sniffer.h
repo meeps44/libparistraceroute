@@ -28,12 +28,12 @@ typedef struct my_ipv6_header {
     uint8_t hop_limit;
     address source;
     address destination;
-} header;
+} ipv6_header;
 
 void parse_packet(const packet_t *p);
-uint8_t parse_ipv6(const packet_t *p);
-void parse_icmp6(const packet_t *p);
-void parse_tcp(const packet_t *p);
+ipv6_header *parse_ipv6(const uint8_t *p);
+void parse_icmp6(const uint8_t *p);
+void parse_tcp(const uint8_t *p);
 
 
 // END ERLEND //

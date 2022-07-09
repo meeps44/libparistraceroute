@@ -354,24 +354,31 @@ enum IPV6_HEADER_OPTS {
     NH_ICMPv6 = 58,
 };
 
-void parse_icmp6(const packet_t *p)
-{
+enum ICMP_TYPES {
+    ICMP_TIME_EXCEEDED = 3,
+};
 
+void parse_icmp6(const uint8_t *icmp_first_byte)
+{
+    uint8_t icmp_type = *icmp_first_byte;
+
+    switch(icmp_type)
+    {
+        case ICMP_TIME_EXCEEDED:
+            puts("Do something");
+            break;
+        default:
+            break;
+    }
 }
 
-uint8_t parse_ipv6(const packet_t *p)
+ipv6_header *parse_ipv6(const uint8_t *first_byte)
 {
-    // Init header struct
-    header *h = calloc(1, sizeof(header));
-
-    // Get pointer to the beginning of bytes managed by packet_t instance
-    uint8_t *first_byte = packet_get_bytes(p);
-    printf("\nFirst byte:\t%d\n", (int) *first_byte);
+    ipv6_header *h = calloc(1, sizeof(ipv6_header));
 
     // Fill IPv6 struct
     h->version = (*first_byte >> 4); // mask out the unneeded values
-    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
-    //memcpy(h, packet_get_bytes(p), 40);
+    printf("Version:\t%d\n", h->version);
     uint8_t tmp = *first_byte & 0x0F;
     uint8_t tmp2 = *(first_byte+1) >> 4;
     uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
@@ -391,7 +398,7 @@ uint8_t parse_ipv6(const packet_t *p)
     printf("Hop limit:\t%x\n", h->hop_limit);
     
     // Set source and destination
-    memcpy(h, (packet_get_bytes(p)+8), 32);
+    memcpy(h, (first_byte+8), 32);
     printf("Source:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
@@ -406,21 +413,23 @@ uint8_t parse_ipv6(const packet_t *p)
         printf("%x ", h->destination.address_short[i]);
     }
     puts("");
-    packet_fprintf(stdout, p);
-    puts("");
 
     //free(h);
+    //return h->next_header;
 
-    return h->next_header;
+    return h;
 }
 
 void parse_packet(const packet_t *p)
 {
-    uint8_t next_header = parse_ipv6(p);
+    packet_fprintf(stdout, p);
+    puts("");
+    uint8_t *first_byte = packet_get_bytes(p);
+    uint8_t next_header = parse_ipv6(first_byte);
     switch(next_header)
     {
         case NH_ICMPv6:
-            parse_icmp6(p + 40);
+            parse_icmp6(first_byte + 40);
             break;
         case NH_HBH_OPTS: //Hop-by-Hop Options
             break;
