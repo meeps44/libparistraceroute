@@ -16,7 +16,7 @@
 // ERLEND //
 
 typedef struct my_ipv6_address  {
-    uint16_t my_address[8];
+    uint16_t address_short[8];
 } address;
 
 typedef struct my_ipv6_header {

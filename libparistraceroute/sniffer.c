@@ -371,7 +371,18 @@ void parse_packet(const packet_t *p)
     
     // Set source and destination
     memcpy(h, (packet_get_bytes(p)+8), 32);
-    //printf("Source:\t%x\n", h->source);
+    printf("Source:\t\n");
+    for (int i = 0; i < 8; i++)
+    {
+        printf("%x ", h->source.address_short[i]);
+    }
+    puts("");
+    printf("Destination:\t\n");
+    for (int i = 0; i < 8; i++)
+    {
+        printf("%x ", h->destination.address_short[i]);
+    }
+    puts("");
     //printf("Destination:\t%x\n", h->destination);
     //h->source;
     //h->destination;
@@ -423,15 +434,15 @@ void parse_packet(const packet_t *p)
     {
         tst[i] = ntohs(tst[i]);
     }
-    printf("Source address hex:\t%x %x %x %x %x %x %x %x\n", tst[0], tst[1], tst[2], tst[3], tst[4], tst[5], tst[6], tst[7]);
-    printf("1:\t%x\n", tst[0]);
-    printf("2:\t%x\n", tst[1]);
-    printf("3:\t%x\n", tst[2]);
-    printf("4:\t%x\n", tst[3]);
-    printf("5:\t%x\n", tst[4]);
-    printf("6:\t%x\n", tst[5]);
-    printf("7:\t%x\n", tst[6]);
-    printf("8:\t%x\n", tst[7]);
+    //printf("Source address hex:\t%x %x %x %x %x %x %x %x\n", tst[0], tst[1], tst[2], tst[3], tst[4], tst[5], tst[6], tst[7]);
+    //printf("1:\t%x\n", tst[0]);
+    //printf("2:\t%x\n", tst[1]);
+    //printf("3:\t%x\n", tst[2]);
+    //printf("4:\t%x\n", tst[3]);
+    //printf("5:\t%x\n", tst[4]);
+    //printf("6:\t%x\n", tst[5]);
+    //printf("7:\t%x\n", tst[6]);
+    //printf("8:\t%x\n", tst[7]);
     //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
     //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
     //printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
