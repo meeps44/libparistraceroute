@@ -350,6 +350,8 @@ void parse_packet(const packet_t *p)
     printf("\nFirst byte:\t%d\n", (int) *first_byte);
 
     // Fill IPv6 struct
+    h->version = (*first_byte >> 4); // mask out the unneeded values
+    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
     //memcpy(h, packet_get_bytes(p), 40);
     uint8_t tmp = *first_byte & 0x0F;
     uint8_t tmp2 = *(first_byte+1) >> 4;
@@ -374,12 +376,14 @@ void parse_packet(const packet_t *p)
     printf("Source:\t\n");
     for (int i = 0; i < 8; i++)
     {
+        h->source.address_short[i] = (((uint16_t) *(first_byte+8+i)) << 8) | *(first_byte+9+i);
         printf("%x ", h->source.address_short[i]);
     }
     puts("");
     printf("Destination:\t\n");
     for (int i = 0; i < 8; i++)
     {
+        h->destination.address_short[i] = (((uint16_t) *(first_byte+24+i)) << 8) | *(first_byte+25+i);
         printf("%x ", h->destination.address_short[i]);
     }
     puts("");
@@ -394,11 +398,9 @@ void parse_packet(const packet_t *p)
     //}
 
     // First print packet content:
-    fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
+    //fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
     packet_fprintf(stdout, p);
 
-    h->version = (*first_byte >> 4); // mask out the unneeded values
-    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
     //h->traffic_class =  (*(++first_byte) << 4) + (*first_byte << 4);
     //h->flow_label;
     //h->payload_length;
