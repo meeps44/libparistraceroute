@@ -368,6 +368,11 @@ void parse_packet(const packet_t *p)
     printf("Next header:\t%x\n", h->next_header);
     h->hop_limit = (uint8_t) ntohs(*(first_byte+7));
     printf("Hop limit:\t%x\n", h->hop_limit);
+    
+    // Set source and destination
+    memcpy(h, (packet_get_bytes(p)+8), 32);
+    printf("Source:\t%x\n", h->source);
+    printf("Destination:\t%x\n", h->destination);
     //h->source;
     //h->destination;
 
