@@ -31,8 +31,7 @@ typedef struct my_ipv6_header {
 } header;
 
 void parse_packet(const packet_t *p);
-
-void parse_ipv6(const packet_t *p);
+uint8_t parse_ipv6(const packet_t *p);
 void parse_icmp6(const packet_t *p);
 void parse_tcp(const packet_t *p);
 

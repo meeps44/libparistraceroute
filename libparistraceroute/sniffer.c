@@ -343,7 +343,7 @@ ERR_RECVMSG:
 enum IPV6_HEADER_OPTS {
     NH_NNH = 59, //No next header
     NH_HBH_OPTS = 0, //Hop-by-Hop Options
-    NH_DST_OPTS = 60, //Destination Options (with Routing Options)
+    NH_DST_OPTS = 60, //Destination Options
     NH_RH = 43, //Routing Header
     NH_FH = 44, //Fragment Header
     NH_AH = 51, //Authentication Header
@@ -354,9 +354,93 @@ enum IPV6_HEADER_OPTS {
     NH_ICMPv6 = 58,
 };
 
-void parse_packet(const packet_t *p)
+void parse_icmp6(const packet_t *p)
+{
+
+}
+
+uint8_t parse_ipv6(const packet_t *p)
 {
     // Init header struct
+    header *h = calloc(1, sizeof(header));
+
+    // Get pointer to the beginning of bytes managed by packet_t instance
+    uint8_t *first_byte = packet_get_bytes(p);
+    printf("\nFirst byte:\t%d\n", (int) *first_byte);
+
+    // Fill IPv6 struct
+    h->version = (*first_byte >> 4); // mask out the unneeded values
+    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
+    //memcpy(h, packet_get_bytes(p), 40);
+    uint8_t tmp = *first_byte & 0x0F;
+    uint8_t tmp2 = *(first_byte+1) >> 4;
+    uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
+    h->traffic_class =  ntohs(tmp3);
+    printf("Traffic class:\t%d\n", h->traffic_class);
+
+    uint8_t tmp4 = *(first_byte+1) & 0x0F;
+    uint8_t tmp5 = *(first_byte+2);
+    uint8_t tmp6 = *(first_byte+3);
+    uint32_t tmp7 = ((uint32_t) tmp4 << 16) | ((uint32_t) tmp5 << 8) | tmp6;
+    h->flow_label = tmp7;
+    h->payload_length = (((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5);
+    printf("Payload length:\t%x\n", h->payload_length);
+    h->next_header = *(first_byte+6);
+    printf("Next header:\t%x\n", h->next_header);
+    h->hop_limit = *(first_byte+7);
+    printf("Hop limit:\t%x\n", h->hop_limit);
+    
+    // Set source and destination
+    memcpy(h, (packet_get_bytes(p)+8), 32);
+    printf("Source:\t\n");
+    for (int i = 0, k = 0; i < 8; i++, k += 2)
+    {
+        h->source.address_short[i] = (((uint16_t) *(first_byte+8+k)) << 8) | *(first_byte+8+k+1);
+        printf("%x ", h->source.address_short[i]);
+    }
+    puts("");
+    printf("Destination:\t\n");
+    for (int i = 0, k = 0; i < 8; i++, k += 2)
+    {
+        h->destination.address_short[i] = (((uint16_t) *(first_byte+24+k)) << 8) | *(first_byte+24+k+1);
+        printf("%x ", h->destination.address_short[i]);
+    }
+    puts("");
+    packet_fprintf(stdout, p);
+    puts("");
+
+    //free(h);
+
+    return h->next_header;
+}
+
+void parse_packet(const packet_t *p)
+{
+    uint8_t next_header = parse_ipv6(p);
+    switch(next_header)
+    {
+        case NH_ICMPv6:
+            parse_icmp6(p + 40);
+            break;
+        case NH_HBH_OPTS: //Hop-by-Hop Options
+            break;
+        case NH_DST_OPTS: //Destination Options (with Routing Options)
+            break;
+        case NH_RH://Routing Header
+            break;
+        case NH_FH://Fragment Header
+            break;
+        case NH_AH://Authentication Header
+            break;
+        case NH_ESPH://Encapsulation Security Payload Header
+            break;
+        case NH_MH://Mobility Header
+            break;
+        default:
+            break;
+    };
+    // Init header struct
+    /*
     header *h = calloc(1, sizeof(header));
 
     // Get pointer to the beginning of bytes managed by packet_t instance
@@ -407,6 +491,7 @@ void parse_packet(const packet_t *p)
     switch(h->next_header)
     {
         case NH_ICMPv6:
+            parse_icmp6(p + 40);
             break;
         case NH_HBH_OPTS: //Hop-by-Hop Options
             break;
@@ -425,6 +510,7 @@ void parse_packet(const packet_t *p)
         default:
             break;
     };
+    */
 
     /*
     uint16_t tst[8] = {0};
@@ -454,7 +540,6 @@ void parse_packet(const packet_t *p)
     */
 
     //free(src_addr);
-    free(h);
 }
 // END ERLEND //
 
