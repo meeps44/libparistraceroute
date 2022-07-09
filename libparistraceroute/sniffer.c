@@ -340,6 +340,20 @@ ERR_RECVMSG:
 
 
 // ERLEND //
+enum IPV6_HEADER_OPTS {
+    NH_NNH = 59, //No next header
+    NH_HBH_OPTS = 0, //Hop-by-Hop Options
+    NH_DST_OPTS = 60, //Destination Options (with Routing Options)
+    NH_RH = 43, //Routing Header
+    NH_FH = 44, //Fragment Header
+    NH_AH = 51, //Authentication Header
+    NH_ESPH = 50, //Encapsulation Security Payload Header
+    NH_MH = 135, //Mobility Header
+    NH_TCP = 6,
+    NH_UDP = 17,
+    NH_ICMPv6 = 58,
+};
+
 void parse_packet(const packet_t *p)
 {
     // Init header struct
@@ -387,31 +401,32 @@ void parse_packet(const packet_t *p)
         printf("%x ", h->destination.address_short[i]);
     }
     puts("");
-    //printf("Destination:\t%x\n", h->destination);
-    //h->source;
-    //h->destination;
-
-    //for (int i = 0; i < 8; i++)
-    //{
-        //uint16_t val = (uint16_t) *(h + i);
-        //tst[i] = ntohs(*(h + i));
-    //}
-
-    // First print packet content:
-    //fprintf(stderr, "DEBUG: Calling packet_fprintf() in parse_packet()\n");
     packet_fprintf(stdout, p);
+    puts("");
 
-    //h->traffic_class =  (*(++first_byte) << 4) + (*first_byte << 4);
-    //h->flow_label;
-    //h->payload_length;
-    //h->next_header;
-    //h->hop_limit;
-    //address *src_addr = malloc(sizeof(address));
-    //h->source;
-    //h->destination;
+    switch(h->next_header)
+    {
+        case NH_ICMPv6:
+            break;
+        case NH_HBH_OPTS: //Hop-by-Hop Options
+            break;
+        case NH_DST_OPTS: //Destination Options (with Routing Options)
+            break;
+        case NH_RH://Routing Header
+            break;
+        case NH_FH://Fragment Header
+            break;
+        case NH_AH://Authentication Header
+            break;
+        case NH_ESPH://Encapsulation Security Payload Header
+            break;
+        case NH_MH://Mobility Header
+            break;
+        default:
+            break;
+    };
 
-    //memcpy(src_addr, packet_get_bytes(p) + 8, 16);
-    //printf("Destination:\t%d\n", h->version); // hopefully this prints out 6
+    /*
     uint16_t tst[8] = {0};
     memcpy(&tst[0], (packet_get_bytes(p) + 8), 2);
     printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
@@ -436,26 +451,7 @@ void parse_packet(const packet_t *p)
     {
         tst[i] = ntohs(tst[i]);
     }
-    //printf("Source address hex:\t%x %x %x %x %x %x %x %x\n", tst[0], tst[1], tst[2], tst[3], tst[4], tst[5], tst[6], tst[7]);
-    //printf("1:\t%x\n", tst[0]);
-    //printf("2:\t%x\n", tst[1]);
-    //printf("3:\t%x\n", tst[2]);
-    //printf("4:\t%x\n", tst[3]);
-    //printf("5:\t%x\n", tst[4]);
-    //printf("6:\t%x\n", tst[5]);
-    //printf("7:\t%x\n", tst[6]);
-    //printf("8:\t%x\n", tst[7]);
-    //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
-    //printf("Source address:\t%d %d %d %d\n", src_addr->my_address[0], *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
-    //printf("Source address hex:\t%x %x %x %x\n", *src_addr, *(src_addr+4), *(src_addr + 8), *(src_addr + 12));
-    //printf("Source address hex:\t%x %x %x %c\n", src_addr->my_address[0], src_addr->my_address[1], src_addr->my_address[2], src_addr->my_address[3]);
-    //src_addr = packet_get_bytes(p) + 8;
-    //h->source = src_addr;
-    //printf("Source:\t%d\n", h->version); // hopefully this prints out 6
-
-
-    //memcpy(h, p, 1);
-    //printf("Version 4:\t%d\n", h->version); // hopefully this prints out 6
+    */
 
     //free(src_addr);
     free(h);
