@@ -380,13 +380,18 @@ void parse_packet(const packet_t *p)
     printf("Packet_get_bytes + 15:\t%x\n", *(packet_get_bytes(p) + 15));
     printf("Packet_get_bytes + 16:\t%x\n", *(packet_get_bytes(p) + 16));
     printf("Packet_get_bytes + 17:\t%x\n", *(packet_get_bytes(p) + 17));
-    memcpy(&tst[1], ntohs((packet_get_bytes(p) + 10)), 2);
-    memcpy(&tst[2], ntohs((packet_get_bytes(p) + 12)), 2);
-    memcpy(&tst[3], ntohs((packet_get_bytes(p) + 14)), 2);
-    memcpy(&tst[4], ntohs((packet_get_bytes(p) + 16)), 2);
-    memcpy(&tst[5], ntohs((packet_get_bytes(p) + 18)), 2);
-    memcpy(&tst[6], ntohs((packet_get_bytes(p) + 20)), 2);
-    memcpy(&tst[7], ntohs((packet_get_bytes(p) + 22)), 2);
+    memcpy(&tst[1], (packet_get_bytes(p) + 10), 2);
+    memcpy(&tst[2], (packet_get_bytes(p) + 12), 2);
+    memcpy(&tst[3], (packet_get_bytes(p) + 14), 2);
+    memcpy(&tst[4], (packet_get_bytes(p) + 16), 2);
+    memcpy(&tst[5], (packet_get_bytes(p) + 18), 2);
+    memcpy(&tst[6], (packet_get_bytes(p) + 20), 2);
+    memcpy(&tst[7], (packet_get_bytes(p) + 22), 2);
+
+    for (int i = 0; i < 8; i++)
+    {
+        tst[i] = ntohs(tst[i]);
+    }
     printf("Source address hex:\t%x %x %x %x %x %x %x %x\n", tst[0], tst[1], tst[2], tst[3], tst[4], tst[5], tst[6], tst[7]);
     printf("1:\t%x\n", tst[0]);
     printf("2:\t%x\n", tst[1]);
