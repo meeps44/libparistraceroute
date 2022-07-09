@@ -376,7 +376,7 @@ void parse_packet(const packet_t *p)
     printf("Source:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
-        h->source.address_short[i] = (((uint16_t) *(first_byte+8+k)) << 8) | *(first_byte+8+i+1);
+        h->source.address_short[i] = (((uint16_t) *(first_byte+8+k)) << 8) | *(first_byte+8+k+1);
         printf("%x ", h->source.address_short[i]);
     }
     puts("");
