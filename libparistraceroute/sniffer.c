@@ -399,20 +399,14 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     //uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
     //h->traffic_class =  ntohs(tmp3);
     h->version = (*first_byte >> 4); // mask out the unneeded values
-    printf("Version:\t%d\n", h->version);
     h->traffic_class = ((uint16_t) (*first_byte & 0x0F) << 8) | (*(first_byte+1) >> 4);
-    printf("Traffic class:\t%x\n", h->traffic_class);
     h->flow_label = ((uint32_t) (*(first_byte+1) & 0x0F) << 16) | ((uint32_t) *(first_byte+2) << 8) | *(first_byte+3);
-    printf("Flow label:\t%x\n", h->flow_label);
     h->payload_length = (((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5);
-    printf("Payload length:\t%x\n", h->payload_length);
     h->next_header = *(first_byte+6);
-    printf("Next header:\t%x\n", h->next_header);
     h->hop_limit = *(first_byte+7);
-    printf("Hop limit:\t%x\n", h->hop_limit);
     
     // Set source and destination
-    memcpy(h, (first_byte+8), 32);
+    //memcpy(h, (first_byte+8), 32);
     printf("Source:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
@@ -428,6 +422,12 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     }
     puts("");
 
+    printf("Version:\t%d\n", h->version);
+    printf("Traffic class:\t%x\n", h->traffic_class);
+    printf("Flow label:\t%x\n", h->flow_label);
+    printf("Payload length:\t%x\n", h->payload_length);
+    printf("Next header:\t%x\n", h->next_header);
+    printf("Hop limit:\t%x\n", h->hop_limit);
     return h;
 }
 
@@ -442,7 +442,7 @@ void parse_packet(const packet_t *p)
         ipv6_header *ip6h = parse_ipv6(first_byte);
         //icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
         puts("Returned from parse_ipv6");
-        printf("ip6h next_header:\t%d\n", ip6h->next_header);
+        printf("ip6h next_header:\t%x\n", ip6h->next_header);
 
         if (ip6h->next_header == 58)
         {
