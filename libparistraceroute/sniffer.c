@@ -380,6 +380,7 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
             printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
             break;
         default:
+            puts("DEBUG:\ticmp_parse default");
             break;
     }
 
@@ -437,7 +438,9 @@ void parse_packet(const packet_t *p)
     switch(ip6h->next_header)
     {
         case NH_ICMPv6:
-            ipv6_header *icmp6h = parse_icmp6(first_byte + 40);
+            //icmp6_header *icmp6h = parse_icmp6(first_byte + 40);
+            parse_icmp6(first_byte + 40);
+
             // If parse_icmp6 returns a valid payload: parse inner ipv6
             // and potentially, also inner tcp.
             // What we want is the inner IPv6 flow-label.
