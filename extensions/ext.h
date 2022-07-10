@@ -6,17 +6,24 @@ typedef struct address {
     int a, b, c, d;
 } address;
 
-struct returned_info {
-    address a;
+/**
+ * @brief Contains data about each hop excluding the hopnumber and address
+ * 
+ */
+typedef struct hop_metadata {
     int returned_flowlabel;
-};
+} hop_metadata;
 
 typedef struct hop {
+    hop_metadata md;
     int hopnumber;
-    struct returned_info r;
+    address a;
 } hop;
 
 typedef struct traceroute {
+    // For easy route comparison - make a hash of the (source_ip, dest_ip, outgoing_flow_label)-tuple and add it 
+    // as a variable to the struct?
+
     char *path_hash;
     hop hops[35]; // maximum hop length is 35. any hops longer than that do not get included. 
     // this could also be a list of *hop-pointers. maybe a better idea?

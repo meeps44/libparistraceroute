@@ -19,6 +19,14 @@ typedef struct my_ipv6_address  {
     uint16_t address_short[8];
 } address;
 
+typedef struct my_icmp6_header
+{
+    uint8_t type;
+    uint8_t code;
+    uint16_t checksum;
+    uint32_t opt;
+} icmp6_header;
+
 typedef struct my_ipv6_header {
     uint8_t version:4;
     uint32_t flow_label:20;
@@ -31,8 +39,8 @@ typedef struct my_ipv6_header {
 } ipv6_header;
 
 void parse_packet(const packet_t *p);
-ipv6_header *parse_ipv6(const uint8_t *p);
-void parse_icmp6(const uint8_t *p);
+ipv6_header *parse_ipv6(const uint8_t *first_byte);
+icmp6_header * parse_icmp6(const uint8_t *icmp_first_byte);
 void parse_tcp(const uint8_t *p);
 
 

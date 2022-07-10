@@ -354,22 +354,36 @@ enum IPV6_HEADER_OPTS {
     NH_ICMPv6 = 58,
 };
 
+// Type codes: https://datatracker.ietf.org/doc/html/rfc4443
 enum ICMP_TYPES {
+    ICMP_ECHO_REQUEST = 128,
+    ICMP_ECHO_REPLY = 129,
+    ICMP_DESTINATION_UNREACHABLE = 1,
+    ICMP_PACKET_TOO_BIG = 2,
     ICMP_TIME_EXCEEDED = 3,
+    ICMP_PARAMETER_PROBLEM = 4,
 };
 
-void parse_icmp6(const uint8_t *icmp_first_byte)
+icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 {
-    uint8_t icmp_type = *icmp_first_byte;
+    icmp6_header *h = calloc(1, sizeof(icmp6_header));
+    h->type = *icmp_first_byte;
+    h->code = *(icmp_first_byte + 1);
+    h->checksum = ((uint16_t) *(icmp_first_byte + 2) << 8) | *(icmp_first_byte + 3);
+    // Depending on the type there will be a value between bytes 5-9 as well, however 
+    // as it is not used in our project it will not be parsed at this time.
 
-    switch(icmp_type)
+    switch(h->type)
     {
         case ICMP_TIME_EXCEEDED:
-            puts("Do something");
+            ipv6_header *inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
+            printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
             break;
         default:
             break;
     }
+
+    return h;
 }
 
 ipv6_header *parse_ipv6(const uint8_t *first_byte)
@@ -377,19 +391,16 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     ipv6_header *h = calloc(1, sizeof(ipv6_header));
 
     // Fill IPv6 struct
+    //uint8_t tmp = *first_byte & 0x0F;
+    //uint8_t tmp2 = *(first_byte+1) >> 4;
+    //uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
+    //h->traffic_class =  ntohs(tmp3);
     h->version = (*first_byte >> 4); // mask out the unneeded values
     printf("Version:\t%d\n", h->version);
-    uint8_t tmp = *first_byte & 0x0F;
-    uint8_t tmp2 = *(first_byte+1) >> 4;
-    uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
-    h->traffic_class =  ntohs(tmp3);
-    printf("Traffic class:\t%d\n", h->traffic_class);
-
-    uint8_t tmp4 = *(first_byte+1) & 0x0F;
-    uint8_t tmp5 = *(first_byte+2);
-    uint8_t tmp6 = *(first_byte+3);
-    uint32_t tmp7 = ((uint32_t) tmp4 << 16) | ((uint32_t) tmp5 << 8) | tmp6;
-    h->flow_label = tmp7;
+    h->traffic_class = ((uint16_t) (*first_byte & 0x0F) << 8) | (*(first_byte+1) >> 4);
+    printf("Traffic class:\t%x\n", h->traffic_class);
+    h->flow_label = ((uint32_t) (*(first_byte+1) & 0x0F) << 16) | ((uint32_t) *(first_byte+2) << 8) | *(first_byte+3);
+    printf("Flow label:\t%x\n", h->flow_label);
     h->payload_length = (((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5);
     printf("Payload length:\t%x\n", h->payload_length);
     h->next_header = *(first_byte+6);
@@ -414,9 +425,6 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     }
     puts("");
 
-    //free(h);
-    //return h->next_header;
-
     return h;
 }
 
@@ -425,11 +433,14 @@ void parse_packet(const packet_t *p)
     packet_fprintf(stdout, p);
     puts("");
     uint8_t *first_byte = packet_get_bytes(p);
-    uint8_t next_header = parse_ipv6(first_byte);
-    switch(next_header)
+    ipv6_header *ip6h = parse_ipv6(first_byte);
+    switch(ip6h->next_header)
     {
         case NH_ICMPv6:
-            parse_icmp6(first_byte + 40);
+            ipv6_header *icmp6h = parse_icmp6(first_byte + 40);
+            // If parse_icmp6 returns a valid payload: parse inner ipv6
+            // and potentially, also inner tcp.
+            // What we want is the inner IPv6 flow-label.
             break;
         case NH_HBH_OPTS: //Hop-by-Hop Options
             break;
@@ -448,6 +459,7 @@ void parse_packet(const packet_t *p)
         default:
             break;
     };
+
     // Init header struct
     /*
     header *h = calloc(1, sizeof(header));
