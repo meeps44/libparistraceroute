@@ -383,6 +383,7 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
             break;
         default:
             puts("DEBUG:\ticmp_parse default");
+            printf("ICMP type:\t%x\n", h->type);
             break;
     }
 
@@ -394,11 +395,7 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     ipv6_header *h = calloc(1, sizeof(ipv6_header));
 
     // Fill IPv6 struct
-    //uint8_t tmp = *first_byte & 0x0F;
-    //uint8_t tmp2 = *(first_byte+1) >> 4;
-    //uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
-    //h->traffic_class =  ntohs(tmp3);
-    h->version = (*first_byte >> 4); // mask out the unneeded values
+    h->version = (*first_byte >> 4); 
     h->traffic_class = ((uint16_t) (*first_byte & 0x0F) << 8) | (*(first_byte+1) >> 4);
     h->flow_label = ((uint32_t) (*(first_byte+1) & 0x0F) << 16) | ((uint32_t) *(first_byte+2) << 8) | *(first_byte+3);
     h->payload_length = (((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5);
@@ -406,7 +403,6 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     h->hop_limit = *(first_byte+7);
     
     // Set source and destination
-    //memcpy(h, (first_byte+8), 32);
     printf("Source:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
@@ -435,7 +431,9 @@ void parse_packet(const packet_t *p)
 {
     packet_fprintf(stdout, p);
     puts("");
+    //uint8_t eh_length;
     uint8_t *first_byte = packet_get_bytes(p);
+    int hl = 40; // Initial value = IPv6 Header Length
 
     if ((*first_byte >> 4) == 6) // If IPv6
     {
@@ -444,38 +442,33 @@ void parse_packet(const packet_t *p)
         puts("Returned from parse_ipv6");
         printf("ip6h next_header:\t%x\n", ip6h->next_header);
 
-        if (ip6h->next_header == 58)
-        {
-            printf("next header = 58. if-statement succeeded\n");
-        } else 
-        {
-            printf("next header != 58. if-statement failed?\n");
-        };
-
         switch(ip6h->next_header)
         {
             case NH_ICMPv6:
-                //icmp6_header *icmp6h = parse_icmp6(first_byte + 40);
+                //icmp6_header *icmp6h = parse_icmp6(first_byte + hl);
                 puts("Calling parse_icmp6");
-                parse_icmp6(first_byte + 40);
+                parse_icmp6(first_byte + hl);
 
                 // If parse_icmp6 returns a valid payload: parse inner ipv6
                 // and potentially, also inner tcp.
                 // What we want is the inner IPv6 flow-label.
                 break;
             case NH_HBH_OPTS: //Hop-by-Hop Options
+                //uint8_t new_next_header = *(first_byte + hl);
+                //eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
+                //chl += (eh_length + 8);
                 break;
-            case NH_DST_OPTS: //Destination Options (with Routing Options)
+            case NH_DST_OPTS: //Destination Options
                 break;
-            case NH_RH://Routing Header
+            case NH_RH: //Routing Header
                 break;
-            case NH_FH://Fragment Header
+            case NH_FH: //Fragment Header
                 break;
-            case NH_AH://Authentication Header
+            case NH_AH: //Authentication Header
                 break;
-            case NH_ESPH://Encapsulation Security Payload Header
+            case NH_ESPH: //Encapsulation Security Payload Header
                 break;
-            case NH_MH://Mobility Header
+            case NH_MH: //Mobility Header
                 break;
             default:
                 puts("DEBUG:\tipv6_parse_default");
