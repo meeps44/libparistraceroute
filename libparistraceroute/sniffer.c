@@ -366,6 +366,7 @@ enum ICMP_TYPES {
 
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 {
+    puts("Entering parse_icmp6");
     icmp6_header *h = calloc(1, sizeof(icmp6_header));
     ipv6_header *inner_ipv6;
     h->type = *icmp_first_byte;
@@ -435,36 +436,41 @@ void parse_packet(const packet_t *p)
     packet_fprintf(stdout, p);
     puts("");
     uint8_t *first_byte = packet_get_bytes(p);
-    ipv6_header *ip6h = parse_ipv6(first_byte);
-    //icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
 
-    switch(ip6h->next_header)
+    if ((*first_byte >> 4) == 6) // If IPv6
     {
-        case NH_ICMPv6:
-            //icmp6_header *icmp6h = parse_icmp6(first_byte + 40);
-            parse_icmp6(first_byte + 40);
+        ipv6_header *ip6h = parse_ipv6(first_byte);
+        //icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
 
-            // If parse_icmp6 returns a valid payload: parse inner ipv6
-            // and potentially, also inner tcp.
-            // What we want is the inner IPv6 flow-label.
-            break;
-        case NH_HBH_OPTS: //Hop-by-Hop Options
-            break;
-        case NH_DST_OPTS: //Destination Options (with Routing Options)
-            break;
-        case NH_RH://Routing Header
-            break;
-        case NH_FH://Fragment Header
-            break;
-        case NH_AH://Authentication Header
-            break;
-        case NH_ESPH://Encapsulation Security Payload Header
-            break;
-        case NH_MH://Mobility Header
-            break;
-        default:
-            break;
-    };
+        switch(ip6h->next_header)
+        {
+            case NH_ICMPv6:
+                //icmp6_header *icmp6h = parse_icmp6(first_byte + 40);
+                parse_icmp6(first_byte + 40);
+
+                // If parse_icmp6 returns a valid payload: parse inner ipv6
+                // and potentially, also inner tcp.
+                // What we want is the inner IPv6 flow-label.
+                break;
+            case NH_HBH_OPTS: //Hop-by-Hop Options
+                break;
+            case NH_DST_OPTS: //Destination Options (with Routing Options)
+                break;
+            case NH_RH://Routing Header
+                break;
+            case NH_FH://Fragment Header
+                break;
+            case NH_AH://Authentication Header
+                break;
+            case NH_ESPH://Encapsulation Security Payload Header
+                break;
+            case NH_MH://Mobility Header
+                break;
+            default:
+                puts("DEBUG:\tipv6_parse_default");
+                break;
+        };
+    }
 
     // Init header struct
     /*
@@ -606,7 +612,7 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
 #endif
 		if (sniffer->recv_callback != NULL) {
             packet = packet_create_from_bytes(recv_bytes, num_bytes);
-            fprintf(stderr, "DEBUG: Calling parse_packet()");
+            fprintf(stderr, "\nDEBUG: Calling parse_packet()");
             parse_packet(packet);
             fprintf(stderr, "DEBUG: Returned from parse_packet()");
             //packet_dump(packet);
