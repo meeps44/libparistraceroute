@@ -441,11 +441,22 @@ void parse_packet(const packet_t *p)
     {
         ipv6_header *ip6h = parse_ipv6(first_byte);
         //icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
+        puts("Returned from parse_ipv6");
+        printf("ip6h next_header:\t%d\n", ip6h->next_header);
+
+        if (ip6h->next_header == 58)
+        {
+            printf("next header = 58. if-statement succeeded\n");
+        } else 
+        {
+            printf("next header != 58. if-statement failed?\n");
+        };
 
         switch(ip6h->next_header)
         {
             case NH_ICMPv6:
                 //icmp6_header *icmp6h = parse_icmp6(first_byte + 40);
+                puts("Calling parse_icmp6");
                 parse_icmp6(first_byte + 40);
 
                 // If parse_icmp6 returns a valid payload: parse inner ipv6
@@ -612,11 +623,10 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
 #endif
 		if (sniffer->recv_callback != NULL) {
             packet = packet_create_from_bytes(recv_bytes, num_bytes);
-            fprintf(stderr, "\nDEBUG: Calling parse_packet()");
+            fprintf(stderr, "DEBUG: Calling parse_packet()\n");
             parse_packet(packet);
-            fprintf(stderr, "DEBUG: Returned from parse_packet()");
+            fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
             //packet_dump(packet);
-            puts("");
 
 			if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
                 fprintf(stderr, "Error in sniffer's callback\n");
