@@ -11,18 +11,21 @@
 
 #define DEBUG_ON 1
 
-int hashPath(parsed_packet *p)
+uint8_t *hashPath(address *l[])
 {
     // Creates a hash of all the hops in a path and returns the result
     // We define a path as an ordered, indexed set of hops to a destination.
 
     // The data to be hashed
-    char data[] = "Hello, world!";
-    size_t length = strlen(data);
+    SHA_CTX shactx;
+    // uint8_t digest[SHA_DIGEST_LENGTH];
+    uint8_t *digest = calloc(SHA_DIGEST_LENGTH, sizeof(uint8_t));
 
-    unsigned char hash[SHA_DIGEST_LENGTH];
-    SHA1(data, length, hash);
-    // hash now contains the 20-byte SHA-1 hash
+    SHA1_Init(&shactx);
+    SHA1_Update(&shactx, l, sizeof(traceroute));
+    SHA1_Final(digest, &shactx); // digest now contains the 20-byte SHA-1 hash
+    
+    return digest;
 }
 
 /**
