@@ -31,7 +31,6 @@ typedef struct traceroute
 {
     // For easy route comparison - make a hash of the (source_ip, dest_ip, outgoing_flow_label)-tuple and add it
     // as a variable to the struct?
-
     /*
             "outgoing_tcp_port": "443",
         "flow_label": "1048575",
@@ -42,20 +41,25 @@ typedef struct traceroute
         "destination_asn": "16509",
         "path_id": "c0f8ed8a7c1f3d725bd89de7ed7eced0b9dcc67b",
     */
-
     uint16_t outgoing_tcp_port;
     char *timestamp;
     address source_ip;
     uint32_t source_asn;
     address destination_ip;
     uint32_t destination_asn;
-
-    char *path_hash;
+    char *path_id;
     hop hops[35]; // maximum hop length is 35. any hops longer than that do not get included.
     // this could also be a list of *hop-pointers. maybe a better idea?
 
 } traceroute;
 
+
+/**
+ * @brief Create an address object initialized to zero
+ * 
+ * @return address* Pointer to the new address object
+ */
+address *createAddress(void);
 
 /**
  * @brief Hashes a list of addresses (aka a path).
@@ -70,9 +74,9 @@ uint8_t *hashPath(address *l[]);
 
 /**
  * @brief Performs ASN-lookup of a given IPv6-address.
- *
- * @param routeViewsFilePath The RouteViews file from which we will get ASN-data.
- * @return int
+ * 
+ * @param ipv6_address The IPv6-address on which to lookup.
+ * @return int The AS number associated with this address
  */
 int asnLookup(address ipv6_address);
 
@@ -105,7 +109,7 @@ int getFlowLabel(parsed_packet *p);
  *
  * @param t
  */
-void fWriteTraceroute(traceroute *t, char *fileName);
+void fWriteTraceroute(traceroute *t, char *filename);
 
 /**
  * @brief Prints each individual field of a traceroute object to STDOUT.

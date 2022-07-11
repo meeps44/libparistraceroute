@@ -11,6 +11,13 @@
 
 #define DEBUG_ON 1
 
+address *createAddress(void)
+{
+    address *a = calloc(1, sizeof(address));
+
+    return a;
+}
+
 uint8_t *hashPath(address *l[])
 {
     // Creates a hash of all the hops in a path and returns the result
@@ -26,18 +33,6 @@ uint8_t *hashPath(address *l[])
     SHA1_Final(digest, &shactx); // digest now contains the 20-byte SHA-1 hash
     
     return digest;
-}
-
-/**
- * @brief Takes an address object and converts it to an integer
- * (This function may be better placed in a separate utils file)
- * 
- */
-int addressToInt(address ipv6_address)
-{
-    int adr;
-
-    return adr;
 }
 
 int asnLookup(address ipv6_address)
@@ -78,18 +73,45 @@ void printParsedPacket(parsed_packet *p);
 
 int getFlowLabel(parsed_packet *p);
 
-void fWriteTraceroute(traceroute *t, char *fileName)
+// 
+// 
+/**
+ * @brief Loads a traceroute object into memory, parses it and prints out
+ * its information
+ * 
+ * @param fileName 
+ */
+void fReadTraceroute(char *filename)
 {
     FILE *f;
-    char *filename = "/home/erlend/C-programming/library-test/write_test.txt";
+    traceroute *t = calloc(1, sizeof(traceroute));
+
+    if ((f = fopen(filename, "r")) == NULL)
+    {
+        fprintf(stderr, "Error opening file:\t%s\nErrno:\t%s\n", filename, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+
+    /* Seek to the beginning of the file */
+    fseek(f, 0, SEEK_SET);
+
+    /* Read and display data */
+    fread(t, sizeof(traceroute), 1, f);
+    fclose(f);
+}
+
+void fWriteTraceroute(traceroute *t, char *filename)
+{
+    FILE *f;
+    // char *filename = "/home/erlend/C-programming/library-test/write_test.txt";
     size_t numb_elements = 1;
     int my_int = 42;
-    address my_struct = {
-        .a = 52,
-        .b = 1,
-        .c = 96,
-        .d = 8765};
-    char my_str[50] = "Hello from process 1!\n";
+    // address my_struct = {
+        // .a = 52,
+        // .b = 1,
+        // .c = 96,
+        // .d = 8765};
+    // char my_str[50] = "Hello from process 1!\n";
 
     // opens a file for reading and appending
     if ((f = fopen(filename, "a+")) == NULL)
@@ -104,7 +126,8 @@ void fWriteTraceroute(traceroute *t, char *fileName)
         exit(EXIT_FAILURE);
     }
 
-    fwrite(&my_struct, sizeof(int), sizeof(my_struct) / sizeof(int), f);
+    fwrite(&t, sizeof(traceroute), 1, f);
+    //fwrite(&my_struct, sizeof(int), sizeof(my_struct) / sizeof(int), f);
     // fwrite(my_str, sizeof(char), sizeof(my_str), f);
 
     flock(fileno(f), LOCK_UN); // unlock file
@@ -115,12 +138,12 @@ void printTraceroute(traceroute *t);
 
 char *tracerouteToJSON(traceroute *t);
 
-char *getFileName(struct tm *currentTime)
-{
-    char *fileName;
+//char *createFileName(struct tm *currentTime) // (Might not be needed)
+//{
+    //char *fileName;
 
-    return fileName;
-}
+    //return fileName;
+//}
 
 struct tm *getCurrentTime(void)
 {
