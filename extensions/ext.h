@@ -24,7 +24,7 @@ typedef struct hop
 {
     hop_metadata md;
     int hopnumber;
-    address a;
+    address a; // Could be a list of address pointers
 } hop;
 
 typedef struct traceroute
@@ -49,7 +49,7 @@ typedef struct traceroute
     uint32_t destination_asn;
     char *path_id;
     hop hops[35]; // maximum hop length is 35. any hops longer than that do not get included.
-    // this could also be a list of *hop-pointers. maybe a better idea?
+    // Could also be a list of *hop-pointers
 
 } traceroute;
 

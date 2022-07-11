@@ -81,7 +81,7 @@ int getFlowLabel(parsed_packet *p);
  * 
  * @param fileName 
  */
-void fReadTraceroute(char *filename)
+traceroute *fReadTraceroute(char *filename)
 {
     FILE *f;
     traceroute *t = calloc(1, sizeof(traceroute));
@@ -98,6 +98,8 @@ void fReadTraceroute(char *filename)
     /* Read and display data */
     fread(t, sizeof(traceroute), 1, f);
     fclose(f);
+
+    return t;
 }
 
 void fWriteTraceroute(traceroute *t, char *filename)
