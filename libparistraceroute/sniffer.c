@@ -475,108 +475,69 @@ void parse_packet(const packet_t *p)
                 break;
         };
     }
+}
 
-    // Init header struct
-    /*
-    header *h = calloc(1, sizeof(header));
+address *createAddress(void)
+{
+    address *a;
+    if (a = calloc(1, sizeof(address)))
+    {
+        perror("Error");
+        exit(1);
+    }
 
-    // Get pointer to the beginning of bytes managed by packet_t instance
-    uint8_t *first_byte = packet_get_bytes(p);
-    printf("\nFirst byte:\t%d\n", (int) *first_byte);
+    return a;
+}
 
-    // Fill IPv6 struct
-    h->version = (*first_byte >> 4); // mask out the unneeded values
-    printf("Version:\t%d\n", h->version); // hopefully this prints out 6
-    //memcpy(h, packet_get_bytes(p), 40);
-    uint8_t tmp = *first_byte & 0x0F;
-    uint8_t tmp2 = *(first_byte+1) >> 4;
-    uint16_t tmp3 = ((uint16_t) tmp << 8) | tmp2;
-    h->traffic_class =  ntohs(tmp3);
-    printf("Traffic class:\t%d\n", h->traffic_class);
+traceroute *createTraceroute(void)
+{
+    traceroute *t;
+    if (t = calloc(1, sizeof(traceroute)) == NULL)
+    {
+        perror("Error");
+        exit(1);
+    }
 
-    uint8_t tmp4 = *(first_byte+1) & 0x0F;
-    uint8_t tmp5 = *(first_byte+2);
-    uint8_t tmp6 = *(first_byte+3);
-    uint32_t tmp7 = ((uint32_t) tmp4 << 16) | ((uint32_t) tmp5 << 8) | tmp6;
-    h->flow_label = tmp7;
-    h->payload_length = (((uint16_t) *(first_byte+4)) << 8) | *(first_byte+5);
-    printf("Payload length:\t%x\n", h->payload_length);
-    h->next_header = *(first_byte+6);
-    printf("Next header:\t%x\n", h->next_header);
-    h->hop_limit = *(first_byte+7);
-    printf("Hop limit:\t%x\n", h->hop_limit);
+    return t;
+}
+
+hop *createHop(void)
+{
+    hop *h;
     
-    // Set source and destination
-    memcpy(h, (packet_get_bytes(p)+8), 32);
-    printf("Source:\t\n");
-    for (int i = 0, k = 0; i < 8; i++, k += 2)
+    if (h = calloc(1, sizeof(hop)) == NULL)
     {
-        h->source.address_short[i] = (((uint16_t) *(first_byte+8+k)) << 8) | *(first_byte+8+k+1);
-        printf("%x ", h->source.address_short[i]);
+        perror("Error");
+        exit(1);
     }
-    puts("");
-    printf("Destination:\t\n");
-    for (int i = 0, k = 0; i < 8; i++, k += 2)
+
+    return h;
+}
+
+
+/**
+ * @brief Appends hop-object to the next available spot in the
+ * hops-array. Returns -1 if the array is full.
+ * 
+ * @param h 
+ * @param t 
+ * @return int 
+ */
+int appendHop(hop *h, traceroute *t)
+{
+    int i;
+
+    for (i = 0; i < 35; i++)
     {
-        h->destination.address_short[i] = (((uint16_t) *(first_byte+24+k)) << 8) | *(first_byte+24+k+1);
-        printf("%x ", h->destination.address_short[i]);
+        if (t->hops[i] == NULL)
+        {
+            printf("Available spot found at index:\t%d\n", i);
+            t->hops[i] = h;
+            return 0;
+        }
     }
-    puts("");
-    packet_fprintf(stdout, p);
-    puts("");
 
-    switch(h->next_header)
-    {
-        case NH_ICMPv6:
-            parse_icmp6(p + 40);
-            break;
-        case NH_HBH_OPTS: //Hop-by-Hop Options
-            break;
-        case NH_DST_OPTS: //Destination Options (with Routing Options)
-            break;
-        case NH_RH://Routing Header
-            break;
-        case NH_FH://Fragment Header
-            break;
-        case NH_AH://Authentication Header
-            break;
-        case NH_ESPH://Encapsulation Security Payload Header
-            break;
-        case NH_MH://Mobility Header
-            break;
-        default:
-            break;
-    };
-    */
-
-    /*
-    uint16_t tst[8] = {0};
-    memcpy(&tst[0], (packet_get_bytes(p) + 8), 2);
-    printf("Packet_get_bytes + 8:\t%x\n", *(packet_get_bytes(p) + 8));
-    printf("Packet_get_bytes + 9:\t%x\n", *(packet_get_bytes(p) + 9));
-    printf("Packet_get_bytes + 10:\t%x\n", *(packet_get_bytes(p) + 10));
-    printf("Packet_get_bytes + 11:\t%x\n", *(packet_get_bytes(p) + 11));
-    printf("Packet_get_bytes + 12:\t%x\n", *(packet_get_bytes(p) + 12));
-    printf("Packet_get_bytes + 13:\t%x\n", *(packet_get_bytes(p) + 13));
-    printf("Packet_get_bytes + 14:\t%x\n", *(packet_get_bytes(p) + 14));
-    printf("Packet_get_bytes + 15:\t%x\n", *(packet_get_bytes(p) + 15));
-    printf("Packet_get_bytes + 16:\t%x\n", *(packet_get_bytes(p) + 16));
-    printf("Packet_get_bytes + 17:\t%x\n", *(packet_get_bytes(p) + 17));
-    memcpy(&tst[1], (packet_get_bytes(p) + 10), 2);
-    memcpy(&tst[2], (packet_get_bytes(p) + 12), 2);
-    memcpy(&tst[3], (packet_get_bytes(p) + 14), 2);
-    memcpy(&tst[4], (packet_get_bytes(p) + 16), 2);
-    memcpy(&tst[5], (packet_get_bytes(p) + 18), 2);
-    memcpy(&tst[6], (packet_get_bytes(p) + 20), 2);
-    memcpy(&tst[7], (packet_get_bytes(p) + 22), 2);
-
-    for (int i = 0; i < 8; i++)
-    {
-        tst[i] = ntohs(tst[i]);
-    }
-    */
-
-    //free(src_addr);
+    return -1;
 }
 // END ERLEND //
 
@@ -620,6 +581,19 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
             parse_packet(packet);
             fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
             //packet_dump(packet);
+
+            int first_run = 1;
+            if(first_run)
+            {
+                traceroute *t = calloc(1, sizeof(traceroute));
+            }
+
+            hop *h = createHop(void);
+            if (appendHop(t, h) == -1)
+            {
+                fprintf(stderr, "Failed to append hop: Hop array is full\n");
+            }
+
 
 			if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
                 fprintf(stderr, "Error in sniffer's callback\n");

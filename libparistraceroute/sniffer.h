@@ -13,9 +13,42 @@
 #include "packet.h"  // packet_t
 #include "use.h"
 
-// ERLEND //
 
-typedef struct my_ipv6_address  {
+// ERLEND //
+typedef struct hop
+{
+    int returned_flowlabel;
+    int hopnumber;
+    address *hop_address; // Could be a list of address pointers
+} hop;
+
+typedef struct traceroute
+{
+    // For easy route comparison - make a hash of the (source_ip, dest_ip, outgoing_flow_label)-tuple and add it
+    // as a variable to the struct?
+    /*
+            "outgoing_tcp_port": "443",
+        "flow_label": "1048575",
+        "timestamp": "2022-05-07 15:50:47.559550",
+        "source": "2a03:b0c0:1:d0::b45:6001",
+        "source_asn": "14061",
+        "destination": "2600:9000:20a5:f800:10:15f0:8cc0:93a1",
+        "destination_asn": "16509",
+        "path_id": "c0f8ed8a7c1f3d725bd89de7ed7eced0b9dcc67b",
+    */
+    uint16_t outgoing_tcp_port;
+    char *timestamp;
+    address source_ip;
+    uint32_t source_asn;
+    address destination_ip;
+    uint32_t destination_asn;
+    // uint8_t path_id[SHA_DIGEST_LENGTH]; // Need to include OpenSSL lib to get SHA_DIGEST_LENGTH definition
+    hop *hops[35]; // maximum hop length is 35. any hops longer than that do not get included.
+    // Could also be a list of *hop-pointers
+
+} traceroute;
+
+typedef struct ipv6_address  {
     uint16_t address_short[8];
 } address;
 

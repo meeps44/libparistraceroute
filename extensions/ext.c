@@ -13,9 +13,39 @@
 
 address *createAddress(void)
 {
-    address *a = calloc(1, sizeof(address));
+    address *a;
+    if (a = calloc(1, sizeof(address)))
+    {
+        perror("Error");
+        exit(1);
+    }
 
     return a;
+}
+
+traceroute *createTraceroute(void)
+{
+    traceroute *t;
+    if (t = calloc(1, sizeof(traceroute)) == NULL)
+    {
+        perror("Error");
+        exit(1);
+    }
+
+    return t;
+}
+
+hop *createHop(void)
+{
+    hop *h;
+    
+    if (h = calloc(1, sizeof(hop)) == NULL) // if error
+    {
+        perror("Error");
+        exit(1);
+    }
+
+    return h;
 }
 
 uint8_t *hashPath(address *l[])
@@ -161,4 +191,43 @@ struct tm *getCurrentTime(void)
            now->tm_hour, now->tm_min, now->tm_sec);
 
     return now;
+}
+
+int appendAddress(address *a, traceroute *t, int hopnumber, int returned_flowlabel)
+{
+    traceroute *tmp = t;
+    int i;
+
+    for (i = 0; i < 35; i++)
+    {
+        if (tmp->hops[i] == NULL)
+        {
+            printf("Available spot found at index:\t%d\n", i);
+            hop *h = malloc(sizeof(hop));
+            h->hop_address = a;
+            h->hopnumber = hopnumber;
+            h->returned_flowlabel = returned_flowlabel;
+            tmp->hops[i] = h;
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+int appendHop(hop *h, traceroute *t)
+{
+    int i;
+
+    for (i = 0; i < 35; i++)
+    {
+        if (t->hops[i] == NULL)
+        {
+            printf("Available spot found at index:\t%d\n", i);
+            t->hops[i] = h;
+            return 0;
+        }
+    }
+
+    return -1;
 }

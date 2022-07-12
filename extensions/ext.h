@@ -1,30 +1,14 @@
 #include <openssl/sha.h> /* SHA1 */
 
-
-typedef struct parsed_packet
-{
-
-} parsed_packet;
-
-typedef struct address
-{
-    int a, b, c, d;
+typedef struct ipv6_address  {
+    uint16_t address_short[8];
 } address;
-
-/**
- * @brief Contains data about each hop excluding the hopnumber and address
- *
- */
-typedef struct hop_metadata
-{
-    int returned_flowlabel;
-} hop_metadata;
 
 typedef struct hop
 {
-    hop_metadata md;
+    int returned_flowlabel;
     int hopnumber;
-    address a; // Could be a list of address pointers
+    address *hop_address; // Could be a list of address pointers
 } hop;
 
 typedef struct traceroute
@@ -47,8 +31,8 @@ typedef struct traceroute
     uint32_t source_asn;
     address destination_ip;
     uint32_t destination_asn;
-    char *path_id;
-    hop hops[35]; // maximum hop length is 35. any hops longer than that do not get included.
+    uint8_t path_id[SHA_DIGEST_LENGTH];
+    hop *hops[35]; // maximum hop length is 35. any hops longer than that do not get included.
     // Could also be a list of *hop-pointers
 
 } traceroute;
@@ -60,6 +44,21 @@ typedef struct traceroute
  * @return address* Pointer to the new address object
  */
 address *createAddress(void);
+
+
+/**
+ * @brief Create a Traceroute object initialized to zero
+ * 
+ * @return traceroute* 
+ */
+traceroute *createTraceroute(void);
+
+/**
+ * @brief Create a Hop object initalized to zero
+ * 
+ * @return hop* 
+ */
+hop *createHop(void);
 
 /**
  * @brief Hashes a list of addresses (aka a path).
@@ -132,3 +131,25 @@ char *tracerouteToJSON(traceroute *t);
  * @return A struct representation of the current time in GMT
  */
 struct tm *getCurrentTime(void);
+
+
+/**
+ * @brief Appends hop-object to the next available spot in the
+ * hops-array. Returns -1 if the array is full.
+ * 
+ * @param h 
+ * @param t 
+ * @return int 
+ */
+int appendHop(hop *h, traceroute *t);
+
+/**
+ * @brief Appends an address-object to the next available spot in the
+ * hops-array. Returns -1 if the array is full, 0 if executed correctly.
+ * 
+ * @param a 
+ * @param t 
+ * @return int Returns -1 if the array is full, 0 if executed correctly with no
+ * errors.
+ */
+int appendAddress(address *a, traceroute *t, int hopnumber, int returned_flowlabel);
