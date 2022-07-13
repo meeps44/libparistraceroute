@@ -586,13 +586,25 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
             if(first_run)
             {
                 traceroute *t = calloc(1, sizeof(traceroute));
+                hop *h = createHop(void);
+                h->hopnumber = 1;
+                h->hop_address;
+                h->returned_flowlabel;
+                appendHop(t, h);
+                t->timestamp;
+                t->source_ip;
+                t->source_asn;
+                t->destination_ip;
+                t->source_asn;
+            } else 
+            {
+                hop *h = createHop(void);
+                if (appendHop(t, h) == -1)
+                {
+                    fprintf(stderr, "Failed to append hop: Hop array is full\n");
+                }
             }
 
-            hop *h = createHop(void);
-            if (appendHop(t, h) == -1)
-            {
-                fprintf(stderr, "Failed to append hop: Hop array is full\n");
-            }
 
 
 			if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
