@@ -577,35 +577,36 @@ void sniffer_process_packets(sniffer_t * sniffer, uint8_t protocol_id)
 #endif
 		if (sniffer->recv_callback != NULL) {
             packet = packet_create_from_bytes(recv_bytes, num_bytes);
+
+            // BEGIN ERLEND //
             fprintf(stderr, "DEBUG: Calling parse_packet()\n");
             parse_packet(packet);
             fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
             //packet_dump(packet);
 
             int first_run = 1;
+            traceroute *t;
+            hop *h;
+
             if(first_run)
             {
-                traceroute *t = calloc(1, sizeof(traceroute));
-                hop *h = createHop(void);
-                h->hopnumber = 1;
-                h->hop_address;
-                h->returned_flowlabel;
-                appendHop(t, h);
+                t = calloc(1, sizeof(traceroute));
                 t->timestamp;
                 t->source_ip;
                 t->source_asn;
                 t->destination_ip;
                 t->source_asn;
-            } else 
+            } 
+
+            h = createHop();
+            h->hopnumber = 1;
+            h->hop_address;
+            h->returned_flowlabel;
+            if (appendHop(t, h) == -1)
             {
-                hop *h = createHop(void);
-                if (appendHop(t, h) == -1)
-                {
-                    fprintf(stderr, "Failed to append hop: Hop array is full\n");
-                }
+                fprintf(stderr, "Failed to append hop: Hop array is full\n");
             }
-
-
+            // END ERLEND //
 
 			if (!(sniffer->recv_callback(packet, sniffer->recv_param))) {
                 fprintf(stderr, "Error in sniffer's callback\n");
