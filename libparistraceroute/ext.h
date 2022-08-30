@@ -54,6 +54,14 @@ typedef struct ipv6_header_s
 } ipv6_header;
 
 /**
+ * @brief Inits ASN-lookup by loading asn2prefix and creating patricia-tree
+ * 
+ * @param filename 
+ * @return int 
+ */
+int asnLookupInit(char *filename);
+
+/**
  * @brief Parses an ICMPv6-packet and creates a newly allocated ICMPv6-header object.
  *
  * @param icmp_first_byte
