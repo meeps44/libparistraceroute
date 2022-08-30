@@ -8,9 +8,11 @@
 #include <time.h>
 #include <stdbool.h>
 #include <arpa/inet.h>
+
 #include "ext.h"
 #include "patricia.h"
 // #include "hashmap.h"
+// #include "packet.h" // included in ext.h
 
 #define DEBUG_ON 1
 
@@ -83,15 +85,15 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     printf("Source:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
-        h->source.address_short[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
-        printf("%x ", h->source.address_short[i]);
+        h->source.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
+        printf("%x ", h->source.__in6_u.__u6_addr16[i]);
     }
     puts("");
     printf("Destination:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
-        h->destination.address_short[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
-        printf("%x ", h->destination.address_short[i]);
+        h->destination.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
+        printf("%x ", h->destination.__in6_u.__u6_addr16[i]);
     }
     puts("");
 
@@ -225,6 +227,7 @@ uint8_t *hashPath(address arr[], int arraySize)
     return obuf;
 }
 
+// TODO: Rewrite to use patricia-tree.
 int asnLookup(address *ipv6_address)
 {
     int ASN;
@@ -265,16 +268,11 @@ int asnLookup(address *ipv6_address)
 
 int printHop(hop *h)
 {
+    char hop_addr[100];
+
     printf("Returned flow label:\t%u\n", h->returned_flowlabel);
     printf("Hop number:\t%d\n", h->hopnumber);
-    printAddress(h->hop_address);
-    return 0;
-}
-
-int printAddress(address *a)
-{
-    char *address_string = addressToString(a);
-    printf("Address:\t%s\n", address_string);
+    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, h->hop_address, hop_addr, sizeof(struct in6_addr)));
     return 0;
 }
 
@@ -290,11 +288,14 @@ int printTraceroute(traceroute *t)
     uint8_t path_id[SHA_DIGEST_LENGTH];
     hop *hops[35]; // maximum hop length is 35. any hops longer than that do not get included.
     */
+    char src_addr[100];
+    char dst_addr[100];
+
     printf("Outgoing tcp port:\t%d\n", t->outgoing_tcp_port);
     printf("Timestamp:\t%d\n", t->outgoing_tcp_port);
-    printAddress(t->source_ip);
+    printf("Source address:\t%s\n", inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr)));
     printf("Source ASN:\t%d\n", t->source_asn);
-    printAddress(t->destination_ip);
+    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, t->destination_ip, dst_addr, sizeof(struct in6_addr)));
     printf("Destination ASN:\t%d\n", t->destination_asn);
     printf("Path ID:\t%x\n", t->path_id);
     printf("Hop count:\t%x\n", t->hop_count);
@@ -377,21 +378,6 @@ int appendHop(hop *h, traceroute *t)
     return -1;
 }
 
-char *addressToString(address *a)
-{
-    char *address_string = malloc(sizeof(char) * 17); // 1 more extra char for \0-terminator
-    for (int i = 0, k = 0; i < 8; i++, k += 2)
-    {
-
-        address_string[k] = (char)a->address_short[i];
-        address_string[k + 1] = (char)a->address_short[i] >> 8;
-    }
-
-    address_string[17] = '\0';
-
-    return address_string;
-}
-
 int serialize_csv(char *fileName, traceroute *t)
 {
     FILE *file;
@@ -417,8 +403,8 @@ int serialize_csv(char *fileName, traceroute *t)
 
     // /* Write to file */
     // fwrite(t, sizeof(traceroute), 1, file);
-    static const char *HOP_FORMAT_OUT = "%d, %d, %d:%d ";
-    static const char *TR_FORMAT_OUT = "%d, %s, %d:%d, %d, %d:%d, %d, %s, %d, ";
+    static const char *HOP_FORMAT_OUT = "%d, %d, %s ";
+    static const char *TR_FORMAT_OUT = "%d, %s, %s, %d, %s, %d, %s, %d, ";
 
     char src_addr[100];
     char dst_addr[100];
@@ -431,7 +417,6 @@ int serialize_csv(char *fileName, traceroute *t)
     fprintf(file, TR_FORMAT_OUT,
             t->outgoing_tcp_port,
             t->timestamp,
-            t->source_ip.high_order_bits,
             src_addr,
             t->source_asn,
             dst_addr,
@@ -444,16 +429,10 @@ int serialize_csv(char *fileName, traceroute *t)
         inet_ntop(AF_INET6, t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr));
         /* Write to file */
         fprintf(file, HOP_FORMAT_OUT,
-                t->hops[i].returned_flowlabel,
-                t->hops[i].hopnumber,
+                t->hops[i]->returned_flowlabel,
+                t->hops[i]->hopnumber,
                 hop_addr);
     }
-    /* TODO:
-    for (int i = t->hop_count; i < 35; i++)
-    {
-        fprintf(file, HOP_FORMAT_OUT, 0, 0, 0, 0);
-    }
-    */
     fprintf(file, "\n");
 
     flock(fileno(fileName), LOCK_UN); // unlock file

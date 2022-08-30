@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <openssl/sha.h> // SHA1
 #include <netinet/in.h>  //in6_addr
+#include "packet.h"
 
 #define HOP_MAX 35
 
@@ -245,14 +246,6 @@ int writeTracerouteToFile(traceroute *t, char *filename);
 int printTraceroute(traceroute *t);
 
 /**
- * @brief Prints each individual field of an address object to STDOUT
- *
- * @param a
- * @return int
- */
-int printAddress(address *a);
-
-/**
  * @brief Prints each individual field of a hop object to STDOUT
  *
  * @param h
@@ -295,15 +288,6 @@ int appendHop(hop *h, traceroute *t);
  * errors.
  */
 int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel);
-
-/**
- * @brief Converts an IPv6 address object to a C-string (null-terminated
- * array of characters).
- *
- * @param a Pointer to IPv6 address object
- * @return char* Pointer to the first character in the character array
- */
-char *addressToString(address *a);
 
 /**
  * @brief Loads a .pt-file into memory and converts its content into an
