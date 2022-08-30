@@ -341,6 +341,8 @@ int main(int argc, char **argv)
     // erlend
     int flow_label;
     int some_error = 1;
+    char csv_file[50]; // erlend - file name lenght cannot be longer 
+    // than 50 chars.
 
     print_hello();
 
@@ -370,8 +372,11 @@ int main(int argc, char **argv)
     options_parse(options, usage, argv);
     // erlend - We assume that the flow-label is always the second-to-last argument
     flow_label = atoi(argv[argc - 2]);
+    csv_file = argv[argc - 3];
     // flow_label = atoi(argv[1]);
     set_flow_label(flow_label);
+    // not yet implemented:
+    set_csv_file(csv_file); // sets csv-file value in sniffer.c
 
     // We assume that the target IP address is always the last argument
     dst_ip = argv[argc - 1];
@@ -525,6 +530,11 @@ int main(int argc, char **argv)
         goto ERR_PT_LOOP;
     }
     exit_code = EXIT_SUCCESS;
+
+    // Erlend - traceroute all done. Saving the results to disk.
+    // NB! Header row gets written when the file is created
+    // via the bash-script.
+    serialize_csv(csv_file, get_traceroute());
 
     // Leave the program
 ERR_PT_LOOP:
