@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 #include "ext.h"
+#include "patricia.h"
+// #include "hashmap.h"
 
 #define DEBUG_ON 1
 
@@ -423,30 +425,28 @@ int serialize_csv(char *fileName, traceroute *t)
     char hop_addr[100];
 
     /* Convert address to string before writing to file. */
-    inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr)); 
-    inet_ntop(AF_INET6, t->destination_ip, dst_addr, sizeof(struct in6_addr)); 
+    inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr));
+    inet_ntop(AF_INET6, t->destination_ip, dst_addr, sizeof(struct in6_addr));
     /* Write to file */
-    fprintf(file, TR_FORMAT_OUT, 
-        t->outgoing_tcp_port, 
-        t->timestamp, 
-        t->source_ip.high_order_bits, 
-        src_addr,
-        t->source_asn, 
-        dst_addr,
-        t->destination_asn,
-        t->path_id, 
-        t->hop_count
-        );
+    fprintf(file, TR_FORMAT_OUT,
+            t->outgoing_tcp_port,
+            t->timestamp,
+            t->source_ip.high_order_bits,
+            src_addr,
+            t->source_asn,
+            dst_addr,
+            t->destination_asn,
+            t->path_id,
+            t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
-        inet_ntop(AF_INET6, t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr)); 
+        inet_ntop(AF_INET6, t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr));
         /* Write to file */
-        fprintf(file, HOP_FORMAT_OUT, 
-        t->hops[i].returned_flowlabel, 
-        t->hops[i].hopnumber, 
-        hop_addr
-        );
+        fprintf(file, HOP_FORMAT_OUT,
+                t->hops[i].returned_flowlabel,
+                t->hops[i].hopnumber,
+                hop_addr);
     }
     /* TODO:
     for (int i = t->hop_count; i < 35; i++)

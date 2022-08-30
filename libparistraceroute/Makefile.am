@@ -84,7 +84,10 @@ nobase_libparistraceroute_@LIBRARY_VERSION@_la_HEADERS =  \
                         use.h \
                         vector.h \
                         whois.h \
-                        ext_test.h
+                        ext.h \
+                        cJSON.h \
+                        hashmap.h \
+                        patricia.h
 
 nodist_nobase_libparistraceroute_@LIBRARY_VERSION@_la_HEADERS = \
     config.h
@@ -160,7 +163,10 @@ libparistraceroute_@LIBRARY_VERSION@_la_SOURCES =    \
                         tree.c \
                         vector.c \
                         whois.c \
-                        ext_test.c
+                        ext.c \
+                        cJSON.c \
+                        hashmap.c \
+                        patricia.c
 
 ## Instruct libtool to include ABI version information in the generated shared
 ## library file (.so).  The library ABI version is defined in configure.ac, so

@@ -32,27 +32,46 @@ enum ICMP_TYPES
     ICMP_PARAMETER_PROBLEM = 4,
 };
 
+typedef struct icmp6_header_s
+{
+    uint8_t type;
+    uint8_t code;
+    uint16_t checksum;
+    uint32_t opt;
+} icmp6_header;
+
+typedef struct ipv6_header_s
+{
+    uint8_t version : 4;
+    uint32_t flow_label : 20;
+    uint8_t traffic_class;
+    uint16_t payload_length;
+    uint8_t next_header;
+    uint8_t hop_limit;
+    address source;
+    address destination;
+} ipv6_header;
 
 /**
  * @brief Parses an ICMPv6-packet and creates a newly allocated ICMPv6-header object.
- * 
- * @param icmp_first_byte 
+ *
+ * @param icmp_first_byte
  * @return icmp6_header* The ICMPv6-header object.
  */
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte);
 
 /**
  * @brief Parses an IPv6-packet and creates a newly allocated IPv6-header object.
- * 
- * @param first_byte 
+ *
+ * @param first_byte
  * @return ipv6_header* The IPv6-header.
  */
 ipv6_header *parse_ipv6(const uint8_t *first_byte);
 
 /**
  * @brief Parses a packet into its component headers.
- * 
- * @param p 
+ *
+ * @param p
  */
 void parse_packet(const packet_t *p);
 
@@ -60,7 +79,7 @@ typedef struct in6_addr address;
 
 // typedef struct ipv6_address
 // {
-    // uint16_t address_short[8];
+// uint16_t address_short[8];
 // } address;
 
 typedef struct hop
@@ -100,15 +119,15 @@ typedef struct traceroute
 
 /**
  * @brief Get the global traceroute object
- * 
+ *
  * @return traceroute* Pointer to the heap-allocated traceroute object.
  */
 traceroute *get_traceroute(void);
 
 /**
  * @brief Set the global traceroute object.
- * 
- * @param t 
+ *
+ * @param t
  */
 void set_traceroute(traceroute *tr);
 
