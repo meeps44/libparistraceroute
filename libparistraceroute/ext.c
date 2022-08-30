@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
+#include <arpa/inet.h>
 #include "ext.h"
 
 #define DEBUG_ON 1
@@ -416,20 +417,21 @@ int serialize_csv(char *fileName, traceroute *t)
     // fwrite(t, sizeof(traceroute), 1, file);
     static const char *HOP_FORMAT_OUT = "%d, %d, %d:%d ";
     static const char *TR_FORMAT_OUT = "%d, %s, %d:%d, %d, %d:%d, %d, %s, %d, ";
+
+    char src_addr[100];
+    char dst_addr[100];
+
+    /* Convert address to string before writing to file. */
+    inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr)); 
+    inet_ntop(AF_INET6, t->destination_ip, dst_addr, sizeof(struct in6_addr)); 
     /* Write to file */
     fprintf(file, TR_FORMAT_OUT, 
         t->outgoing_tcp_port, 
         t->timestamp, 
         t->source_ip.high_order_bits, 
-        t->source_ip->__u6_addr.__u6_addr32[0], 
-        t->source_ip->__u6_addr.__u6_addr32[1], 
-        t->source_ip->__u6_addr.__u6_addr32[2], 
-        t->source_ip->__u6_addr.__u6_addr32[3], 
+        src_addr,
         t->source_asn, 
-        t->destination_ip->__u6_addr.__u6_addr32[0], 
-        t->destination_ip->__u6_addr.__u6_addr32[1], 
-        t->destination_ip->__u6_addr.__u6_addr32[2], 
-        t->destination_ip->__u6_addr.__u6_addr32[3], 
+        dst_addr,
         t->destination_asn,
         t->path_id, 
         t->hop_count
