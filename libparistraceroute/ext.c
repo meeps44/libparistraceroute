@@ -420,6 +420,7 @@ int serialize_csv(char *fileName, traceroute *t)
 
     char src_addr[100];
     char dst_addr[100];
+    char hop_addr[100];
 
     /* Convert address to string before writing to file. */
     inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr)); 
@@ -438,13 +439,13 @@ int serialize_csv(char *fileName, traceroute *t)
         );
     for (int i = 0; i < t->hop_count; i++)
     {
+        /* Convert address to string before writing to file */
+        inet_ntop(AF_INET6, t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr)); 
+        /* Write to file */
         fprintf(file, HOP_FORMAT_OUT, 
         t->hops[i].returned_flowlabel, 
         t->hops[i].hopnumber, 
-        t->hops[i]->hop_address->__u6_addr.__u6_addr32[0],
-        t->hops[i]->hop_address->__u6_addr.__u6_addr32[1],
-        t->hops[i]->hop_address->__u6_addr.__u6_addr32[2],
-        t->hops[i]->hop_address->__u6_addr.__u6_addr32[3],
+        hop_addr
         );
     }
     /* TODO:
