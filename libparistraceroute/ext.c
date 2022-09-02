@@ -32,6 +32,106 @@
 // static const char *TRACEROUTE_FORMAT_IN = "\n%d,%[^,], %[], %d, %[], %d, %[^,], %d, %[]";
 // static const char *TRACEROUTE_FORMAT_OUT = "%d, %s, %[], %d, %[], %d, %[^,], %d, %[]\n";
 
+struct in6_addr *convert_address_string(char *ipv6_address_string)
+{
+
+    struct in6_addr *i6 = malloc(sizeof(struct in6_addr));
+    char *dst = malloc(sizeof(char) * 48);
+    dst = get_host_ip();
+    int pton_result;
+    if ((pton_result = inet_pton(AF_INET6, dst, i6)) == 1)
+    {
+        printf("Converted successfully from string to struct in6_addr\n");
+    }
+    else
+    {
+        fprintf(stderr, "Error: convert_address_string failed to convert \
+        string %s to struct in6_addr\n",
+                ipv6_address_string);
+        return NULL;
+    }
+
+    return i6;
+}
+
+char *get_host_ip()
+{
+    char *dst = malloc(sizeof(char) * 48);
+    // struct in6_addr *i6 = malloc(sizeof(struct in6_addr));
+
+    FILE *f;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    char *filename = "/proc/net/if_inet6";
+    int current_token = 0;
+
+    /* IPv6 scope value in hexadecimal representation.
+    A scope value of "00" indicates global scope.
+    Ref.: https://tldp.org/HOWTO/Linux+IPv6-HOWTO/ch11s04.html */
+    char scope_value[50];
+
+    f = fopen(filename, "r");
+    if (f == NULL)
+    {
+        fprintf(stderr, "get_host_ip: Failed to open %s", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    while ((read = getline(&line, &len, f)) != -1)
+    {
+        current_token++;
+        printf("%s", line);
+        /* Get the first token */
+        char *token = strtok(line, " ");
+        char *address = token;
+#ifdef EXT_DEBUG
+        printf("First token:\t%s\n", token);
+#endif
+        /* Walk through other tokens */
+        while (token != NULL)
+        {
+            if (current_token == 4)
+            {
+                strcpy(scope_value, token);
+            }
+            token = strtok(NULL, " ");
+            current_token++;
+        }
+
+        if (strcmp(scope_value, "00") == 0)
+        {
+            for (int i = 0, k = 0; k < strlen(address); i += 5, k += 4)
+            {
+                memcpy((dst + i), (address + k), 4);
+                if (k + 4 < strlen(address))
+                    *(dst + i + 4) = 58;
+            }
+
+            // int pton_result;
+            // if ((pton_result = inet_pton(AF_INET6, dst, i6)) == 1)
+            //{
+            // printf("Converted successfully from string to struct in6_addr\n");
+            //}
+            fclose(f);
+            if (line)
+                free(line);
+#ifdef EXT_DEBUG
+            printf("The global IPv6-address is:\t%s\n", dst);
+#endif
+            return dst;
+        }
+        current_token = 0;
+    }
+
+    perror("Global IPv6-address not found\n");
+    fclose(f);
+    if (line)
+        free(line);
+
+    return NULL;
+}
+
 traceroute *t;
 
 void set_traceroute(traceroute *tr)
@@ -213,6 +313,38 @@ void printHash(uint8_t *digest)
     puts("");
 }
 
+// char *init_path_hash(traceroute *t, address *i6)
+// {
+// unsigned char *obuf = malloc(sizeof(uint8_t) * 20);
+// SHA_CTX shactx;
+// SHA1_Init(&shactx);
+// return obuf;
+// }
+
+// int update_path_hash(traceroute *t, address *i6)
+// {
+// unsigned char *obuf = malloc(sizeof(uint8_t) * 20);
+// SHA_CTX shactx;
+
+// SHA1_Init(&shactx);
+// SHA1_Update(&shactx, i6, sizeof(address));
+// SHA1_Final(obuf, &shactx); // digest now contains the 20-byte SHA-1 hash
+
+// /* Copy hash into path_id */
+// memcpy(t->path_id, obuf, 20);
+// return 0;
+// }
+
+// int finalize_path_hash(traceroute *t, address *i6)
+// {
+// SHA1_Final(obuf, &shactx); // digest now contains the 20-byte SHA-1 hash
+
+// /* Copy hash into path_id */
+// memcpy(t->path_id, obuf, 20);
+
+// return 0;
+// }
+
 uint8_t *hashPath(address arr[], int arraySize)
 {
     unsigned char *obuf = malloc(sizeof(uint8_t) * 20);
@@ -233,6 +365,14 @@ int asnLookupInit(char *filename)
 {
     patricia_init(false);
     FILE *f;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    char *token = NULL;
+    char *address;
+    int mask;
+    char *asn;
+    struct in6_addr *my_addr = calloc(1, sizeof(struct in6_addr));
 
     f = fopen(filename, "r");
     if (f == NULL)
@@ -241,48 +381,57 @@ int asnLookupInit(char *filename)
         return -1;
     }
 
-    struct in6_addr *my_addr = calloc(1, sizeof(struct in6_addr));
-    example_address = "2001::";
-    inet_pton(AF_INET6, example_address, my_addr);
-    my_mask = 32;
-    my_asn = 6939;
-    insert(AF_INET6, (inx_addr)*my_addr, my_mask, my_asn);
+    while ((read = getline(&line, &len, f)) != -1)
+    {
+        printf("Retrieved line of length %zu:\n", read);
+        printf("%s", line);
+        token = strtok(line, " ");
+        int nmb = 1;
+        while (token)
+        {
+            switch (nmb)
+            {
+            case 1:
+                address = token;
+                printf("address: %s\n", address);
+                inet_pton(AF_INET6, address, my_addr);
+                break;
+            case 2:
+                mask = atoi(token);
+                printf("mask: %d\n", mask);
+                break;
+            case 3:
+                nmb = 1;
+                asn = token;
+                printf("asn: %s\n", asn);
 
+                // Insert into patricia-tree
+                insert(AF_INET6, (struct in6_addr) * my_addr, mask, my_asn);
+                break;
+            default:
+                puts("Error: default");
+                break;
+            }
+            nmb++;
+            token = strtok(NULL, " ");
+        }
+    }
+
+    fclose(f);
+    if (line)
+        free(line);
     return 0;
 }
 
 // TODO: Rewrite to use patricia-tree.
-int asnLookup(address *ipv6_address)
+char *asnLookup(address *ipv6_address)
 {
-    int ASN;
-    // FILE *fp;
-    // char input_buffer[1024], open_string_buffer[1024];
-    // int num;
-    // int i = 1;
-
-    // sprintf(open_string_buffer, "python3 main.py %d", atoi(addressToString(ipv6_address)));
-
-    // printf("DEBUG:\tvalue of open_string_buffer:\t%s\n", open_string_buffer);
-    // fp = popen(open_string_buffer, "r");
-    // if (fp == NULL)
-    //{
-    // perror("Failed to create file pointer\n");
-    // fprintf(stderr, "Errno:\t%s\n", strerror(errno));
-    // exit(1);
-    //}
-
-    // while (fgets(input_buffer, sizeof(input_buffer), fp) != NULL)
-    //{
-    // printf("Read line:\t%d\n", i++);
-    // num = atoi(input_buffer);
-    // printf("Num = %d\n", num);
-    //}
-    // pclose(fp);
+    char *ASN;
 
     struct in6_addr bar;
     unsigned char *example_address2 = "1900:2100::2a2d";
     inet_pton(AF_INET6, example_address2, &bar);
-    int lookup_result = lookup_addr(AF_INET6, (inx_addr)bar);
+    int lookup_result = lookup_addr(AF_INET6, (struct in6_addr)bar);
     printf("Lookup result (returned ASN):\t%d\n", lookup_result);
     return ASN;
 }
@@ -364,6 +513,18 @@ struct tm *getCurrentTime()
     struct tm *now = gmtime(&t);
 
     return now;
+}
+
+char *create_timestamp()
+{
+    char *timestamp = malloc(sizeof(char) * 50);
+    struct tm *now = getCurrentTime();
+    // Output timestamp in format "YYYY-MM-DD-hh_mm_ss : "
+    sprintf(timestamp, "%04d-%02d-%02d-%02d_%02d_%02d",
+            now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
+            now->tm_hour, now->tm_min, now->tm_sec);
+
+    return timestamp;
 }
 
 int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel)

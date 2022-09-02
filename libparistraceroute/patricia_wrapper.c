@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 patricia_tree_t *tree;
 const uint8_t v4_mapped_prefix[12] = {0, 0, 0, 0,
@@ -16,33 +17,24 @@ inline static prefix_t *make_prefix()
     return rval;
 }
 
-inline static bool set_prefix(prefix_t *subnet, int family, inx_addr *addr, unsigned int width)
+inline static bool set_prefix(prefix_t *subnet, int family, struct in6_addr *addr, unsigned int width)
 {
-    if (!(family == AF_INET || family == AF_INET6))
-        return false;
-
-    if (family == AF_INET && width > 32)
+    if (!(family == AF_INET6))
         return false;
 
     if (family == AF_INET6 && width > 128)
         return false;
 
-    if (family == AF_INET)
-    {
-        memcpy(&subnet->add.sin6, v4_mapped_prefix, sizeof(v4_mapped_prefix));
-        memcpy(&subnet->add.sin6.s6_addr[12], addr, sizeof(struct in_addr));
-    }
-
-    else if (family == AF_INET6)
-        memcpy(&subnet->add.sin6, addr, sizeof(subnet->add.sin6));
+    memcpy(&subnet->add.sin6, addr, sizeof(subnet->add.sin6));
 
     subnet->family = AF_INET6;
-    subnet->bitlen = (family == AF_INET ? width + 96 : width);
+    // subnet->bitlen = (family == AF_INET ? width + 96 : width);
+    subnet->bitlen = width; // erlend
 
     return true;
 }
 
-inline static bool parse_cidr(const char *cidr, int *family, inx_addr *subnet, unsigned short *mask)
+inline static bool parse_cidr(const char *cidr, int *family, struct in6_addr *subnet, unsigned short *mask)
 {
     char buffer[40];
     const char *addr_str = 0;
@@ -68,15 +60,21 @@ inline static bool parse_cidr(const char *cidr, int *family, inx_addr *subnet, u
         mask_str = 0;
     }
 
-    *family = AF_INET;
+    *family = AF_INET6;
 
     if (inet_pton(*family, addr_str, subnet) != 1)
-    {
-        *family = AF_INET6;
+        return false;
 
-        if (inet_pton(*family, addr_str, subnet) != 1)
-            return false;
-    }
+    // erlend
+    // *family = AF_INET;
+
+    // if (inet_pton(*family, addr_str, subnet) != 1)
+    // {
+    // *family = AF_INET6;
+
+    // if (inet_pton(*family, addr_str, subnet) != 1)
+    // return false;
+    // }
 
     if (mask_str)
     {
@@ -107,7 +105,7 @@ void patricia_init(bool arg_binary_lookup_mode)
     tree = New_Patricia(128);
 }
 
-int insert(int family, inx_addr subnet, unsigned short mask, int data)
+int insert(int family, struct in6_addr subnet, unsigned short mask, char *data)
 {
     prefix_t *sn = make_prefix();
 
@@ -139,16 +137,17 @@ int insert(int family, inx_addr subnet, unsigned short mask, int data)
     // if (!data)
     // data = NULL;
 
-    // node->data = (void *)&data;
-    node->data = calloc(1, sizeof(int));
-    memcpy(node->data, &data, sizeof(int));
+    node->data = (void *)data;
+    // node->data = calloc(1, sizeof(int));
+    // memcpy(node->data, &data, sizeof(int));
+    memcpy(node->data, data, strlen(data));
     printf("Insert: Node addr:\t%p\n", node->data);
-    printf("Insert: Node data:\t%d\n", *(int *)node->data);
+    printf("Insert: Node data:\t%s\n", *(char *)node->data);
 
     return 1;
 }
 
-int lookup_addr(int family, inx_addr addr)
+int lookup_addr(int family, struct in6_addr addr)
 {
     prefix_t *subnet = make_prefix();
 

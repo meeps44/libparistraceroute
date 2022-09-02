@@ -1,5 +1,5 @@
 #include "config.h"
-#include "ext_test.h" // erlend
+#include "ext.h" // erlend
 
 #include <stdlib.h>     // malloc...
 #include <stdio.h>      // perror, printf
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
     // erlend
     int flow_label;
     int some_error = 1;
-    char csv_file[50]; // erlend - file name lenght cannot be longer 
+    char csv_file[50]; // erlend - file name lenght cannot be longer
     // than 50 chars.
 
     print_hello();
@@ -531,10 +531,20 @@ int main(int argc, char **argv)
     }
     exit_code = EXIT_SUCCESS;
 
+    // Erlend - calculate and set path hash
+    traceroute *t = get_traceroute();
+    address *a = malloc(sizeof(address) * t->hop_count);
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        a[i] = t->hops[i]->hop_address;
+    }
+    uint8_t *path_hash = hashPath(a, t->hop_count);
+    memcpy(t->path_id, path_hash, sizeof(uint8_t) * 20);
+
     // Erlend - traceroute all done. Saving the results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
-    serialize_csv(csv_file, get_traceroute());
+    serialize_csv(csv_file, t);
 
     // Leave the program
 ERR_PT_LOOP:

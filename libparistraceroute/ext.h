@@ -55,9 +55,9 @@ typedef struct ipv6_header_s
 
 /**
  * @brief Inits ASN-lookup by loading asn2prefix and creating patricia-tree
- * 
- * @param filename 
- * @return int 
+ *
+ * @param filename
+ * @return int
  */
 int asnLookupInit(char *filename);
 
@@ -85,11 +85,6 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte);
 void parse_packet(const packet_t *p);
 
 typedef struct in6_addr address;
-
-// typedef struct ipv6_address
-// {
-// uint16_t address_short[8];
-// } address;
 
 typedef struct hop
 {
@@ -198,9 +193,9 @@ uint8_t *hashPath(address arr[], int arraySize);
  * @brief Performs ASN-lookup of a given IPv6-address.
  *
  * @param ipv6_address The IPv6-address on which to lookup.
- * @return int The AS number associated with this address
+ * @return int The AS number associated with this address.
  */
-int asnLookup(address *ipv6_address);
+char *asnLookup(address *ipv6_address);
 
 /**
  * @brief Parses a raw IPv6-packet and saves the result to a parsed_packet struct.
@@ -437,5 +432,40 @@ int serialize_bytes(char *fileName, traceroute *t);
  * @return int
  */
 int deserialize_bytes(char *fileName, traceroute *t, long offset);
+
+/**
+ * @brief Creates a timestamp of the current time represented
+ * as a string.
+ *
+ * @return String representation of the current time in UTC-format.
+ */
+char *create_timestamp();
+
+/**
+ * @brief Get the global IPv6-address of the local host. Address is
+ * extracted from file /proc/net/if_inet6.
+ *
+ * @return String representation of global host IPv6 in
+ * xx:xx:xx:xx:xx:xx-format.
+ */
+char *get_host_ip();
+
+/**
+ * @brief Converts a string representation of an IPv6-address to a
+ * struct in6_addr.
+ * 
+ * @param ipv6_address_string The string to be converted.
+ * @return struct in6_addr* The resultant struct. Returns NULL on failure.
+ */
+struct in6_addr *convert_address_string(char *ipv6_address_string);
+
+/**
+ * @brief 
+ * 
+ * @param t Pointer to the traceroute object.
+ * @param i6 Pointer to the IPv6-address to be hashed.
+ * @return int 
+ */
+// int update_path_hash(traceroute *t, address *i6);
 
 #endif
