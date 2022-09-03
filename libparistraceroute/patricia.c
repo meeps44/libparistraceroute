@@ -65,7 +65,6 @@ static char copyright[] =
 
 #include "patricia.h"
 
-#define PATRICIA_DEBUG
 #define Delete free
 
 void out_of_memory(const char *where)
@@ -852,7 +851,9 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
 	}
 
 	new_node = calloc(1, sizeof *new_node);
+#ifdef PATRICIA_DEBUG
 	fprintf(stderr, "New_node addr: %p\n", new_node);
+#endif /* PATRICIA_DEBUG */
 	if (new_node == NULL)
 		out_of_memory("patricia/patricia_lookup");
 
@@ -958,7 +959,9 @@ patricia_lookup(patricia_tree_t *patricia, prefix_t *prefix)
 				prefix_toa(prefix), prefix->bitlen);
 #endif /* PATRICIA_DEBUG */
 	}
+#ifdef PATRICIA_DEBUG
 	fprintf(stderr, "Returning new_node with addr: %p\n", new_node);
+#endif /* PATRICIA_DEBUG */
 	return (new_node);
 }
 
@@ -1088,7 +1091,9 @@ make_and_lookup(patricia_tree_t *tree, char *string)
 	patricia_node_t *node;
 
 	prefix = ascii2prefix(AF_INET, string);
+#ifdef PATRICIA_DEBUG
 	printf("make_and_lookup: %s/%d\n", prefix_toa(prefix), prefix->bitlen);
+#endif /* PATRICIA_DEBUG */
 	node = patricia_lookup(tree, prefix);
 	Deref_Prefix(prefix);
 	return (node);
@@ -1101,7 +1106,9 @@ try_search_exact(patricia_tree_t *tree, char *string)
 	patricia_node_t *node;
 
 	prefix = ascii2prefix(AF_INET, string);
+#ifdef PATRICIA_DEBUG
 	printf("try_search_exact: %s/%d\n", prefix_toa(prefix), prefix->bitlen);
+#endif /* PATRICIA_DEBUG */
 	if ((node = patricia_search_exact(tree, prefix)) == NULL)
 	{
 		printf("try_search_exact: not found\n");

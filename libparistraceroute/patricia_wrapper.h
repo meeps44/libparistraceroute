@@ -1,5 +1,11 @@
 #include "patricia.h"
 #include <netinet/in.h> //in6_addr
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <arpa/inet.h>
 
 inline static prefix_t *make_prefix();
 

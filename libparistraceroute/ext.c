@@ -448,8 +448,8 @@ int asnLookupInit(char *filename)
 
     while ((read = getline(&line, &len, f)) != -1)
     {
-        printf("Retrieved line of length %zu:\n", read);
-        printf("%s", line);
+        // printf("Retrieved line of length %zu:\n", read);
+        // printf("%s", line);
         token = strtok(line, " ");
         int nmb = 1;
         while (token)
@@ -458,20 +458,20 @@ int asnLookupInit(char *filename)
             {
             case 1:
                 address = token;
-                printf("address: %s\n", address);
+                // printf("address: %s\n", address);
                 inet_pton(AF_INET6, address, my_addr);
                 break;
             case 2:
                 mask = atoi(token);
-                printf("mask: %d\n", mask);
+                // printf("mask: %d\n", mask);
                 break;
             case 3:
                 nmb = 1;
-                asn = token;
-                printf("asn: %s\n", asn);
-
+                asn = malloc(sizeof(char) * 100);
+                strcpy(asn, token);
+                // printf("asn: %s\n", asn);
                 // Insert into patricia-tree
-                insert(AF_INET6, (struct in6_addr) * my_addr, mask, my_asn);
+                insert(AF_INET6, (struct in6_addr) * my_addr, mask, asn);
                 break;
             default:
                 puts("Error: default");
@@ -490,13 +490,15 @@ int asnLookupInit(char *filename)
 
 char *asnLookup(struct in6_addr *ipv6_address)
 {
-    char *ASN;
-    // struct in6_addr i6;
-    //  unsigned char *example_address2 = "1900:2100::2a2d";
-    //  inet_pton(AF_INET6, ipv6_address, &i6);
+    // char *ASN;
+    //  struct in6_addr i6;
+    //   unsigned char *example_address2 = "1900:2100::2a2d";
+    //   inet_pton(AF_INET6, ipv6_address, &i6);
     char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
+#ifdef EXT_DEBUG
     printf("Lookup result (returned ASN):\t%s\n", lookup_result);
-    return ASN;
+#endif
+    return lookup_result;
 }
 
 // address *parseIPv6(packet_t packet);

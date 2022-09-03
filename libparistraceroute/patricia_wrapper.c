@@ -1,9 +1,4 @@
-#include "patricia.h"
 #include "patricia_wrapper.h"
-#include <errno.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 
 patricia_tree_t *tree;
 const uint8_t v4_mapped_prefix[12] = {0, 0, 0, 0,
@@ -29,7 +24,7 @@ inline static bool set_prefix(prefix_t *subnet, int family, struct in6_addr *add
 
     subnet->family = AF_INET6;
     // subnet->bitlen = (family == AF_INET ? width + 96 : width);
-    subnet->bitlen = width; // erlend
+    subnet->bitlen = width;
 
     return true;
 }
@@ -64,17 +59,6 @@ inline static bool parse_cidr(const char *cidr, int *family, struct in6_addr *su
 
     if (inet_pton(*family, addr_str, subnet) != 1)
         return false;
-
-    // erlend
-    // *family = AF_INET;
-
-    // if (inet_pton(*family, addr_str, subnet) != 1)
-    // {
-    // *family = AF_INET6;
-
-    // if (inet_pton(*family, addr_str, subnet) != 1)
-    // return false;
-    // }
 
     if (mask_str)
     {
@@ -125,7 +109,7 @@ int insert(int family, struct in6_addr subnet, unsigned short mask, char *data)
     }
 
     patricia_node_t *node = patricia_lookup(tree, sn);
-    fprintf(stderr, "Got new node, addr: %p\n", node);
+    // fprintf(stderr, "Got new node, addr: %p\n", node);
     Deref_Prefix(sn);
 
     if (!node)
@@ -141,8 +125,8 @@ int insert(int family, struct in6_addr subnet, unsigned short mask, char *data)
     // node->data = calloc(1, sizeof(int));
     // memcpy(node->data, &data, sizeof(int));
     memcpy(node->data, data, strlen(data));
-    printf("Insert: Node addr:\t%p\n", node->data);
-    printf("Insert: Node data:\t%s\n", *(char *)node->data);
+    // printf("Insert: Node addr:\t%p\n", node->data);
+    // printf("Insert: Node data:\t%s\n", (char *)node->data);
 
     return 1;
 }
@@ -154,7 +138,7 @@ char *lookup_addr(int family, struct in6_addr addr)
     if (!subnet)
     {
         perror("invalid subnet/prefix");
-        return 0;
+        return NULL;
     }
 
     int mask = family == AF_INET ? 32 : 128;
@@ -164,17 +148,17 @@ char *lookup_addr(int family, struct in6_addr addr)
     {
         Deref_Prefix(subnet);
         perror("out of memory");
-        return 0;
+        return NULL;
     }
 
     patricia_node_t *node = patricia_search_best(tree, subnet);
     Deref_Prefix(subnet);
 
     if (!node)
-        return 0;
+        return NULL;
 
-    printf("Node bitlen:\t%d\n", node->prefix->bitlen);
-    printf("Node data:\t%s\n", *(char *)node->data);
+    // printf("Node bitlen:\t%d\n", node->prefix->bitlen);
+    // printf("Node data:\t%s\n", (char *)node->data);
     char *data = malloc(sizeof(char) * 100);
     strcpy(data, (char *)node->data);
 
