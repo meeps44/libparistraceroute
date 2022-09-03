@@ -453,19 +453,27 @@ char *get_host_ip();
 /**
  * @brief Converts a string representation of an IPv6-address to a
  * struct in6_addr.
- * 
+ *
  * @param ipv6_address_string The string to be converted.
  * @return struct in6_addr* The resultant struct. Returns NULL on failure.
  */
 struct in6_addr *convert_address_string(char *ipv6_address_string);
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  * @param t Pointer to the traceroute object.
  * @param i6 Pointer to the IPv6-address to be hashed.
- * @return int 
+ * @return int
  */
 // int update_path_hash(traceroute *t, address *i6);
+
+/**
+ * @brief Get the inner ipv6 header object
+ *
+ * @param p The raw IPv6 packet.
+ * @return ipv6_header* Pointer to the inner IPv6-header.
+ */
+ipv6_header *get_inner_ipv6_header(const packet_t *p);
 
 #endif

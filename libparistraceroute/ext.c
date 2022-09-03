@@ -39,11 +39,7 @@ struct in6_addr *convert_address_string(char *ipv6_address_string)
     char *dst = malloc(sizeof(char) * 48);
     dst = get_host_ip();
     int pton_result;
-    if ((pton_result = inet_pton(AF_INET6, dst, i6)) == 1)
-    {
-        printf("Converted successfully from string to struct in6_addr\n");
-    }
-    else
+    if ((pton_result = inet_pton(AF_INET6, dst, i6)) != 1)
     {
         fprintf(stderr, "Error: convert_address_string failed to convert \
         string %s to struct in6_addr\n",
@@ -144,6 +140,71 @@ traceroute *get_traceroute(void)
     return t;
 }
 
+ipv6_header *get_inner_ipv6_header(const packet_t *p)
+{
+    uint8_t *first_byte = packet_get_bytes(p);
+    int IPV6_HEADER_LENGTH = 40;  // Initial value = IPv6 Header Length
+    int ICMPV6_HEADER_LENGTH = 8; // Initial value = IPv6 Header Length
+
+    if ((*first_byte >> 4) == 6) // If IPv6
+    {
+        ipv6_header *ip6h = parse_ipv6(first_byte);
+        // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
+#ifdef EXT_DEBUG
+        puts("parse_packet: Returned from parse_ipv6");
+        printf("parse_packet: ip6h next_header:\t%x\n", ip6h->next_header);
+#endif
+
+        switch (ip6h->next_header)
+        {
+        case NH_ICMPv6:
+            // icmp6_header *icmp6h = parse_icmp6(first_byte + hl);
+#ifdef EXT_DEBUG
+            puts("parse_packet: Calling parse_icmp6");
+#endif
+            icmp6_header *icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
+            switch (icmp6->type)
+            {
+            case ICMP_TIME_EXCEEDED:
+                ipv6_header *inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+#ifdef EXT_DEBUG
+                printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
+#endif
+                return inner_ipv6;
+            default:
+                puts("DEBUG:\ticmp_parse default");
+                printf("ICMP type:\t%x\n", icmp6->type);
+                break;
+            }
+
+            // If parse_icmp6 returns a valid payload: parse inner ipv6
+            // and potentially, also inner tcp.
+            // What we want is the inner IPv6 flow-label.
+            break;
+        case NH_HBH_OPTS: // Hop-by-Hop Options
+            // uint8_t new_next_header = *(first_byte + hl);
+            // eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
+            // chl += (eh_length + 8);
+            break;
+        case NH_DST_OPTS: // Destination Options
+            break;
+        case NH_RH: // Routing Header
+            break;
+        case NH_FH: // Fragment Header
+            break;
+        case NH_AH: // Authentication Header
+            break;
+        case NH_ESPH: // Encapsulation Security Payload Header
+            break;
+        case NH_MH: // Mobility Header
+            break;
+        default:
+            puts("parse_packet:\treached ipv6_parse_default in switch statement");
+            break;
+        };
+    }
+}
+
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 {
     puts("Entering parse_icmp6");
@@ -173,6 +234,7 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 ipv6_header *parse_ipv6(const uint8_t *first_byte)
 {
     ipv6_header *h = calloc(1, sizeof(ipv6_header));
+    char presentation_buffer[INET6_ADDRSTRLEN];
 
     // Fill IPv6 struct
     h->version = (*first_byte >> 4);
@@ -183,27 +245,26 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     h->hop_limit = *(first_byte + 7);
 
     // Set source and destination
-    printf("Source:\t\n");
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
         h->source.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
-        printf("%x ", h->source.__in6_u.__u6_addr16[i]);
     }
-    puts("");
-    printf("Destination:\t\n");
+#ifdef EXT_DEBUG
+    printf("parse_ipv6: Source IP:\n%s\n", inet_ntop(AF_INET6, &h->source, presentation_buffer, 48));
+#endif
     for (int i = 0, k = 0; i < 8; i++, k += 2)
     {
         h->destination.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
-        printf("%x ", h->destination.__in6_u.__u6_addr16[i]);
     }
-    puts("");
-
+#ifdef EXT_DEBUG
+    printf("parse_ipv6: Destination IP:\n%s\n", inet_ntop(AF_INET6, &h->destination, presentation_buffer, 48));
     printf("Version:\t%d\n", h->version);
     printf("Traffic class:\t%x\n", h->traffic_class);
     printf("Flow label:\t%x\n", h->flow_label);
     printf("Payload length:\t%x\n", h->payload_length);
     printf("Next header:\t%x\n", h->next_header);
     printf("Hop limit:\t%x\n", h->hop_limit);
+#endif
     return h;
 }
 
@@ -219,14 +280,18 @@ void parse_packet(const packet_t *p)
     {
         ipv6_header *ip6h = parse_ipv6(first_byte);
         // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
-        puts("Returned from parse_ipv6");
-        printf("ip6h next_header:\t%x\n", ip6h->next_header);
+#ifdef EXT_DEBUG
+        puts("parse_packet: Returned from parse_ipv6");
+        printf("parse_packet: ip6h next_header:\t%x\n", ip6h->next_header);
+#endif
 
         switch (ip6h->next_header)
         {
         case NH_ICMPv6:
             // icmp6_header *icmp6h = parse_icmp6(first_byte + hl);
-            puts("Calling parse_icmp6");
+#ifdef EXT_DEBUG
+            puts("parse_packet: Calling parse_icmp6");
+#endif
             parse_icmp6(first_byte + hl);
 
             // If parse_icmp6 returns a valid payload: parse inner ipv6
@@ -251,7 +316,7 @@ void parse_packet(const packet_t *p)
         case NH_MH: // Mobility Header
             break;
         default:
-            puts("DEBUG:\tipv6_parse_default");
+            puts("parse_packet:\treached ipv6_parse_default in switch statement");
             break;
         };
     }
