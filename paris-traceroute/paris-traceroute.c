@@ -531,12 +531,12 @@ int main(int argc, char **argv)
     }
     exit_code = EXIT_SUCCESS;
 
-    // Erlend - calculate and set path hash
+    // Erlend - set path hash
     traceroute *t = get_traceroute();
-    address *a = malloc(sizeof(address) * t->hop_count);
+    struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
-        a[i] = t->hops[i]->hop_address;
+        a[i] = t->hops[i].hop_address;
     }
     uint8_t *path_hash = hashPath(a, t->hop_count);
     memcpy(t->path_id, path_hash, sizeof(uint8_t) * 20);

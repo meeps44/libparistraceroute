@@ -542,7 +542,7 @@ int printTraceroute(traceroute *t)
     printf("Hop count:\t%x\n", t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
-        printHop(t->hops[i]);
+        printHop(&t->hops[i]);
     }
 
     return 0;
@@ -684,11 +684,11 @@ int serialize_csv(char *fileName, traceroute *t)
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
-        inet_ntop(AF_INET6, &t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr));
+        inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(struct in6_addr));
         /* Write to file */
         fprintf(file, HOP_FORMAT_OUT,
-                &t->hops[i]->returned_flowlabel,
-                &t->hops[i]->hopnumber,
+                &t->hops[i].returned_flowlabel,
+                &t->hops[i].hopnumber,
                 hop_addr);
     }
     fprintf(file, "\n");

@@ -565,7 +565,6 @@ ERR_RECVMSG:
 // END ERLEND //
 
 int first_run = true;
-int hopnumber = 1;
 traceroute *t;
 void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
 {
@@ -624,6 +623,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 // asnLookupInit("/root/routeviews/routeviews-rv6-pfx2as.txt");
 
                 t = createTraceroute();
+                set_traceroute(t);
                 t->timestamp = create_timestamp();
                 /* Set source ip */
                 inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
@@ -639,15 +639,13 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             }
 
             h = createHop();
-            h->hopnumber = hopnumber;
+            h->hopnumber = t->hop_count + 1;
             h->hop_address = outer_ipv6->source;
             h->returned_flowlabel = returned_flowlabel;
             if (appendHop(t, h) == -1)
             {
                 fprintf(stderr, "Failed to append hop: Hop array is full\n");
             }
-
-            hopnumber++;
             // END ERLEND //
 
             if (!(sniffer->recv_callback(packet, sniffer->recv_param)))
