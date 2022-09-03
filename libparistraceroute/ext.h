@@ -91,7 +91,7 @@ typedef struct hop
     uint32_t returned_flowlabel;
     uint8_t hopnumber;
     // address *hop_address; // Could be a list of address pointers
-    struct in6_addr *hop_address; // uint32_t __u6_addr32[4], uint8_t	__u6_addr8[16], uint16_t __u6_addr16[8]
+    struct in6_addr hop_address; // uint32_t __u6_addr32[4], uint8_t	__u6_addr8[16], uint16_t __u6_addr16[8]
 } hop;
 
 typedef struct traceroute
@@ -110,13 +110,16 @@ typedef struct traceroute
     */
     uint16_t outgoing_tcp_port;
     char *timestamp;
-    address *source_ip;
-    uint32_t source_asn;
-    address *destination_ip;
-    uint32_t destination_asn;
+    // address *source_ip;
+    struct in6_addr source_ip;
+    char source_asn[100];
+    // address *destination_ip;
+    struct in6_addr destination_ip;
+    char destination_asn[100];
     uint8_t path_id[SHA_DIGEST_LENGTH];
     uint8_t hop_count;
-    hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
+    //hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
+    hop hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
     // Could also be a list of *hop-pointers
 
 } traceroute;
@@ -281,16 +284,16 @@ struct tm *getCurrentTime(void);
  */
 int appendHop(hop *h, traceroute *t);
 
-/**
- * @brief Appends an address-object to the next available spot in the
- * hops-array. Returns -1 if the array is full, 0 if executed correctly.
- *
- * @param a
- * @param t
- * @return int Returns -1 if the array is full, 0 if executed correctly with no
- * errors.
- */
-int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel);
+///**
+ //* @brief Appends an address-object to the next available spot in the
+ //* hops-array. Returns -1 if the array is full, 0 if executed correctly.
+ //*
+ //* @param a
+ //* @param t
+ //* @return int Returns -1 if the array is full, 0 if executed correctly with no
+ //* errors.
+ //*/
+//int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel);
 
 /**
  * @brief Loads a .pt-file into memory and converts its content into an

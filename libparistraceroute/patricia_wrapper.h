@@ -11,4 +11,4 @@ void patricia_init(bool arg_binary_lookup_mode);
 
 int insert(int family, struct in6_addr subnet, unsigned short mask, char *data);
 
-int lookup_addr(int family, struct in6_addr addr);
+char *lookup_addr(int family, struct in6_addr addr);

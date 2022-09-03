@@ -147,7 +147,7 @@ int insert(int family, struct in6_addr subnet, unsigned short mask, char *data)
     return 1;
 }
 
-int lookup_addr(int family, struct in6_addr addr)
+char *lookup_addr(int family, struct in6_addr addr)
 {
     prefix_t *subnet = make_prefix();
 
@@ -174,8 +174,9 @@ int lookup_addr(int family, struct in6_addr addr)
         return 0;
 
     printf("Node bitlen:\t%d\n", node->prefix->bitlen);
-    printf("Node data:\t%d\n", *(int *)node->data);
-    int data = *(int *)node->data;
+    printf("Node data:\t%s\n", *(char *)node->data);
+    char *data = malloc(sizeof(char) * 100);
+    strcpy(data, (char *)node->data);
 
     return data;
 }

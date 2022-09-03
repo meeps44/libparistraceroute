@@ -619,19 +619,28 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             hop *h;
             if (first_run)
             {
+                /* Init asn-lookup */
+                asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
+                // asnLookupInit("/root/routeviews/routeviews-rv6-20220411-1200.pfx2as.txt");
+
                 t = createTraceroute();
                 t->timestamp = create_timestamp();
-                t->source_ip = get_host_ip();
-                t->source_asn = asnLookup(t->source_ip);
-                t->destination_ip = &(inner_ipv6->destination);
-                struct in6_addr *i6 = convert_address_string(get_host_ip());
-                t->source_asn = asnLookup(i6);
+                /* Set source ip */
+                inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
+                /* Set source ASN */
+                strcpy(t->source_asn, asnLookup(&t->source_ip));
+                /* Set destination ip */
+                t->destination_ip = inner_ipv6->destination;
+                /* Set destination ASN */
+                strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                /* Set hop count */
+                t->hop_count = 0;
                 first_run = false;
             }
 
             h = createHop();
             h->hopnumber = hopnumber;
-            h->hop_address = &(outer_ipv6->source);
+            h->hop_address = outer_ipv6->source;
             h->returned_flowlabel = returned_flowlabel;
             if (appendHop(t, h) == -1)
             {

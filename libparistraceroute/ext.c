@@ -488,16 +488,14 @@ int asnLookupInit(char *filename)
     return 0;
 }
 
-// TODO: Rewrite to use patricia-tree.
-char *asnLookup(address *ipv6_address)
+char *asnLookup(struct in6_addr *ipv6_address)
 {
     char *ASN;
-
-    struct in6_addr bar;
-    unsigned char *example_address2 = "1900:2100::2a2d";
-    inet_pton(AF_INET6, example_address2, &bar);
-    int lookup_result = lookup_addr(AF_INET6, (struct in6_addr)bar);
-    printf("Lookup result (returned ASN):\t%d\n", lookup_result);
+    // struct in6_addr i6;
+    //  unsigned char *example_address2 = "1900:2100::2a2d";
+    //  inet_pton(AF_INET6, ipv6_address, &i6);
+    char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
+    printf("Lookup result (returned ASN):\t%s\n", lookup_result);
     return ASN;
 }
 
@@ -513,7 +511,7 @@ int printHop(hop *h)
 
     printf("Returned flow label:\t%u\n", h->returned_flowlabel);
     printf("Hop number:\t%d\n", h->hopnumber);
-    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, h->hop_address, hop_addr, sizeof(struct in6_addr)));
+    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, sizeof(struct in6_addr)));
     return 0;
 }
 
@@ -534,9 +532,9 @@ int printTraceroute(traceroute *t)
 
     printf("Outgoing tcp port:\t%d\n", t->outgoing_tcp_port);
     printf("Timestamp:\t%d\n", t->outgoing_tcp_port);
-    printf("Source address:\t%s\n", inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr)));
+    printf("Source address:\t%s\n", inet_ntop(AF_INET6, &t->source_ip, src_addr, sizeof(struct in6_addr)));
     printf("Source ASN:\t%d\n", t->source_asn);
-    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, t->destination_ip, dst_addr, sizeof(struct in6_addr)));
+    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, &t->destination_ip, dst_addr, sizeof(struct in6_addr)));
     printf("Destination ASN:\t%d\n", t->destination_asn);
     printf("Path ID:\t%x\n", t->path_id);
     printf("Hop count:\t%x\n", t->hop_count);
@@ -582,7 +580,7 @@ struct tm *getCurrentTime()
 
 char *create_timestamp()
 {
-    char *timestamp = malloc(sizeof(char) * 50);
+    char *timestamp = calloc(1, sizeof(char) * 50);
     struct tm *now = getCurrentTime();
     // Output timestamp in format "YYYY-MM-DD-hh_mm_ss : "
     sprintf(timestamp, "%04d-%02d-%02d-%02d_%02d_%02d",
@@ -592,43 +590,48 @@ char *create_timestamp()
     return timestamp;
 }
 
-int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel)
-{
-    traceroute *tmp = t;
-    int i;
+// int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel)
+//{
+// int i;
+// for (i = 0; i < 35; i++)
+//{
+// if (t->hops[i] == NULL)
+//{
+// printf("appendAddress:\tAvailable spot found at index:\t%d\n", i);
+// hop *h = malloc(sizeof(hop));
+// h->hop_address = *a;
+// h->hopnumber = hopnumber;
+// h->returned_flowlabel = returned_flowlabel;
+// t->hops[i] = *h;
+// return 0;
+//}
+//}
 
-    for (i = 0; i < 35; i++)
-    {
-        if (tmp->hops[i] == NULL)
-        {
-            printf("appendAddress:\tAvailable spot found at index:\t%d\n", i);
-            hop *h = malloc(sizeof(hop));
-            h->hop_address = a;
-            h->hopnumber = hopnumber;
-            h->returned_flowlabel = returned_flowlabel;
-            tmp->hops[i] = h;
-            return 0;
-        }
-    }
-
-    return -1;
-}
+// return -1;
+//}
 
 int appendHop(hop *h, traceroute *t)
 {
-    int i;
+    // int i;
 
-    for (i = 0; i < 35; i++)
+    // for (i = 0; i < 35; i++)
+    //{
+    // if (t->hops[i] == NULL)
+    //{
+    // printf("appendHop:\tAvailable spot found at index:\t%d\n", i);
+    // t->hops[i] = h;
+    // t->hop_count++;
+    // return 0;
+    //}
+    //}
+
+    if (t->hop_count >= 35)
     {
-        if (t->hops[i] == NULL)
-        {
-            printf("appendHop:\tAvailable spot found at index:\t%d\n", i);
-            t->hops[i] = h;
-            return 0;
-        }
+        return -1;
     }
-
-    return -1;
+    t->hops[t->hop_count] = *h;
+    t->hop_count++;
+    return 0;
 }
 
 int serialize_csv(char *fileName, traceroute *t)
@@ -664,8 +667,8 @@ int serialize_csv(char *fileName, traceroute *t)
     char hop_addr[100];
 
     /* Convert address to string before writing to file. */
-    inet_ntop(AF_INET6, t->source_ip, src_addr, sizeof(struct in6_addr));
-    inet_ntop(AF_INET6, t->destination_ip, dst_addr, sizeof(struct in6_addr));
+    inet_ntop(AF_INET6, &t->source_ip, src_addr, sizeof(struct in6_addr));
+    inet_ntop(AF_INET6, &t->destination_ip, dst_addr, sizeof(struct in6_addr));
     /* Write to file */
     fprintf(file, TR_FORMAT_OUT,
             t->outgoing_tcp_port,
@@ -679,11 +682,11 @@ int serialize_csv(char *fileName, traceroute *t)
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
-        inet_ntop(AF_INET6, t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr));
+        inet_ntop(AF_INET6, &t->hops[i]->hop_address, hop_addr, sizeof(struct in6_addr));
         /* Write to file */
         fprintf(file, HOP_FORMAT_OUT,
-                t->hops[i]->returned_flowlabel,
-                t->hops[i]->hopnumber,
+                &t->hops[i]->returned_flowlabel,
+                &t->hops[i]->hopnumber,
                 hop_addr);
     }
     fprintf(file, "\n");
