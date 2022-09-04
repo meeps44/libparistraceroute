@@ -452,7 +452,8 @@ int asnLookupInit(char *filename)
     if (f == NULL)
     {
         perror("asnLookupInit: Error opening file");
-        return -1;
+        exit(EXIT_FAILURE);
+        // return -1;
     }
 
     while ((read = getline(&line, &len, f)) != -1)
