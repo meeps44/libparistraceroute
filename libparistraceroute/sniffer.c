@@ -626,19 +626,28 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 puts("Leaving asnLookupInit");
 
                 t = createTraceroute();
+                puts("createTraceroute done");
                 set_traceroute(t);
+                puts("set_traceroute done");
                 t->timestamp = create_timestamp();
+                puts("create_timestamp done");
                 /* Set source ip */
                 inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
+                puts("set source ip done");
                 /* Set source ASN */
                 strcpy(t->source_asn, asnLookup(&t->source_ip));
+                puts("set source ASN done");
                 /* Set destination ip */
                 t->destination_ip = inner_ipv6->destination;
+                puts("set destination ip done");
                 /* Set destination ASN */
                 strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                puts("set destination ASN done");
                 /* Set hop count */
                 t->hop_count = 0;
+                puts("set hop_count done");
                 first_run = false;
+                puts("set first_run done");
             }
 
             puts("Starting createHop");
