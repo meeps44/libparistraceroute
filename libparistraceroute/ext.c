@@ -255,17 +255,24 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     h->hop_limit = *(first_byte + 7);
 
     // Set source and destination
-    for (int i = 0, k = 0; i < 8; i++, k += 2)
-    {
-        h->source.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
-    }
+    // for (int i = 0, k = 0; i < 8; i++, k += 2)
+    //{
+    // h->source.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
+    //}
+
+    // memcpy(h->source.__in6_u.__u6_addr8[0], (first_byte + 8), 16);
+    //  Erlend - test
+    memcpy(h->source.__in6_u.__u6_addr8, (first_byte + 8), 16);
+
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Source IP:\n%s\n", inet_ntop(AF_INET6, &h->source, presentation_buffer, 48));
 #endif
-    for (int i = 0, k = 0; i < 8; i++, k += 2)
-    {
-        h->destination.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
-    }
+    // for (int i = 0, k = 0; i < 8; i++, k += 2)
+    //{
+    // h->destination.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
+    //}
+    //  Erlend - test
+    memcpy(h->destination.__in6_u.__u6_addr8, (first_byte + 24), 16);
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Destination IP:\n%s\n", inet_ntop(AF_INET6, &h->destination, presentation_buffer, 48));
     printf("Version:\t%d\n", h->version);

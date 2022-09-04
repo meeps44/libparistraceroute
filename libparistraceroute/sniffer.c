@@ -630,6 +630,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
 
                     t = createTraceroute();
                     puts("createTraceroute done");
+                    t->outgoing_tcp_port;
                     set_traceroute(t);
                     puts("set_traceroute done");
                     t->timestamp = create_timestamp();
