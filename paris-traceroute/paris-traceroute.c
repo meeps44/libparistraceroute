@@ -343,6 +343,7 @@ int main(int argc, char **argv)
     int flow_label;
     int some_error = 1;
     char *csv_file; // erlend
+    uint16_t dport_tmp = 0;
     // than 50 chars.
 
     // Prepare the commande line options
@@ -468,6 +469,8 @@ int main(int argc, char **argv)
             I16("dst_port", dport),
             NULL);
 
+        dport_tmp = dport; // Erlend
+
         // Resize payload (it will be use to set our customized checksum in the {TCP, UDP} layer)
         probe_payload_resize(probe, 2);
     }
@@ -529,8 +532,11 @@ int main(int argc, char **argv)
     exit_code = EXIT_SUCCESS;
 
     // Erlend - set path hash
-    puts("Creating path hash");
     traceroute *t = get_traceroute();
+    // Set outgoing port
+    t->outgoing_tcp_port = dport_tmp;
+
+    puts("Creating path hash");
     struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
