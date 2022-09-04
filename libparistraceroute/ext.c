@@ -477,7 +477,7 @@ int asnLookupInit(char *filename)
                 break;
             case 3:
                 nmb = 1;
-                asn = malloc(sizeof(char) * 100);
+                asn = malloc(sizeof(char) * 200);
                 strcpy(asn, token);
                 // printf("asn: %s\n", asn);
                 // Insert into patricia-tree
