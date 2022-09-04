@@ -53,7 +53,8 @@ struct in6_addr *convert_address_string(char *ipv6_address_string)
 
 char *get_host_ip()
 {
-    char *dst = malloc(sizeof(char) * 48);
+    // char *dst = malloc(sizeof(char) * 40);
+    char *dst = malloc(sizeof(char) * 40);
     // struct in6_addr *i6 = malloc(sizeof(struct in6_addr));
 
     FILE *f;
@@ -104,6 +105,8 @@ char *get_host_ip()
                 if (k + 4 < strlen(address))
                     *(dst + i + 4) = 58;
             }
+
+            dst[40] = '\0';
 
             // int pton_result;
             // if ((pton_result = inet_pton(AF_INET6, dst, i6)) == 1)
