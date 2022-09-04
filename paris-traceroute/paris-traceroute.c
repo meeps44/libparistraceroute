@@ -341,7 +341,7 @@ int main(int argc, char **argv)
     // erlend
     int flow_label;
     int some_error = 1;
-    char csv_file[50]; // erlend - file name lenght cannot be longer
+    char *csv_file; // erlend
     // than 50 chars.
 
     // Prepare the commande line options
