@@ -505,6 +505,7 @@ char *asnLookup(struct in6_addr *ipv6_address)
     //   unsigned char *example_address2 = "1900:2100::2a2d";
     //   inet_pton(AF_INET6, ipv6_address, &i6);
     char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
+    puts("Lookup_result done");
 #ifdef EXT_DEBUG
     printf("Lookup result (returned ASN):\t%s\n", lookup_result);
 #endif
