@@ -145,6 +145,8 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
     uint8_t *first_byte = packet_get_bytes(p);
     int IPV6_HEADER_LENGTH = 40;  // Initial value = IPv6 Header Length
     int ICMPV6_HEADER_LENGTH = 8; // Initial value = IPv6 Header Length
+    icmp6_header *icmp6;
+    ipv6_header *inner_ipv6;
 
     if ((*first_byte >> 4) == 6) // If IPv6
     {
@@ -162,19 +164,21 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
 #ifdef EXT_DEBUG
             puts("parse_packet: Calling parse_icmp6");
 #endif
-            icmp6_header *icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
+            icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
             switch (icmp6->type)
             {
             case ICMP_TIME_EXCEEDED:
-                ipv6_header *inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+                inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
 #ifdef EXT_DEBUG
                 printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
 #endif
                 return inner_ipv6;
             default:
-                puts("DEBUG:\ticmp_parse default");
-                printf("ICMP type:\t%x\n", icmp6->type);
-                break;
+                fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED. \
+                ICMP type is:\t%x\n",
+                        icmp6->type);
+                return NULL;
+                // break;
             }
 
             // If parse_icmp6 returns a valid payload: parse inner ipv6
@@ -199,10 +203,14 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
         case NH_MH: // Mobility Header
             break;
         default:
-            puts("parse_packet:\treached ipv6_parse_default in switch statement");
-            break;
+            fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default \
+            in switch statement. IPv6 Next Header is not ICMPv6");
+            return NULL;
+            // break;
         };
     }
+    fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
+    return NULL;
 }
 
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
@@ -234,7 +242,7 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 ipv6_header *parse_ipv6(const uint8_t *first_byte)
 {
     ipv6_header *h = calloc(1, sizeof(ipv6_header));
-    char presentation_buffer[INET6_ADDRSTRLEN];
+    // char presentation_buffer[INET6_ADDRSTRLEN];
 
     // Fill IPv6 struct
     h->version = (*first_byte >> 4);
@@ -322,10 +330,10 @@ void parse_packet(const packet_t *p)
     }
 }
 
-address *createAddress()
+struct in6_addr *createAddress()
 {
-    address *a;
-    if ((a = calloc(1, sizeof(address))) == NULL)
+    struct in6_addr *a;
+    if ((a = calloc(1, sizeof(struct in6_addr))) == NULL)
     {
         perror("Error");
         exit(1);
@@ -410,7 +418,7 @@ void printHash(uint8_t *digest)
 // return 0;
 // }
 
-uint8_t *hashPath(address arr[], int arraySize)
+uint8_t *hashPath(struct in6_addr arr[], int arraySize)
 {
     unsigned char *obuf = malloc(sizeof(uint8_t) * 20);
     SHA_CTX shactx;
@@ -418,7 +426,7 @@ uint8_t *hashPath(address arr[], int arraySize)
     SHA1_Init(&shactx);
     for (int i = 0; i < arraySize; i++)
     {
-        SHA1_Update(&shactx, &arr[i], sizeof(address));
+        SHA1_Update(&shactx, &arr[i], sizeof(struct in6_addr));
     }
     SHA1_Final(obuf, &shactx); // digest now contains the 20-byte SHA-1 hash
 
@@ -435,7 +443,7 @@ int asnLookupInit(char *filename)
     ssize_t read;
     char *token = NULL;
     char *address;
-    int mask;
+    int mask = 0;
     char *asn;
     struct in6_addr *my_addr = calloc(1, sizeof(struct in6_addr));
 
@@ -535,10 +543,10 @@ int printTraceroute(traceroute *t)
     printf("Outgoing tcp port:\t%d\n", t->outgoing_tcp_port);
     printf("Timestamp:\t%d\n", t->outgoing_tcp_port);
     printf("Source address:\t%s\n", inet_ntop(AF_INET6, &t->source_ip, src_addr, sizeof(struct in6_addr)));
-    printf("Source ASN:\t%d\n", t->source_asn);
+    printf("Source ASN:\t%s\n", t->source_asn);
     printf("Destination address:\t%s\n", inet_ntop(AF_INET6, &t->destination_ip, dst_addr, sizeof(struct in6_addr)));
-    printf("Destination ASN:\t%d\n", t->destination_asn);
-    printf("Path ID:\t%x\n", t->path_id);
+    printf("Destination ASN:\t%s\n", t->destination_asn);
+    printf("Path ID:\t%s\n", t->path_id);
     printf("Hop count:\t%x\n", t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
@@ -693,42 +701,42 @@ int serialize_csv(char *fileName, traceroute *t)
     }
     fprintf(file, "\n");
 
-    flock(fileno(fileName), LOCK_UN); // unlock file
+    flock(fileno(file), LOCK_UN); // unlock file
     fclose(file);
     return 0;
 }
 
-int deserialize_csv(char *fileName, traceroute *t, long offset)
-{
-    FILE *file;
-    if ((file = fopen(fileName, "r")) == 0)
-    {
-        perror("Error ");
-        return 1;
-    }
+// int deserialize_csv(char *fileName, traceroute *t, long offset)
+//{
+// FILE *file;
+// if ((file = fopen(fileName, "r")) == 0)
+//{
+// perror("Error ");
+// return 1;
+//}
 
-    fseek(file, offset, SEEK_SET);
-    // fread(t, sizeof(traceroute), 1, file);
-    static const char *TR_TEST_FORMAT_IN = "\n%d, %[^,], %d:%d, %d, %d:%d, %d, %[^,], %d";
-    static const char *HOP_FORMAT_IN = " %d, %d, %d:%d";
-    fscanf(file, TR_TEST_FORMAT_IN);
+// fseek(file, offset, SEEK_SET);
+//// fread(t, sizeof(traceroute), 1, file);
+// static const char *TR_TEST_FORMAT_IN = "\n%d, %[^,], %d:%d, %d, %d:%d, %d, %[^,], %d";
+// static const char *HOP_FORMAT_IN = " %d, %d, %d:%d";
+// fscanf(file, TR_TEST_FORMAT_IN);
 
-    // scanf returns EOF (which is -1) on end of file
-    while (fscanf(file, TR_TEST_FORMAT_IN,
-                  t->outgoing_tcp_port,
-                  t->timestamp,
-                  t->source_ip,
-                  t->source_asn,
-                  t->destination_ip,
-                  t->destination_asn,
-                  t->path_id,
-                  t->hop_count) != EOF)
-    {
-    }
+//// scanf returns EOF (which is -1) on end of file
+// while (fscanf(file, TR_TEST_FORMAT_IN,
+// t->outgoing_tcp_port,
+// t->timestamp,
+// t->source_ip,
+// t->source_asn,
+// t->destination_ip,
+// t->destination_asn,
+// t->path_id,
+// t->hop_count) != EOF)
+//{
+//}
 
-    fclose(file);
-    return 0;
-}
+// fclose(file);
+// return 0;
+//}
 
 int serialize_bytes(char *fileName, traceroute *t)
 {
@@ -756,23 +764,23 @@ int serialize_bytes(char *fileName, traceroute *t)
     /* Write to file */
     fwrite(t, sizeof(traceroute), 1, file);
 
-    flock(fileno(fileName), LOCK_UN); // unlock file
+    flock(fileno(file), LOCK_UN); // unlock file
     fclose(file);
     return 0;
 }
 
-int deserialize_bytes(char *fileName, traceroute *t, long offset)
-{
-    FILE *file;
-    if ((file = fopen(fileName, "r")) == 0)
-    {
-        perror("Error ");
-        return 1;
-    }
+// int deserialize_bytes(char *fileName, traceroute *t, long offset)
+//{
+// FILE *file;
+// if ((file = fopen(fileName, "r")) == 0)
+//{
+// perror("Error ");
+// return 1;
+//}
 
-    fseek(file, offset, SEEK_SET);
-    fread(t, sizeof(traceroute), 1, file);
+// fseek(file, offset, SEEK_SET);
+// fread(t, sizeof(traceroute), 1, file);
 
-    fclose(file);
-    return 0;
-}
+// fclose(file);
+// return 0;
+//}

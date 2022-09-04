@@ -605,11 +605,12 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
         if (sniffer->recv_callback != NULL)
         {
             packet = packet_create_from_bytes(recv_bytes, num_bytes);
+            const uint8_t *first_byte = packet_get_bytes(packet);
 
             // BEGIN ERLEND //
             // fprintf(stderr, "DEBUG: Calling parse_packet()\n");
             // parse_packet(packet);
-            ipv6_header *outer_ipv6 = parse_ipv6(packet);
+            ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
             ipv6_header *inner_ipv6 = get_inner_ipv6_header(packet);
             uint32_t returned_flowlabel = inner_ipv6->flow_label;
             // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
@@ -619,8 +620,8 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             if (first_run)
             {
                 /* Init asn-lookup */
-                asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
-                // asnLookupInit("/root/routeviews/routeviews-rv6-pfx2as.txt");
+                // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
+                asnLookupInit("/root/routeviews/routeviews-rv6-pfx2as.txt");
 
                 t = createTraceroute();
                 set_traceroute(t);
@@ -642,7 +643,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             h->hopnumber = t->hop_count + 1;
             h->hop_address = outer_ipv6->source;
             h->returned_flowlabel = returned_flowlabel;
-            if (appendHop(t, h) == -1)
+            if (appendHop(h, t) == -1)
             {
                 fprintf(stderr, "Failed to append hop: Hop array is full\n");
             }

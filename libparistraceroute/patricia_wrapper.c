@@ -5,14 +5,14 @@ const uint8_t v4_mapped_prefix[12] = {0, 0, 0, 0,
                                       0, 0, 0, 0,
                                       0, 0, 0xff, 0xff};
 
-inline static prefix_t *make_prefix()
+prefix_t *make_prefix()
 {
     prefix_t *rval = (prefix_t *)malloc(sizeof(prefix_t));
     rval->ref_count = 1;
     return rval;
 }
 
-inline static bool set_prefix(prefix_t *subnet, int family, struct in6_addr *addr, unsigned int width)
+bool set_prefix(prefix_t *subnet, int family, struct in6_addr *addr, unsigned int width)
 {
     if (!(family == AF_INET6))
         return false;
@@ -29,7 +29,7 @@ inline static bool set_prefix(prefix_t *subnet, int family, struct in6_addr *add
     return true;
 }
 
-inline static bool parse_cidr(const char *cidr, int *family, struct in6_addr *subnet, unsigned short *mask)
+bool parse_cidr(const char *cidr, int *family, struct in6_addr *subnet, unsigned short *mask)
 {
     char buffer[40];
     const char *addr_str = 0;

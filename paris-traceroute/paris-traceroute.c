@@ -344,8 +344,6 @@ int main(int argc, char **argv)
     char csv_file[50]; // erlend - file name lenght cannot be longer
     // than 50 chars.
 
-    print_hello();
-
     // Prepare the commande line options
     if (!(options = init_options(version)))
     {
@@ -375,8 +373,6 @@ int main(int argc, char **argv)
     csv_file = argv[argc - 3];
     // flow_label = atoi(argv[1]);
     set_flow_label(flow_label);
-    // not yet implemented:
-    set_csv_file(csv_file); // sets csv-file value in sniffer.c
 
     // We assume that the target IP address is always the last argument
     dst_ip = argv[argc - 1];
@@ -540,6 +536,7 @@ int main(int argc, char **argv)
     }
     uint8_t *path_hash = hashPath(a, t->hop_count);
     memcpy(t->path_id, path_hash, sizeof(uint8_t) * 20);
+    printf("path hash: %s\n", path_hash);
 
     // Erlend - traceroute all done. Saving the results to disk.
     // NB! Header row gets written when the file is created

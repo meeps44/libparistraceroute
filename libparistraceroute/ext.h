@@ -49,8 +49,8 @@ typedef struct ipv6_header_s
     uint16_t payload_length;
     uint8_t next_header;
     uint8_t hop_limit;
-    address source;
-    address destination;
+    struct in6_addr source;
+    struct in6_addr destination;
 } ipv6_header;
 
 /**
@@ -84,8 +84,6 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte);
  */
 void parse_packet(const packet_t *p);
 
-typedef struct in6_addr address;
-
 typedef struct hop
 {
     uint32_t returned_flowlabel;
@@ -118,7 +116,7 @@ typedef struct traceroute
     char destination_asn[100];
     uint8_t path_id[SHA_DIGEST_LENGTH];
     uint8_t hop_count;
-    //hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
+    // hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
     hop hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
     // Could also be a list of *hop-pointers
 
@@ -143,7 +141,7 @@ void set_traceroute(traceroute *tr);
  *
  * @return address* Pointer to the new address object
  */
-address *createAddress(void);
+struct in6_addr *createAddress(void);
 
 /**
  * @brief Create a Traceroute object initialized to zero
@@ -190,7 +188,7 @@ void printHash(uint8_t digest[]);
  * NB! Code must be linked with libopenSSL in order for this to work.
  * Linkage example: gcc sha1-in-c.c -lcrypto
  */
-uint8_t *hashPath(address arr[], int arraySize);
+uint8_t *hashPath(struct in6_addr arr[], int arraySize);
 
 /**
  * @brief Performs ASN-lookup of a given IPv6-address.
@@ -198,7 +196,7 @@ uint8_t *hashPath(address arr[], int arraySize);
  * @param ipv6_address The IPv6-address on which to lookup.
  * @return int The AS number associated with this address.
  */
-char *asnLookup(address *ipv6_address);
+char *asnLookup(struct in6_addr *ipv6_address);
 
 /**
  * @brief Parses a raw IPv6-packet and saves the result to a parsed_packet struct.
@@ -221,7 +219,7 @@ char *asnLookup(address *ipv6_address);
  * @param p
  * @return int
  */
-int getFlowLabel(address *a);
+int getFlowLabel(struct in6_addr *a);
 
 /**
  * @brief Loads a traceroute object at OFFSET <offset> in FILE <filename>
@@ -285,15 +283,15 @@ struct tm *getCurrentTime(void);
 int appendHop(hop *h, traceroute *t);
 
 ///**
- //* @brief Appends an address-object to the next available spot in the
- //* hops-array. Returns -1 if the array is full, 0 if executed correctly.
- //*
- //* @param a
- //* @param t
- //* @return int Returns -1 if the array is full, 0 if executed correctly with no
- //* errors.
- //*/
-//int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel);
+//* @brief Appends an address-object to the next available spot in the
+//* hops-array. Returns -1 if the array is full, 0 if executed correctly.
+//*
+//* @param a
+//* @param t
+//* @return int Returns -1 if the array is full, 0 if executed correctly with no
+//* errors.
+//*/
+// int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel);
 
 /**
  * @brief Loads a .pt-file into memory and converts its content into an
@@ -374,7 +372,7 @@ int compareHops(hop *h1, hop *h2);
  * @param a2 Pointer to the second address object.
  * @return int 1 if equal, 0 if not equal.
  */
-int compareAddresses(address *a1, address *a2);
+int compareAddresses(struct in6_addr *a1, struct in6_addr *a2);
 
 /**
  * @brief Writes all traceroute objects in tr_array to filename.
@@ -406,15 +404,15 @@ int readTracerouteArrayFromFile(char *filename, traceroute *tr_arr[], int arrayS
  */
 int serialize_csv(char *fileName, traceroute *t);
 
-/**
- * @brief Deserializes a traceroute-object in CSV-format from file.
- *
- * @param fileName
- * @param t
- * @param offset
- * @return int
- */
-int deserialize_csv(char *fileName, traceroute *t, long offset);
+///**
+//* @brief Deserializes a traceroute-object in CSV-format from file.
+//*
+//* @param fileName
+//* @param t
+//* @param offset
+//* @return int
+//*/
+// int deserialize_csv(char *fileName, traceroute *t, long offset);
 
 /**
  * @brief Serializes a traceroute object and writes it to file as a
@@ -426,15 +424,15 @@ int deserialize_csv(char *fileName, traceroute *t, long offset);
  */
 int serialize_bytes(char *fileName, traceroute *t);
 
-/**
- * @brief Deserializes a traceroute object from a raw sequence of bytes.
- *
- * @param fileName
- * @param t
- * @param offset
- * @return int
- */
-int deserialize_bytes(char *fileName, traceroute *t, long offset);
+///**
+//* @brief Deserializes a traceroute object from a raw sequence of bytes.
+//*
+//* @param fileName
+//* @param t
+//* @param offset
+//* @return int
+//*/
+// int deserialize_bytes(char *fileName, traceroute *t, long offset);
 
 /**
  * @brief Creates a timestamp of the current time represented

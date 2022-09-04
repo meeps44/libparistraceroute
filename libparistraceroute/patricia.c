@@ -47,9 +47,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-static char copyright[] =
+/*static char copyright[] =
 	"This product includes software developed by the University of Michigan, Merit"
-	"Network, Inc., and their contributors.";
+	"Network, Inc., and their contributors."; */
 
 #include <assert.h>		/* assert */
 #include <ctype.h>		/* isdigit */
