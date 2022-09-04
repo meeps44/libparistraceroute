@@ -612,71 +612,74 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             // parse_packet(packet);
             ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
             ipv6_header *inner_ipv6 = get_inner_ipv6_header(packet);
-            uint32_t returned_flowlabel = inner_ipv6->flow_label;
-            char foo[INET6_ADDRSTRLEN];
-            // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
-            // packet_dump(packet);
-
-            hop *h;
-            if (first_run)
+            if ((inner_ipv6 = get_inner_ipv6_header(packet)) != NULL)
             {
-                /* Init asn-lookup */
-                // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
-                puts("Starting asnLookupInit");
-                asnLookupInit("../routeviews-rv6-pfx2as.txt");
-                puts("Leaving asnLookupInit");
+                uint32_t returned_flowlabel = inner_ipv6->flow_label;
+                char foo[INET6_ADDRSTRLEN];
+                // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
+                // packet_dump(packet);
 
-                t = createTraceroute();
-                puts("createTraceroute done");
-                set_traceroute(t);
-                puts("set_traceroute done");
-                t->timestamp = create_timestamp();
-                puts("create_timestamp done");
-                /* Set source ip */
-                inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
-                puts("set source ip done");
-                inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
-                printf("Destination IP:\n%s\n", foo);
-                /* Set source ASN */
-                if (asnLookup(&t->source_ip) != NULL)
+                hop *h;
+                if (first_run)
                 {
-                    strcpy(t->source_asn, asnLookup(&t->source_ip));
-                }
-                else
-                {
-                    strcpy(t->source_asn, "NULL");
-                }
-                puts("set source ASN done");
-                /* Set destination ip */
-                t->destination_ip = inner_ipv6->destination;
-                puts("set destination ip done");
-                inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
-                printf("Destination IP:\n%s\n", foo);
-                /* Set destination ASN */
-                if (asnLookup(&t->destination_ip) != NULL)
-                {
-                    strcpy(t->destination_asn, asnLookup(&t->destination_ip));
-                }
-                else
-                {
-                    strcpy(t->destination_asn, "NULL");
-                }
-                puts("set destination ASN done");
-                /* Set hop count */
-                t->hop_count = 0;
-                puts("set hop_count done");
-                first_run = false;
-                puts("set first_run done");
-            }
+                    /* Init asn-lookup */
+                    // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
+                    puts("Starting asnLookupInit");
+                    asnLookupInit("../routeviews-rv6-pfx2as.txt");
+                    puts("Leaving asnLookupInit");
 
-            puts("Starting createHop");
-            h = createHop();
-            h->hopnumber = t->hop_count + 1;
-            h->hop_address = outer_ipv6->source;
-            h->returned_flowlabel = returned_flowlabel;
-            if (appendHop(h, t) == -1)
-            {
-                fprintf(stderr, "Failed to append hop: Hop array is full\n");
+                    t = createTraceroute();
+                    puts("createTraceroute done");
+                    set_traceroute(t);
+                    puts("set_traceroute done");
+                    t->timestamp = create_timestamp();
+                    puts("create_timestamp done");
+                    /* Set source ip */
+                    inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
+                    puts("set source ip done");
+                    inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
+                    printf("Source IP:\n%s\n", foo);
+                    /* Set source ASN */
+                    if (asnLookup(&t->source_ip) != NULL)
+                    {
+                        strcpy(t->source_asn, asnLookup(&t->source_ip));
+                    }
+                    else
+                    {
+                        strcpy(t->source_asn, "NULL");
+                    }
+                    puts("set source ASN done");
+                    /* Set destination ip */
+                    t->destination_ip = inner_ipv6->destination;
+                    puts("set destination ip done");
+                    inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
+                    printf("Destination IP:\n%s\n", foo);
+                    /* Set destination ASN */
+                    if (asnLookup(&t->destination_ip) != NULL)
+                    {
+                        strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                    }
+                    else
+                    {
+                        strcpy(t->destination_asn, "NULL");
+                    }
+                    puts("set destination ASN done");
+                    /* Set hop count */
+                    t->hop_count = 0;
+                    puts("set hop_count done");
+                    first_run = false;
+                    puts("set first_run done");
+                }
+
+                puts("Starting createHop");
+                h = createHop();
+                h->hopnumber = t->hop_count + 1;
+                h->hop_address = outer_ipv6->source;
+                h->returned_flowlabel = returned_flowlabel;
+                if (appendHop(h, t) == -1)
+                {
+                    fprintf(stderr, "Failed to append hop: Hop array is full\n");
+                }
             }
             // END ERLEND //
 
