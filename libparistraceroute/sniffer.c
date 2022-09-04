@@ -621,7 +621,9 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             {
                 /* Init asn-lookup */
                 // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
+                puts("Starting asnLookupInit");
                 asnLookupInit("../routeviews-rv6-pfx2as.txt");
+                puts("Leaving asnLookupInit");
 
                 t = createTraceroute();
                 set_traceroute(t);
@@ -639,6 +641,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 first_run = false;
             }
 
+            puts("Starting createHop");
             h = createHop();
             h->hopnumber = t->hop_count + 1;
             h->hop_address = outer_ipv6->source;
