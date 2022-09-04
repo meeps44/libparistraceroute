@@ -114,7 +114,7 @@ typedef struct traceroute
     // address *destination_ip;
     struct in6_addr destination_ip;
     char destination_asn[200];
-    uint8_t path_id[SHA_DIGEST_LENGTH];
+    uint8_t path_id[SHA_DIGEST_LENGTH + 1]; // +1 for terminating null-character
     uint8_t hop_count;
     // hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
     hop hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
