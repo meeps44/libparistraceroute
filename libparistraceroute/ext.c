@@ -263,6 +263,10 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     // memcpy(h->source.__in6_u.__u6_addr8[0], (first_byte + 8), 16);
     //  Erlend - test
     memcpy(h->source.__in6_u.__u6_addr8, (first_byte + 8), 16);
+    char src_ip_tmp[17];
+    memcpy(src_ip_tmp, h->source.__in6_u.__u6_addr8, 16);
+    src_ip_tmp[16] = '\0';
+    printf("parse_ipv6: source IP: %s\n", src_ip_tmp);
 
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Source IP:\n%s\n", inet_ntop(AF_INET6, &h->source, presentation_buffer, 48));
@@ -273,6 +277,10 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     //}
     //  Erlend - test
     memcpy(h->destination.__in6_u.__u6_addr8, (first_byte + 24), 16);
+    char dst_ip_tmp[17];
+    memcpy(dst_ip_tmp, h->destination.__in6_u.__u6_addr8, 16);
+    dst_ip_tmp[16] = '\0';
+    printf("parse_ipv6: source IP: %s\n", dst_ip_tmp);
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Destination IP:\n%s\n", inet_ntop(AF_INET6, &h->destination, presentation_buffer, 48));
     printf("Version:\t%d\n", h->version);
