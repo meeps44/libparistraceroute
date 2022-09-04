@@ -613,6 +613,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
             ipv6_header *inner_ipv6 = get_inner_ipv6_header(packet);
             uint32_t returned_flowlabel = inner_ipv6->flow_label;
+            char foo[INET6_ADDRSTRLEN];
             // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
             // packet_dump(packet);
 
@@ -634,14 +635,32 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 /* Set source ip */
                 inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
                 puts("set source ip done");
+                inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
+                printf("Destination IP:\n%s\n", foo);
                 /* Set source ASN */
-                strcpy(t->source_asn, asnLookup(&t->source_ip));
+                if (asnLookup(&t->source_ip) != NULL)
+                {
+                    strcpy(t->source_asn, asnLookup(&t->source_ip));
+                }
+                else
+                {
+                    strcpy(t->source_asn, "NULL");
+                }
                 puts("set source ASN done");
                 /* Set destination ip */
                 t->destination_ip = inner_ipv6->destination;
                 puts("set destination ip done");
+                inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
+                printf("Destination IP:\n%s\n", foo);
                 /* Set destination ASN */
-                strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                if (asnLookup(&t->destination_ip) != NULL)
+                {
+                    strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                }
+                else
+                {
+                    strcpy(t->destination_asn, "NULL");
+                }
                 puts("set destination ASN done");
                 /* Set hop count */
                 t->hop_count = 0;
