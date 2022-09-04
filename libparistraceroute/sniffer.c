@@ -635,6 +635,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     t->timestamp = create_timestamp();
                     puts("create_timestamp done");
                     /* Set source ip */
+                    printf("get_host_ip: %s\n", get_host_ip());
                     inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
                     puts("set source ip done");
                     inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);

@@ -113,9 +113,7 @@ char *get_host_ip()
             fclose(f);
             if (line)
                 free(line);
-#ifdef EXT_DEBUG
-            printf("The global IPv6-address is:\t%s\n", dst);
-#endif
+            printf("get_host_ip: The global IPv6-address is:\t%s\n", dst);
             return dst;
         }
         current_token = 0;
@@ -651,6 +649,7 @@ int appendHop(hop *h, traceroute *t)
 int serialize_csv(char *fileName, traceroute *t)
 {
     FILE *file;
+    printf("serialize_csv: opening file %s for writing\n", fileName);
     if ((file = fopen(fileName, "a+")) == 0)
     {
         fprintf(stderr, "Error opening file:\t%s\nErrno:\t%s\n", fileName, strerror(errno));
@@ -684,6 +683,7 @@ int serialize_csv(char *fileName, traceroute *t)
     inet_ntop(AF_INET6, &t->source_ip, src_addr, sizeof(struct in6_addr));
     inet_ntop(AF_INET6, &t->destination_ip, dst_addr, sizeof(struct in6_addr));
     /* Write to file */
+    puts("serialize_csv: Writing traceroute to file");
     fprintf(file, TR_FORMAT_OUT,
             t->outgoing_tcp_port,
             t->timestamp,
@@ -693,6 +693,17 @@ int serialize_csv(char *fileName, traceroute *t)
             t->destination_asn,
             t->path_id,
             t->hop_count);
+    puts("serialize_csv: wrote traceroute:");
+    printf(TR_FORMAT_OUT,
+           t->outgoing_tcp_port,
+           t->timestamp,
+           src_addr,
+           t->source_asn,
+           dst_addr,
+           t->destination_asn,
+           t->path_id,
+           t->hop_count);
+    puts("serialize_csv: Done writing traceroute to file. Writing hops...");
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
@@ -702,8 +713,15 @@ int serialize_csv(char *fileName, traceroute *t)
                 &t->hops[i].returned_flowlabel,
                 &t->hops[i].hopnumber,
                 hop_addr);
+        puts("serialize_csv: wrote hop:");
+        printf(HOP_FORMAT_OUT,
+               &t->hops[i].returned_flowlabel,
+               &t->hops[i].hopnumber,
+               hop_addr);
     }
+    puts("serialize_csv: Done writing hops to file");
     fprintf(file, "\n");
+    puts("serialize_csv: Finished writing traceroute to file");
 
     flock(fileno(file), LOCK_UN); // unlock file
     fclose(file);

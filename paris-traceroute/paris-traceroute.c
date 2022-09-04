@@ -529,6 +529,7 @@ int main(int argc, char **argv)
     exit_code = EXIT_SUCCESS;
 
     // Erlend - set path hash
+    puts("Creating path hash");
     traceroute *t = get_traceroute();
     struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
@@ -542,7 +543,9 @@ int main(int argc, char **argv)
     // Erlend - traceroute all done. Saving the results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
+    puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
+    puts("Finished serialize_csv");
 
     // Leave the program
 ERR_PT_LOOP:
