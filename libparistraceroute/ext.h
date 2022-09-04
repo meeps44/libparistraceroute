@@ -110,10 +110,10 @@ typedef struct traceroute
     char *timestamp;
     // address *source_ip;
     struct in6_addr source_ip;
-    char source_asn[100];
+    char source_asn[200];
     // address *destination_ip;
     struct in6_addr destination_ip;
-    char destination_asn[100];
+    char destination_asn[200];
     uint8_t path_id[SHA_DIGEST_LENGTH];
     uint8_t hop_count;
     // hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
