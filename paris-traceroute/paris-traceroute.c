@@ -1,5 +1,6 @@
 #include "config.h"
 #include "ext.h" // erlend
+#include <openssl/sha.h>
 
 #include <stdlib.h>     // malloc...
 #include <stdio.h>      // perror, printf

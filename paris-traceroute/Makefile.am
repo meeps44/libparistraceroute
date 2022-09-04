@@ -21,8 +21,17 @@ paris_traceroute_CFLAGS = \
 	-I$(srcdir)/../libparistraceroute
 
 #../libparistraceroute/libparistraceroute-@LIBRARY_VERSION@.la
+#paris_traceroute_LDADD = \
+	#../libparistraceroute/libparistraceroute-@LIBRARY_VERSION@.la
+#Erlend:
 paris_traceroute_LDADD = \
-	../libparistraceroute/libparistraceroute-@LIBRARY_VERSION@.la
+	../libparistraceroute/libparistraceroute-@LIBRARY_VERSION@.la \
+	-lcrypto \
+	-lssl
+
+# Erlend:
+#paris_traceroute_LDFLAGS = \ 
+	#-lcrypto -lssl
 
 install-bin: install
 

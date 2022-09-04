@@ -1,3 +1,4 @@
+#include <openssl/sha.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
