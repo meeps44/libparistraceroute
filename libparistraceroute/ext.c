@@ -690,7 +690,7 @@ int serialize_csv(char *fileName, traceroute *t)
     // /* Write to file */
     // fwrite(t, sizeof(traceroute), 1, file);
     static const char *HOP_FORMAT_OUT = "%d, %d, %s ";
-    static const char *TR_FORMAT_OUT = "%d, %s, %s, %d, %s, %d, %s, %d, ";
+    static const char *TR_FORMAT_OUT = "%d, %s, %s, %s, %s, %s, %s, %d, ";
 
     char src_addr[INET6_ADDRSTRLEN + 1];
     char dst_addr[INET6_ADDRSTRLEN + 1];

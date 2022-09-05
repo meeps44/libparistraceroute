@@ -615,6 +615,8 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             if ((inner_ipv6 = get_inner_ipv6_header(packet)) != NULL)
             {
                 uint32_t returned_flowlabel = inner_ipv6->flow_label;
+                printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
+
                 char foo[INET6_ADDRSTRLEN + 1];
                 memcpy(&foo[46], "\0", 1);
                 // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
@@ -689,8 +691,10 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 puts("Starting createHop");
                 h = createHop();
                 h->hopnumber = t->hop_count + 1;
+                printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
                 h->hop_address = outer_ipv6->source;
                 h->returned_flowlabel = returned_flowlabel;
+                printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
                 if (appendHop(h, t) == -1)
                 {
                     fprintf(stderr, "Failed to append hop: Hop array is full\n");
