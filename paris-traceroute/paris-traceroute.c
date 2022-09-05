@@ -533,6 +533,7 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     traceroute *t = get_traceroute();
+    t->outgoing_flow_label = flow_label;
     t->outgoing_tcp_port = dport_tmp;
 
     /* Create path hash */

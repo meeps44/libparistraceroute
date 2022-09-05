@@ -691,7 +691,7 @@ int serialize_csv(char *fileName, traceroute *t)
     // fwrite(t, sizeof(traceroute), 1, file);
     static const char *HOP_FORMAT_OUT = "%d, %d, %s, %s, ";
     static const char *HOP_FORMAT_LAST = "%d, %d, %s, %s";
-    static const char *TR_FORMAT_OUT = "%d, %s, %s, %s, %s, %s, %s, %d, ";
+    static const char *TR_FORMAT_OUT = "%d, %d, %s, %s, %s, %s, %s, %s, %d, ";
 
     char src_addr[INET6_ADDRSTRLEN + 1];
     char dst_addr[INET6_ADDRSTRLEN + 1];
@@ -709,6 +709,7 @@ int serialize_csv(char *fileName, traceroute *t)
     /* Write to file */
     // puts("serialize_csv: Writing traceroute to file");
     fprintf(file, TR_FORMAT_OUT,
+            t->outgoing_flow_label,
             t->outgoing_tcp_port,
             t->timestamp,
             src_addr,
