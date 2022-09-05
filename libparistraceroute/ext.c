@@ -79,7 +79,7 @@ char *get_host_ip()
     while ((read = getline(&line, &len, f)) != -1)
     {
         current_token++;
-        printf("%s", line);
+        // printf("%s", line);
         /* Get the first token */
         char *token = strtok(line, " ");
         char *address = token;
@@ -116,7 +116,7 @@ char *get_host_ip()
             fclose(f);
             if (line)
                 free(line);
-            printf("get_host_ip: The global IPv6-address is:\t%s\n", dst);
+            // printf("get_host_ip: The global IPv6-address is:\t%s\n", dst);
             return dst;
         }
         current_token = 0;
@@ -176,9 +176,8 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
 #endif
                 return inner_ipv6;
             default:
-                fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED. \
-                ICMP type is:\t%x\n",
-                        icmp6->type);
+                //fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED. \
+                ICMP type is:\t%x\n", icmp6->type);
                 return NULL;
                 // break;
             }
@@ -229,11 +228,11 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
     {
     case ICMP_TIME_EXCEEDED:
         inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
-        fprintf(stderr, "Returned flow label (hexadecimal):\t%x\n", inner_ipv6->flow_label);
+        // fprintf(stderr, "Returned flow label (hexadecimal):\t%x\n", inner_ipv6->flow_label);
         break;
     default:
         // puts("DEBUG:\ticmp_parse default");
-        fprintf(stderr, "ICMP type:\t%x\n", h->type);
+        // fprintf(stderr, "ICMP type:\t%x\n", h->type);
         break;
     }
 
@@ -523,8 +522,7 @@ char *asnLookup(struct in6_addr *ipv6_address)
     //   unsigned char *example_address2 = "1900:2100::2a2d";
     //   inet_pton(AF_INET6, ipv6_address, &i6);
     char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
-    puts("Lookup_result done");
-    printf("Lookup result:\t%s\n", lookup_result);
+    // printf("Lookup result:\t%s\n", lookup_result);
     return lookup_result;
 }
 
@@ -666,7 +664,7 @@ int appendHop(hop *h, traceroute *t)
 int serialize_csv(char *fileName, traceroute *t)
 {
     FILE *file;
-    printf("serialize_csv: opening file %s for writing\n", fileName);
+    // printf("serialize_csv: opening file %s for writing\n", fileName);
     if ((file = fopen(fileName, "a+")) == 0)
     {
         fprintf(stderr, "Error opening file:\t%s\nErrno:\t%s\n", fileName, strerror(errno));
@@ -719,16 +717,16 @@ int serialize_csv(char *fileName, traceroute *t)
             t->path_id,
             t->hop_count);
     // puts("serialize_csv: wrote traceroute:");
-    printf(TR_FORMAT_OUT,
-           t->outgoing_flow_label,
-           t->outgoing_tcp_port,
-           t->timestamp,
-           src_addr,
-           t->source_asn,
-           dst_addr,
-           t->destination_asn,
-           t->path_id,
-           t->hop_count);
+    // printf(TR_FORMAT_OUT,
+    // t->outgoing_flow_label,
+    // t->outgoing_tcp_port,
+    // t->timestamp,
+    // src_addr,
+    // t->source_asn,
+    // dst_addr,
+    // t->destination_asn,
+    // t->path_id,
+    // t->hop_count);
     // puts("serialize_csv: Done writing traceroute to file. Writing hops...");
     for (int i = 0; i < t->hop_count; i++)
     {
@@ -744,11 +742,11 @@ int serialize_csv(char *fileName, traceroute *t)
                     hop_addr,
                     t->hops[i].hop_asn);
             /* Write to stdout */
-            printf(HOP_FORMAT_OUT,
-                   t->hops[i].hopnumber,
-                   t->hops[i].returned_flowlabel,
-                   hop_addr,
-                   t->hops[i].hop_asn);
+            // printf(HOP_FORMAT_OUT,
+            // t->hops[i].hopnumber,
+            // t->hops[i].returned_flowlabel,
+            // hop_addr,
+            // t->hops[i].hop_asn);
         }
         else
         {
@@ -759,11 +757,11 @@ int serialize_csv(char *fileName, traceroute *t)
                     hop_addr,
                     t->hops[i].hop_asn);
             /* Write to stdout */
-            printf(HOP_FORMAT_LAST,
-                   t->hops[i].hopnumber,
-                   t->hops[i].returned_flowlabel,
-                   hop_addr,
-                   t->hops[i].hop_asn);
+            // printf(HOP_FORMAT_LAST,
+            // t->hops[i].hopnumber,
+            // t->hops[i].returned_flowlabel,
+            // hop_addr,
+            // t->hops[i].hop_asn);
         }
     }
     // puts("serialize_csv: Done writing hops to file");
