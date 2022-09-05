@@ -739,8 +739,8 @@ int serialize_csv(char *fileName, traceroute *t)
                 hop_addr);
         puts("serialize_csv: wrote hop:");
         printf(HOP_FORMAT_OUT,
-               &t->hops[i].returned_flowlabel,
-               &t->hops[i].hopnumber,
+               t->hops[i].returned_flowlabel,
+               t->hops[i].hopnumber,
                hop_addr);
     }
     puts("serialize_csv: Done writing hops to file");
