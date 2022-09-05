@@ -217,7 +217,6 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
 
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 {
-    puts("Entering parse_icmp6");
     icmp6_header *h = calloc(1, sizeof(icmp6_header));
     ipv6_header *inner_ipv6;
     h->type = *icmp_first_byte;
@@ -230,11 +229,11 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
     {
     case ICMP_TIME_EXCEEDED:
         inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
-        printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
+        // printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
         break;
     default:
-        puts("DEBUG:\ticmp_parse default");
-        printf("ICMP type:\t%x\n", h->type);
+        // puts("DEBUG:\ticmp_parse default");
+        fprintf(stderr, "ICMP type:\t%x\n", h->type);
         break;
     }
 
@@ -339,7 +338,7 @@ void parse_packet(const packet_t *p)
         case NH_MH: // Mobility Header
             break;
         default:
-            puts("parse_packet:\treached ipv6_parse_default in switch statement");
+            fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
             break;
         };
     }
@@ -374,7 +373,7 @@ hop *createHop()
     hop *h;
     if ((h = calloc(1, sizeof(hop))) == NULL)
     {
-        perror("Error");
+        perror("createHop: calloc error");
         exit(1);
     }
 
