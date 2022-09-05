@@ -650,11 +650,10 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     if (asnlookup_result != NULL)
                     {
                         // strcpy(t->source_asn, asnLookup(&t->source_ip));
-                        size_t asnlookup_strlen = strlen(asnlookup_result);
-                        printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                        printf("source asnlookup_result: %s\n", asnlookup_result);
+                        // printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                        // printf("source asnlookup_result: %s\n", asnlookup_result);
                         memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                        printf("source asn: %s\n", t->source_asn);
+                        // printf("source asn: %s\n", t->source_asn);
                     }
                     else
                     {
@@ -671,7 +670,6 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     if (asnlookup_result != NULL)
                     {
                         // strcpy(t->destination_asn, asnLookup(&t->destination_ip));
-                        size_t asnlookup_strlen = strlen(asnlookup_result);
                         // printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
                         // printf("destination asnlookup_result: %s\n", asnlookup_result);
                         memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result) + 1);
@@ -702,7 +700,6 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 if (asnlookup_result != NULL)
                 {
                     // strcpy(t->source_asn, asnLookup(&t->source_ip));
-                    size_t asnlookup_strlen = strlen(asnlookup_result);
                     // printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
                     // printf("hop asnlookup_result: %s\n", asnlookup_result);
                     memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
