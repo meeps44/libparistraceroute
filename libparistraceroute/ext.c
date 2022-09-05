@@ -693,13 +693,19 @@ int serialize_csv(char *fileName, traceroute *t)
     static const char *HOP_FORMAT_OUT = "%d, %d, %s ";
     static const char *TR_FORMAT_OUT = "%d, %s, %s, %d, %s, %d, %s, %d, ";
 
-    char src_addr[100];
-    char dst_addr[100];
-    char hop_addr[100];
+    char src_addr[INET6_ADDRSTRLEN + 1];
+    char dst_addr[INET6_ADDRSTRLEN + 1];
+    char hop_addr[INET6_ADDRSTRLEN + 1];
 
-    /* Convert address to string before writing to file. */
-    inet_ntop(AF_INET6, &t->source_ip, src_addr, sizeof(struct in6_addr));
-    inet_ntop(AF_INET6, &t->destination_ip, dst_addr, sizeof(struct in6_addr));
+    /* Convert src address to string before writing to file. */
+    inet_ntop(AF_INET6, &t->source_ip, src_addr, sizeof(src_addr));
+    memcpy(src_addr[46], "\0", 1);
+    printf("serialize_csv: converted source ip: %s", src_addr);
+
+    /* Convert destination address to string before writing to file. */
+    inet_ntop(AF_INET6, &t->destination_ip, dst_addr, sizeof(dst_addr));
+    memcpy(dst_addr[46], "\0", 1);
+    printf("serialize_csv: converted destination ip: %s", dst_addr);
     /* Write to file */
     puts("serialize_csv: Writing traceroute to file");
     fprintf(file, TR_FORMAT_OUT,
@@ -725,7 +731,8 @@ int serialize_csv(char *fileName, traceroute *t)
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
-        inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(struct in6_addr));
+        inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
+        memcpy(hop_addr[46], "\0", 1);
         /* Write to file */
         fprintf(file, HOP_FORMAT_OUT,
                 &t->hops[i].returned_flowlabel,
