@@ -590,7 +590,7 @@ char *createFileName(struct tm *now) // (Might not be needed)
     gethostname(hostname, 30);
 
     // Output timestamp in format "YYYY-MM-DD-hh_mm_ss : "
-    sprintf(timestamp, "-%04d-%02d-%02d-%02d_%02d_%02d",
+    sprintf(timestamp, "-%04d-%02d-%02dT%02d:%02d:%02d",
             now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
             now->tm_hour, now->tm_min, now->tm_sec);
 
@@ -612,7 +612,7 @@ char *create_timestamp()
     char *timestamp = calloc(1, sizeof(char) * 50);
     struct tm *now = getCurrentTime();
     // Output timestamp in format "YYYY-MM-DD-hh_mm_ss : "
-    sprintf(timestamp, "%04d-%02d-%02d-%02d_%02d_%02d",
+    sprintf(timestamp, "%04d-%02d-%02dT%02d:%02d:%02d",
             now->tm_year + 1900, now->tm_mon + 1, now->tm_mday,
             now->tm_hour, now->tm_min, now->tm_sec);
 
