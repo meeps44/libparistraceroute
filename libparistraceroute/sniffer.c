@@ -651,6 +651,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                         printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
                         printf("source asnlookup_result: %s\n", asnlookup_result);
                         memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result));
+                        printf("source asn: %s\n", t->source_asn);
                     }
                     else
                     {
@@ -671,6 +672,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                         printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
                         printf("destination asnlookup_result: %s\n", asnlookup_result);
                         memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result));
+                        printf("destination asn: %s\n", t->destination_asn);
                     }
                     else
                     {
