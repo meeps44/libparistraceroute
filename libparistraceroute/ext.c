@@ -689,7 +689,8 @@ int serialize_csv(char *fileName, traceroute *t)
 
     // /* Write to file */
     // fwrite(t, sizeof(traceroute), 1, file);
-    static const char *HOP_FORMAT_OUT = "%d, %d, %s, %s ";
+    static const char *HOP_FORMAT_OUT = "%d, %d, %s, %s, ";
+    static const char *HOP_FORMAT_LAST = "%d, %d, %s, %s";
     static const char *TR_FORMAT_OUT = "%d, %s, %s, %s, %s, %s, %s, %d, ";
 
     char src_addr[INET6_ADDRSTRLEN + 1];
@@ -732,18 +733,36 @@ int serialize_csv(char *fileName, traceroute *t)
         /* Convert address to string before writing to file */
         inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
         memcpy(&hop_addr[46], "\0", 1);
-        /* Write to file */
-        fprintf(file, HOP_FORMAT_OUT,
-                t->hops[i].hopnumber,
-                t->hops[i].returned_flowlabel,
-                hop_addr,
-                t->hops[i].hop_asn);
-        // puts("serialize_csv: wrote hop:");
-        printf(HOP_FORMAT_OUT,
-               t->hops[i].hopnumber,
-               t->hops[i].returned_flowlabel,
-               hop_addr,
-               t->hops[i].hop_asn);
+        if (i != t->hop_count - 2)
+        {
+            /* Write to file */
+            fprintf(file, HOP_FORMAT_OUT,
+                    t->hops[i].hopnumber,
+                    t->hops[i].returned_flowlabel,
+                    hop_addr,
+                    t->hops[i].hop_asn);
+            /* Write to stdout */
+            printf(HOP_FORMAT_OUT,
+                   t->hops[i].hopnumber,
+                   t->hops[i].returned_flowlabel,
+                   hop_addr,
+                   t->hops[i].hop_asn);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, HOP_FORMAT_LAST,
+                    t->hops[i].hopnumber,
+                    t->hops[i].returned_flowlabel,
+                    hop_addr,
+                    t->hops[i].hop_asn);
+            /* Write to stdout */
+            printf(HOP_FORMAT_LAST,
+                   t->hops[i].hopnumber,
+                   t->hops[i].returned_flowlabel,
+                   hop_addr,
+                   t->hops[i].hop_asn);
+        }
     }
     // puts("serialize_csv: Done writing hops to file");
     fprintf(file, "\n");
