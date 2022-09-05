@@ -177,7 +177,7 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
                 return inner_ipv6;
             default:
                 //fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED. \
-                ICMP type is:\t%x\n", icmp6->type);
+                // ICMP type is:\t%x\n", icmp6->type);
                 return NULL;
                 // break;
             }
@@ -217,7 +217,7 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 {
     icmp6_header *h = calloc(1, sizeof(icmp6_header));
-    ipv6_header *inner_ipv6;
+    // ipv6_header *inner_ipv6;
     h->type = *icmp_first_byte;
     h->code = *(icmp_first_byte + 1);
     h->checksum = ((uint16_t) * (icmp_first_byte + 2) << 8) | *(icmp_first_byte + 3);
@@ -227,7 +227,7 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
     switch (h->type)
     {
     case ICMP_TIME_EXCEEDED:
-        inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
+        ipv6_header *inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
         // fprintf(stderr, "Returned flow label (hexadecimal):\t%x\n", inner_ipv6->flow_label);
         break;
     default:
