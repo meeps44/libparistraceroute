@@ -615,7 +615,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             if ((inner_ipv6 = get_inner_ipv6_header(packet)) != NULL)
             {
                 uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
+                // printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
 
                 char foo[INET6_ADDRSTRLEN + 1];
                 memcpy(&foo[46], "\0", 1);
@@ -628,22 +628,22 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 {
                     /* Init asn-lookup */
                     // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
-                    puts("Starting asnLookupInit");
+                    // puts("Starting asnLookupInit");
                     asnLookupInit("../routeviews-rv6-pfx2as.txt");
-                    puts("Leaving asnLookupInit");
+                    // puts("Leaving asnLookupInit");
 
                     t = createTraceroute();
-                    puts("createTraceroute done");
+                    // puts("createTraceroute done");
                     set_traceroute(t);
-                    puts("set_traceroute done");
+                    // puts("set_traceroute done");
                     t->timestamp = create_timestamp();
-                    puts("create_timestamp done");
+                    // puts("create_timestamp done");
                     /* Set source ip */
-                    printf("get_host_ip: %s\n", get_host_ip());
+                    // printf("get_host_ip: %s\n", get_host_ip());
                     inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
-                    puts("set source ip done");
+                    // puts("set source ip done");
                     inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
-                    printf("Source IP:\n%s\n", foo);
+                    // printf("Source IP:\n%s\n", foo);
                     /* Set source ASN */
                     // char asnlookup_buffer[200];
                     asnlookup_result = asnLookup(&t->source_ip);
@@ -660,42 +660,42 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     {
                         strcpy(t->source_asn, "NULL");
                     }
-                    puts("set source ASN done");
+                    // puts("set source ASN done");
                     /* Set destination ip */
                     t->destination_ip = inner_ipv6->destination;
-                    puts("set destination ip done");
+                    // puts("set destination ip done");
                     inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
-                    printf("Destination IP:\n%s\n", foo);
+                    // printf("Destination IP:\n%s\n", foo);
                     /* Set destination ASN */
                     asnlookup_result = asnLookup(&t->destination_ip);
                     if (asnlookup_result != NULL)
                     {
                         // strcpy(t->destination_asn, asnLookup(&t->destination_ip));
                         size_t asnlookup_strlen = strlen(asnlookup_result);
-                        printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                        printf("destination asnlookup_result: %s\n", asnlookup_result);
+                        // printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                        // printf("destination asnlookup_result: %s\n", asnlookup_result);
                         memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                        printf("destination asn: %s\n", t->destination_asn);
+                        // printf("destination asn: %s\n", t->destination_asn);
                     }
                     else
                     {
                         strcpy(t->destination_asn, "NULL");
                     }
-                    puts("set destination ASN done");
+                    // puts("set destination ASN done");
                     /* Set hop count */
                     t->hop_count = 0;
-                    puts("set hop_count done");
+                    // puts("set hop_count done");
                     first_run = false;
-                    puts("set first_run done");
+                    // puts("set first_run done");
                 }
 
-                puts("Starting createHop");
+                // puts("Starting createHop");
                 h = createHop();
                 h->hopnumber = t->hop_count + 1;
-                printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
+                // printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
                 h->hop_address = outer_ipv6->source;
                 h->returned_flowlabel = returned_flowlabel;
-                printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
+                // printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
 
                 /* Set hop ASN */
                 asnlookup_result = asnLookup(&h->hop_address);
@@ -703,10 +703,10 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 {
                     // strcpy(t->source_asn, asnLookup(&t->source_ip));
                     size_t asnlookup_strlen = strlen(asnlookup_result);
-                    printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                    printf("hop asnlookup_result: %s\n", asnlookup_result);
+                    // printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                    // printf("hop asnlookup_result: %s\n", asnlookup_result);
                     memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                    printf("hop asn: %s\n", h->hop_asn);
+                    // printf("hop asn: %s\n", h->hop_asn);
                 }
                 else
                 {

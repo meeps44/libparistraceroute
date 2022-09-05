@@ -532,12 +532,10 @@ int main(int argc, char **argv)
     exit_code = EXIT_SUCCESS;
 
     // BEGIN ERLEND //
-    // Erlend - set path hash
     traceroute *t = get_traceroute();
-    // Set outgoing port
     t->outgoing_tcp_port = dport_tmp;
 
-    puts("Creating path hash");
+    /* Create path hash */
     struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
@@ -546,7 +544,7 @@ int main(int argc, char **argv)
     uint8_t *path_hash = hashPath(a, t->hop_count);
     char output_buffer[21];
 
-    // Create string-representation of hash digest
+    /* Create string-representation of path hash digest */
     for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
     {
         sprintf(output_buffer + (i * 2), "%02x", path_hash[i]);
@@ -554,15 +552,11 @@ int main(int argc, char **argv)
 
     output_buffer[20] = '\0';
     strcpy(t->path_id, output_buffer);
-    // memcpy(t->path_id, path_hash, sizeof(uint8_t) * 21);
-    printf("path hash: %s\n", path_hash);
 
     // Erlend - traceroute all done. Saving the results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
-    puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
-    puts("Finished serialize_csv");
     // END ERLEND //
 
     // Leave the program
