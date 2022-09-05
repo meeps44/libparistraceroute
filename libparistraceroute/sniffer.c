@@ -629,7 +629,8 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     /* Init asn-lookup */
                     // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
                     // puts("Starting asnLookupInit");
-                    asnLookupInit("../routeviews-rv6-pfx2as.txt");
+                    // asnLookupInit("../routeviews-rv6-pfx2as.txt");
+                    asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
                     // puts("Leaving asnLookupInit");
 
                     t = createTraceroute();
