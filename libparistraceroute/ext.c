@@ -733,7 +733,7 @@ int serialize_csv(char *fileName, traceroute *t)
         /* Convert address to string before writing to file */
         inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
         memcpy(&hop_addr[46], "\0", 1);
-        if (i != t->hop_count - 2)
+        if (i < t->hop_count - 1)
         {
             /* Write to file */
             fprintf(file, HOP_FORMAT_OUT,
