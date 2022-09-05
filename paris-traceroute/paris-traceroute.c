@@ -531,6 +531,7 @@ int main(int argc, char **argv)
     }
     exit_code = EXIT_SUCCESS;
 
+    // BEGIN ERLEND //
     // Erlend - set path hash
     traceroute *t = get_traceroute();
     // Set outgoing port
@@ -562,6 +563,7 @@ int main(int argc, char **argv)
     puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
     puts("Finished serialize_csv");
+    // END ERLEND //
 
     // Leave the program
 ERR_PT_LOOP:

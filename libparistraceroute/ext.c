@@ -266,7 +266,6 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     char src_ip_tmp[17];
     memcpy(src_ip_tmp, h->source.__in6_u.__u6_addr8, 16);
     src_ip_tmp[16] = '\0';
-    printf("parse_ipv6: source IP: %s\n", src_ip_tmp);
 
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Source IP:\n%s\n", inet_ntop(AF_INET6, &h->source, presentation_buffer, 48));
@@ -280,7 +279,6 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     char dst_ip_tmp[17];
     memcpy(dst_ip_tmp, h->destination.__in6_u.__u6_addr8, 16);
     dst_ip_tmp[16] = '\0';
-    printf("parse_ipv6: source IP: %s\n", dst_ip_tmp);
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Destination IP:\n%s\n", inet_ntop(AF_INET6, &h->destination, presentation_buffer, 48));
     printf("Version:\t%d\n", h->version);
@@ -495,9 +493,10 @@ int asnLookupInit(char *filename)
                 nmb = 1;
                 asn = malloc(sizeof(char) * 200);
                 strcpy(asn, token);
-                // printf("asn: %s\n", asn);
-                // Insert into patricia-tree
-                insert(AF_INET6, (struct in6_addr) * my_addr, mask, asn);
+                //  printf("asn: %s\n", asn);
+                //  Insert into patricia-tree
+                //  insert(AF_INET6, (struct in6_addr) * my_addr, mask, asn);
+                insert(AF_INET6, *my_addr, mask, asn);
                 break;
             default:
                 puts("Error: default");

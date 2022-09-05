@@ -615,7 +615,8 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             if ((inner_ipv6 = get_inner_ipv6_header(packet)) != NULL)
             {
                 uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                char foo[INET6_ADDRSTRLEN];
+                char foo[INET6_ADDRSTRLEN + 1];
+                memcpy(&foo[46], "\0", 1);
                 // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
                 // packet_dump(packet);
 
@@ -641,9 +642,15 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
                     printf("Source IP:\n%s\n", foo);
                     /* Set source ASN */
-                    if (asnLookup(&t->source_ip) != NULL)
+                    // char asnlookup_buffer[200];
+                    char *asnlookup_result = asnLookup(&t->source_ip);
+                    if (asnlookup_result != NULL)
                     {
-                        strcpy(t->source_asn, asnLookup(&t->source_ip));
+                        // strcpy(t->source_asn, asnLookup(&t->source_ip));
+                        size_t asnlookup_strlen = strlen(asnlookup_result);
+                        printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                        printf("source asnlookup_result: %s\n", asnlookup_result);
+                        memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result));
                     }
                     else
                     {
@@ -656,9 +663,14 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
                     printf("Destination IP:\n%s\n", foo);
                     /* Set destination ASN */
-                    if (asnLookup(&t->destination_ip) != NULL)
+                    asnlookup_result = asnLookup(&t->destination_ip);
+                    if (asnlookup_result != NULL)
                     {
-                        strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                        // strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                        size_t asnlookup_strlen = strlen(asnlookup_result);
+                        printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                        printf("destination asnlookup_result: %s\n", asnlookup_result);
+                        memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result));
                     }
                     else
                     {
