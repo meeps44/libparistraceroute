@@ -86,9 +86,9 @@ void parse_packet(const packet_t *p);
 
 typedef struct hop
 {
-    uint32_t returned_flowlabel;
     uint8_t hopnumber;
-    // address *hop_address; // Could be a list of address pointers
+    uint32_t returned_flowlabel;
+    char hop_asn[200];
     struct in6_addr hop_address; // uint32_t __u6_addr32[4], uint8_t	__u6_addr8[16], uint16_t __u6_addr16[8]
 } hop;
 
@@ -118,7 +118,6 @@ typedef struct traceroute
     char path_id[SHA_DIGEST_LENGTH + 1]; // +1 for terminating null-character
     // uint8_t path_id[SHA_DIGEST_LENGTH + 1]; // +1 for terminating null-character
     uint8_t hop_count;
-    // hop *hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
     hop hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
     // Could also be a list of *hop-pointers
 

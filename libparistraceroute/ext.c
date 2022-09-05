@@ -493,6 +493,10 @@ int asnLookupInit(char *filename)
                 nmb = 1;
                 asn = malloc(sizeof(char) * 200);
                 strcpy(asn, token);
+
+                /* Strip trailing newline */
+                asn[strcspn(asn, "\n")] = 0;
+
                 //  printf("asn: %s\n", asn);
                 //  Insert into patricia-tree
                 //  insert(AF_INET6, (struct in6_addr) * my_addr, mask, asn);
@@ -522,9 +526,6 @@ char *asnLookup(struct in6_addr *ipv6_address)
     char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
     puts("Lookup_result done");
     printf("Lookup result:\t%s\n", lookup_result);
-#ifdef EXT_DEBUG
-    printf("Lookup result (returned ASN):\t%s\n", lookup_result);
-#endif
     return lookup_result;
 }
 
@@ -689,7 +690,7 @@ int serialize_csv(char *fileName, traceroute *t)
 
     // /* Write to file */
     // fwrite(t, sizeof(traceroute), 1, file);
-    static const char *HOP_FORMAT_OUT = "%d, %d, %s ";
+    static const char *HOP_FORMAT_OUT = "%d, %d, %s, %s ";
     static const char *TR_FORMAT_OUT = "%d, %s, %s, %s, %s, %s, %s, %d, ";
 
     char src_addr[INET6_ADDRSTRLEN + 1];
@@ -734,14 +735,16 @@ int serialize_csv(char *fileName, traceroute *t)
         memcpy(&hop_addr[46], "\0", 1);
         /* Write to file */
         fprintf(file, HOP_FORMAT_OUT,
-                &t->hops[i].returned_flowlabel,
-                &t->hops[i].hopnumber,
-                hop_addr);
+                t->hops[i].hopnumber,
+                t->hops[i].returned_flowlabel,
+                hop_addr,
+                t->hops[i].hop_asn);
         puts("serialize_csv: wrote hop:");
         printf(HOP_FORMAT_OUT,
-               t->hops[i].returned_flowlabel,
                t->hops[i].hopnumber,
-               hop_addr);
+               t->hops[i].returned_flowlabel,
+               hop_addr,
+               t->hops[i].hop_asn);
     }
     puts("serialize_csv: Done writing hops to file");
     fprintf(file, "\n");

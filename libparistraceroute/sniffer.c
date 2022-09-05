@@ -622,6 +622,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
                 // packet_dump(packet);
 
+                char *asnlookup_result;
                 hop *h;
                 if (first_run)
                 {
@@ -645,14 +646,14 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     printf("Source IP:\n%s\n", foo);
                     /* Set source ASN */
                     // char asnlookup_buffer[200];
-                    char *asnlookup_result = asnLookup(&t->source_ip);
+                    asnlookup_result = asnLookup(&t->source_ip);
                     if (asnlookup_result != NULL)
                     {
                         // strcpy(t->source_asn, asnLookup(&t->source_ip));
                         size_t asnlookup_strlen = strlen(asnlookup_result);
                         printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
                         printf("source asnlookup_result: %s\n", asnlookup_result);
-                        memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result));
+                        memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result) + 1);
                         printf("source asn: %s\n", t->source_asn);
                     }
                     else
@@ -673,7 +674,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                         size_t asnlookup_strlen = strlen(asnlookup_result);
                         printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
                         printf("destination asnlookup_result: %s\n", asnlookup_result);
-                        memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result));
+                        memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result) + 1);
                         printf("destination asn: %s\n", t->destination_asn);
                     }
                     else
@@ -695,6 +696,23 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 h->hop_address = outer_ipv6->source;
                 h->returned_flowlabel = returned_flowlabel;
                 printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
+
+                /* Set hop ASN */
+                asnlookup_result = asnLookup(&h->hop_address);
+                if (asnlookup_result != NULL)
+                {
+                    // strcpy(t->source_asn, asnLookup(&t->source_ip));
+                    size_t asnlookup_strlen = strlen(asnlookup_result);
+                    printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                    printf("hop asnlookup_result: %s\n", asnlookup_result);
+                    memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+                    printf("hop asn: %s\n", h->hop_asn);
+                }
+                else
+                {
+                    strcpy(h->hop_asn, "NULL");
+                }
+
                 if (appendHop(h, t) == -1)
                 {
                     fprintf(stderr, "Failed to append hop: Hop array is full\n");
