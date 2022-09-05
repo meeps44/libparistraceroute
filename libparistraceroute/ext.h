@@ -107,7 +107,7 @@ typedef struct traceroute
         "path_id": "c0f8ed8a7c1f3d725bd89de7ed7eced0b9dcc67b",
     */
     uint16_t outgoing_tcp_port;
-    uint32_t outgoing_flow_label;
+    int outgoing_flow_label;
     char *timestamp;
     // address *source_ip;
     struct in6_addr source_ip;
