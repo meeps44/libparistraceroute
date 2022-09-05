@@ -533,11 +533,11 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     traceroute *t = get_traceroute();
-    puts("Setting outgoing flow label");
-    printf("Flow label = %d\n", flow_label);
+    // puts("Setting outgoing flow label");
+    // printf("Flow label = %d\n", flow_label);
     t->outgoing_flow_label = flow_label;
-    puts("Finished setting outgoing flow label");
-    printf("Outgoing flow label = %d\n", t->outgoing_flow_label);
+    // puts("Finished setting outgoing flow label");
+    // printf("Outgoing flow label = %d\n", t->outgoing_flow_label);
     t->outgoing_tcp_port = dport_tmp;
 
     /* Create path hash */
@@ -561,7 +561,7 @@ int main(int argc, char **argv)
     // Erlend - traceroute all done. Saving the results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
-    puts("Entering serialize_csv");
+    // puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
     // END ERLEND //
 
