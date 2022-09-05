@@ -707,7 +707,7 @@ int serialize_csv(char *fileName, traceroute *t)
     memcpy(&dst_addr[46], "\0", 1);
     // printf("serialize_csv: converted destination ip: %s", dst_addr);
     /* Write to file */
-    // puts("serialize_csv: Writing traceroute to file");
+    puts("serialize_csv: Writing traceroute to file");
     fprintf(file, TR_FORMAT_OUT,
             t->outgoing_flow_label,
             t->outgoing_tcp_port,
@@ -718,7 +718,7 @@ int serialize_csv(char *fileName, traceroute *t)
             t->destination_asn,
             t->path_id,
             t->hop_count);
-    // puts("serialize_csv: wrote traceroute:");
+    puts("serialize_csv: wrote traceroute:");
     printf(TR_FORMAT_OUT,
            t->outgoing_tcp_port,
            t->timestamp,
