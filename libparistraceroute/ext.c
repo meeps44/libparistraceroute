@@ -229,7 +229,7 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
     {
     case ICMP_TIME_EXCEEDED:
         inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
-        // printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
+        fprintf(stderr, "Returned flow label (hexadecimal):\t%x\n", inner_ipv6->flow_label);
         break;
     default:
         // puts("DEBUG:\ticmp_parse default");
