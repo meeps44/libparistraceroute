@@ -643,10 +643,10 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                         set_traceroute(t);
                         t->timestamp = create_timestamp();
                         /* Set source ip */
-                        // printf("get_host_ip: %s\n", get_host_ip());
+                        printf("get_host_ip: %s\n", get_host_ip());
                         inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
                         inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
-                        // printf("get_host_ip done. result: %s\n", foo);
+                        printf("get_host_ip done. result: %s\n", foo);
                         //  printf("Source IP:\n%s\n", foo);
                         /* Set source ASN */
                         // char asnlookup_buffer[200];
