@@ -229,7 +229,7 @@ ipv6_header *get_inner_ipv6_header(const packet_t *p)
 icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 {
     icmp6_header *h = calloc(1, sizeof(icmp6_header));
-    ipv6_header *inner_ipv6;
+    // ipv6_header *inner_ipv6;
     h->type = *icmp_first_byte;
     h->code = *(icmp_first_byte + 1);
     h->checksum = ((uint16_t) * (icmp_first_byte + 2) << 8) | *(icmp_first_byte + 3);
