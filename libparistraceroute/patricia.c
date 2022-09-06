@@ -423,7 +423,7 @@ void Deref_Prefix(prefix_t *prefix)
 	assert(prefix->ref_count >= 0);
 	if (prefix->ref_count <= 0)
 	{
-		Delete(prefix);
+		// Delete(prefix);
 		return;
 	}
 }
