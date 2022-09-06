@@ -40,7 +40,7 @@
 // Default field values
 #define IPV6_DEFAULT_VERSION         6
 #define IPV6_DEFAULT_TRAFFIC_CLASS   0
-#define IPV6_DEFAULT_FLOW_LABEL      203 // erlend
+#define IPV6_DEFAULT_FLOW_LABEL      0 // erlend
 #define IPV6_DEFAULT_PAYLOAD_LENGTH  0
 #define IPV6_DEFAULT_NEXT_HEADER     IPPROTO_UDP
 #define IPV6_DEFAULT_HOP_LIMIT       64
