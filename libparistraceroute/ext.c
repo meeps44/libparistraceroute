@@ -130,8 +130,20 @@ char *get_host_ip()
     return NULL;
 }
 
-traceroute *t;
+struct in6_addr *dest_addr;
+struct in6_addr *init_destination(void)
+{
+    struct in6_addr *da = calloc(1, sizeof(struct in6_addr));
+    dest_addr = da;
+    return dest_addr;
+}
 
+struct in6_addr *get_destination(void)
+{
+    return dest_addr;
+}
+
+traceroute *t;
 void set_traceroute(traceroute *tr)
 {
     t = tr;
@@ -221,9 +233,10 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
     h->type = *icmp_first_byte;
     h->code = *(icmp_first_byte + 1);
     h->checksum = ((uint16_t) * (icmp_first_byte + 2) << 8) | *(icmp_first_byte + 3);
-    // Depending on the type there will be a value between bytes 5-9 as well, however
-    // as it is not used in our project it will not be parsed at this time.
+    // Depending on the type there can be a value between bytes 5-9 as well,
+    // though this value is not used in our project.
 
+    /*
     switch (h->type)
     {
     case ICMP_TIME_EXCEEDED:
@@ -231,10 +244,9 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
         fprintf(stderr, "Returned flow label (hexadecimal):\t%x\n", inner_ipv6->flow_label);
         break;
     default:
-        // puts("DEBUG:\ticmp_parse default");
-        // fprintf(stderr, "ICMP type:\t%x\n", h->type);
         break;
     }
+    */
 
     return h;
 }
@@ -252,31 +264,17 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     h->next_header = *(first_byte + 6);
     h->hop_limit = *(first_byte + 7);
 
-    // Set source and destination
-    // for (int i = 0, k = 0; i < 8; i++, k += 2)
-    //{
-    // h->source.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
-    //}
-
-    // memcpy(h->source.__in6_u.__u6_addr8[0], (first_byte + 8), 16);
-    //  Erlend - test
+    // Set source
     memcpy(h->source.__in6_u.__u6_addr8, (first_byte + 8), 16);
-    char src_ip_tmp[17];
-    memcpy(src_ip_tmp, h->source.__in6_u.__u6_addr8, 16);
-    src_ip_tmp[16] = '\0';
+    // char src_ip_tmp[17];
+    // memcpy(src_ip_tmp, h->source.__in6_u.__u6_addr8, 16);
+    // src_ip_tmp[16] = '\0';
 
-#ifdef EXT_DEBUG
-    printf("parse_ipv6: Source IP:\n%s\n", inet_ntop(AF_INET6, &h->source, presentation_buffer, 48));
-#endif
-    // for (int i = 0, k = 0; i < 8; i++, k += 2)
-    //{
-    // h->destination.__in6_u.__u6_addr16[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
-    //}
-    //  Erlend - test
+    // Set destination
     memcpy(h->destination.__in6_u.__u6_addr8, (first_byte + 24), 16);
-    char dst_ip_tmp[17];
-    memcpy(dst_ip_tmp, h->destination.__in6_u.__u6_addr8, 16);
-    dst_ip_tmp[16] = '\0';
+    // char dst_ip_tmp[17];
+    // memcpy(dst_ip_tmp, h->destination.__in6_u.__u6_addr8, 16);
+    // dst_ip_tmp[16] = '\0';
 #ifdef EXT_DEBUG
     printf("parse_ipv6: Destination IP:\n%s\n", inet_ntop(AF_INET6, &h->destination, presentation_buffer, 48));
     printf("Version:\t%d\n", h->version);

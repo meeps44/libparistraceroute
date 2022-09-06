@@ -415,6 +415,13 @@ int main(int argc, char **argv)
         goto ERR_ADDRESS_IP_FROM_STRING;
     }
 
+    // BEGIN ERLEND //
+    puts("paris_traceroute: starting memcpy");
+    struct in6_addr *glb_dst = init_destination();
+    memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
+    puts("paris_traceroute: memcpy done");
+    // END ERLEND //
+
     // Probe skeleton definition: IPv4/UDP probe targetting 'dst_ip'
     if (!(probe = probe_create()))
     {
@@ -533,12 +540,15 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     traceroute *t = get_traceroute();
-    // puts("Setting outgoing flow label");
-    // printf("Flow label = %d\n", flow_label);
     t->outgoing_flow_label = flow_label;
-    // puts("Finished setting outgoing flow label");
-    // printf("Outgoing flow label = %d\n", t->outgoing_flow_label);
     t->outgoing_tcp_port = dport_tmp;
+    // dst_ip
+    //  address_t instance:
+    // dst_addr
+    // puts("paris_traceroute: starting memcpy");
+    // struct in6_addr *glb_dst = get_destination();
+    // memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
+    // puts("paris_traceroute: memcpy done");
 
     /* Create path hash */
     struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
@@ -558,10 +568,9 @@ int main(int argc, char **argv)
     output_buffer[20] = '\0';
     strcpy(t->path_id, output_buffer);
 
-    // Erlend - traceroute all done. Saving the results to disk.
+    // Erlend - traceroute all done. Saving results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
-    // puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
     // END ERLEND //
 

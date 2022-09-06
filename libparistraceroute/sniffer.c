@@ -612,7 +612,18 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             // parse_packet(packet);
             ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
             ipv6_header *inner_ipv6 = get_inner_ipv6_header(packet);
-            if ((inner_ipv6 = get_inner_ipv6_header(packet)) != NULL)
+
+            /* Get inner destination IP */
+            struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
+            /* Convert inner destination IP to String */
+            // uint8_t inner_ipv6_destination_buffer[INET6_ADDRSTRLEN + 1];
+            // inet_ntop(AF_INET6, &t->source_ip, inner_ipv6_destination_buffer, INET6_ADDRSTRLEN);
+            // inner_ipv6_destination_buffer[46] = '\0';
+            /* Compare destination IP */
+            int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
+            printf("Memcmp result: %d\n", cmp_result);
+
+            if (inner_ipv6 != NULL)
             {
                 uint32_t returned_flowlabel = inner_ipv6->flow_label;
                 // printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
@@ -626,19 +637,10 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 hop *h;
                 if (first_run)
                 {
-                    /* Init asn-lookup */
-                    // asnLookupInit("/home/erlend/dev/routeviews-rv6-20220411-1200.pfx2as.txt");
-                    // puts("Starting asnLookupInit");
-                    // asnLookupInit("../routeviews-rv6-pfx2as.txt");
                     asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
-                    // puts("Leaving asnLookupInit");
-
                     t = createTraceroute();
-                    // puts("createTraceroute done");
                     set_traceroute(t);
-                    // puts("set_traceroute done");
                     t->timestamp = create_timestamp();
-                    // puts("create_timestamp done");
                     /* Set source ip */
                     printf("get_host_ip: %s\n", get_host_ip());
                     inet_pton(AF_INET6, get_host_ip(), &t->source_ip);

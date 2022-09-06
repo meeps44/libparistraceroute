@@ -478,4 +478,18 @@ struct in6_addr *convert_address_string(char *ipv6_address_string);
  */
 ipv6_header *get_inner_ipv6_header(const packet_t *p);
 
+/**
+ * @brief Init destination, creating a newly allocated struct in6_addr.
+ *
+ * @return struct in6_addr*
+ */
+struct in6_addr *init_destination(void);
+
+/**
+ * @brief Get a pointer to the global destination object.
+ *
+ * @return struct in6_addr*
+ */
+struct in6_addr *get_destination(void);
+
 #endif
