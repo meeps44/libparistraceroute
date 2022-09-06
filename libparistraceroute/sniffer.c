@@ -613,18 +613,18 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
             ipv6_header *inner_ipv6 = get_inner_ipv6_header(packet);
 
-            /* Get inner destination IP */
-            struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
             /* Convert inner destination IP to String */
             // uint8_t inner_ipv6_destination_buffer[INET6_ADDRSTRLEN + 1];
             // inet_ntop(AF_INET6, &t->source_ip, inner_ipv6_destination_buffer, INET6_ADDRSTRLEN);
             // inner_ipv6_destination_buffer[46] = '\0';
             /* Compare destination IP */
-            int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
-            printf("Memcmp result: %d\n", cmp_result);
-
             if (inner_ipv6 != NULL)
             {
+                /* Get inner destination IP */
+                struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
+                int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
+                printf("Memcmp result: %d\n", cmp_result);
+
                 uint32_t returned_flowlabel = inner_ipv6->flow_label;
                 // printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
 
