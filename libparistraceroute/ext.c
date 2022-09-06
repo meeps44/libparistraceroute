@@ -114,8 +114,8 @@ char *get_host_ip()
             // printf("Converted successfully from string to struct in6_addr\n");
             //}
             fclose(f);
-            if (line)
-                free(line);
+            // if (line)
+            // free(line);
             // printf("get_host_ip: The global IPv6-address is:\t%s\n", dst);
             return dst;
         }
@@ -124,8 +124,8 @@ char *get_host_ip()
 
     perror("Global IPv6-address not found\n");
     fclose(f);
-    if (line)
-        free(line);
+    // if (line)
+    // free(line);
 
     return NULL;
 }
