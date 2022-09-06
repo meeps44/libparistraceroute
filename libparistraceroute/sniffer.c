@@ -690,15 +690,16 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     // puts("set first_run done");
                 }
 
-                // puts("Starting createHop");
+                puts("Starting createHop");
                 h = createHop();
                 h->hopnumber = t->hop_count + 1;
-                // printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
+                printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
                 h->hop_address = outer_ipv6->source;
                 h->returned_flowlabel = returned_flowlabel;
-                // printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
+                printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
 
                 /* Set hop ASN */
+                puts("Startign asnLookup");
                 asnlookup_result = asnLookup(&h->hop_address);
                 if (asnlookup_result != NULL)
                 {
@@ -712,6 +713,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 {
                     strcpy(h->hop_asn, "NULL");
                 }
+                puts("Finished asnLookup");
 
                 if (appendHop(h, t) == -1)
                 {

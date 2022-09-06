@@ -571,7 +571,9 @@ int main(int argc, char **argv)
     // Erlend - traceroute all done. Saving results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
+    puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
+    puts("Finished serialize_csv");
     // END ERLEND //
 
     // Leave the program
