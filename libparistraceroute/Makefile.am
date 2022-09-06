@@ -83,7 +83,12 @@ nobase_libparistraceroute_@LIBRARY_VERSION@_la_HEADERS =  \
                         tree.h \
                         use.h \
                         vector.h \
-                        whois.h
+                        whois.h \
+                        ext.h \
+                        cJSON.h \
+                        hashmap.h \
+                        patricia_wrapper.h \
+                        patricia.h
 
 nodist_nobase_libparistraceroute_@LIBRARY_VERSION@_la_HEADERS = \
     config.h
@@ -158,12 +163,19 @@ libparistraceroute_@LIBRARY_VERSION@_la_SOURCES =    \
                         socketpool.c \
                         tree.c \
                         vector.c \
-                        whois.c
+                        whois.c \
+                        ext.c \
+                        cJSON.c \
+                        hashmap.c \
+                        patricia_wrapper.c \
+                        patricia.c
 
 ## Instruct libtool to include ABI version information in the generated shared
 ## library file (.so).  The library ABI version is defined in configure.ac, so
 ## that all version information is kept in one place.
-libparistraceroute_@LIBRARY_VERSION@_la_LDFLAGS = -lm -version-info @API_VERSION@
+#libparistraceroute_@LIBRARY_VERSION@_la_LDFLAGS = -lm -version-info @API_VERSION@
+# Erlend:
+libparistraceroute_@LIBRARY_VERSION@_la_LDFLAGS = -lcrypto -lssl -lm -version-info @API_VERSION@
 
 ## Define the list of public header files and their install location.  The
 ## nobase_ prefix instructs Automake to not strip the directory part from each
