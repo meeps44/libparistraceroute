@@ -624,100 +624,102 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
                 int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
                 printf("Memcmp result: %d\n", cmp_result);
-
-                uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                // printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
-
-                char foo[INET6_ADDRSTRLEN + 1];
-                memcpy(&foo[46], "\0", 1);
-                // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
-                // packet_dump(packet);
-
-                char *asnlookup_result;
-                hop *h;
-                if (first_run)
+                if (cmp_result == 0)
                 {
-                    asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
-                    t = createTraceroute();
-                    set_traceroute(t);
-                    t->timestamp = create_timestamp();
-                    /* Set source ip */
-                    printf("get_host_ip: %s\n", get_host_ip());
-                    inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
-                    inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
-                    printf("get_host_ip done. result: %s\n", foo);
-                    // printf("Source IP:\n%s\n", foo);
-                    /* Set source ASN */
-                    // char asnlookup_buffer[200];
-                    asnlookup_result = asnLookup(&t->source_ip);
+                    uint32_t returned_flowlabel = inner_ipv6->flow_label;
+                    // printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
+
+                    char foo[INET6_ADDRSTRLEN + 1];
+                    memcpy(&foo[46], "\0", 1);
+                    // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
+                    // packet_dump(packet);
+
+                    char *asnlookup_result;
+                    hop *h;
+                    if (first_run)
+                    {
+                        asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
+                        t = createTraceroute();
+                        set_traceroute(t);
+                        t->timestamp = create_timestamp();
+                        /* Set source ip */
+                        printf("get_host_ip: %s\n", get_host_ip());
+                        inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
+                        inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
+                        printf("get_host_ip done. result: %s\n", foo);
+                        // printf("Source IP:\n%s\n", foo);
+                        /* Set source ASN */
+                        // char asnlookup_buffer[200];
+                        asnlookup_result = asnLookup(&t->source_ip);
+                        if (asnlookup_result != NULL)
+                        {
+                            // strcpy(t->source_asn, asnLookup(&t->source_ip));
+                            // printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                            // printf("source asnlookup_result: %s\n", asnlookup_result);
+                            memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+                            // printf("source asn: %s\n", t->source_asn);
+                        }
+                        else
+                        {
+                            strcpy(t->source_asn, "NULL");
+                        }
+                        // puts("set source ASN done");
+                        /* Set destination ip */
+                        t->destination_ip = inner_ipv6->destination;
+                        // puts("set destination ip done");
+                        inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
+                        // printf("Destination IP:\n%s\n", foo);
+                        /* Set destination ASN */
+                        asnlookup_result = asnLookup(&t->destination_ip);
+                        if (asnlookup_result != NULL)
+                        {
+                            // strcpy(t->destination_asn, asnLookup(&t->destination_ip));
+                            // printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                            // printf("destination asnlookup_result: %s\n", asnlookup_result);
+                            memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+                            // printf("destination asn: %s\n", t->destination_asn);
+                        }
+                        else
+                        {
+                            strcpy(t->destination_asn, "NULL");
+                        }
+                        // puts("set destination ASN done");
+                        /* Set hop count */
+                        t->hop_count = 0;
+                        // puts("set hop_count done");
+                        first_run = false;
+                        // puts("set first_run done");
+                    }
+
+                    puts("Starting createHop");
+                    h = createHop();
+                    h->hopnumber = t->hop_count + 1;
+                    printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
+                    h->hop_address = outer_ipv6->source;
+                    h->returned_flowlabel = returned_flowlabel;
+                    printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
+
+                    /* Set hop ASN */
+                    puts("Startign asnLookup");
+                    asnlookup_result = asnLookup(&h->hop_address);
                     if (asnlookup_result != NULL)
                     {
                         // strcpy(t->source_asn, asnLookup(&t->source_ip));
-                        // printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                        // printf("source asnlookup_result: %s\n", asnlookup_result);
-                        memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                        // printf("source asn: %s\n", t->source_asn);
+                        // printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
+                        // printf("hop asnlookup_result: %s\n", asnlookup_result);
+                        memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+                        // printf("hop asn: %s\n", h->hop_asn);
                     }
                     else
                     {
-                        strcpy(t->source_asn, "NULL");
+                        strcpy(h->hop_asn, "NULL");
                     }
-                    // puts("set source ASN done");
-                    /* Set destination ip */
-                    t->destination_ip = inner_ipv6->destination;
-                    // puts("set destination ip done");
-                    inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
-                    // printf("Destination IP:\n%s\n", foo);
-                    /* Set destination ASN */
-                    asnlookup_result = asnLookup(&t->destination_ip);
-                    if (asnlookup_result != NULL)
+                    puts("Finished asnLookup");
+
+                    if (appendHop(h, t) == -1)
                     {
-                        // strcpy(t->destination_asn, asnLookup(&t->destination_ip));
-                        // printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                        // printf("destination asnlookup_result: %s\n", asnlookup_result);
-                        memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                        // printf("destination asn: %s\n", t->destination_asn);
+                        fprintf(stderr, "Failed to append hop: Hop array is full\n");
                     }
-                    else
-                    {
-                        strcpy(t->destination_asn, "NULL");
-                    }
-                    // puts("set destination ASN done");
-                    /* Set hop count */
-                    t->hop_count = 0;
-                    // puts("set hop_count done");
-                    first_run = false;
-                    // puts("set first_run done");
-                }
-
-                puts("Starting createHop");
-                h = createHop();
-                h->hopnumber = t->hop_count + 1;
-                printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
-                h->hop_address = outer_ipv6->source;
-                h->returned_flowlabel = returned_flowlabel;
-                printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
-
-                /* Set hop ASN */
-                puts("Startign asnLookup");
-                asnlookup_result = asnLookup(&h->hop_address);
-                if (asnlookup_result != NULL)
-                {
-                    // strcpy(t->source_asn, asnLookup(&t->source_ip));
-                    // printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                    // printf("hop asnlookup_result: %s\n", asnlookup_result);
-                    memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                    // printf("hop asn: %s\n", h->hop_asn);
-                }
-                else
-                {
-                    strcpy(h->hop_asn, "NULL");
-                }
-                puts("Finished asnLookup");
-
-                if (appendHop(h, t) == -1)
-                {
-                    fprintf(stderr, "Failed to append hop: Hop array is full\n");
                 }
             }
             // END ERLEND //
