@@ -416,11 +416,11 @@ int main(int argc, char **argv)
     }
 
     // BEGIN ERLEND //
-    puts("paris_traceroute: starting memcpy");
+    // puts("paris_traceroute: starting memcpy");
     struct in6_addr *glb_dst = init_destination();
     memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
-    puts("paris_traceroute: memcpy done");
-    // END ERLEND //
+    // puts("paris_traceroute: memcpy done");
+    //  END ERLEND //
 
     // Probe skeleton definition: IPv4/UDP probe targetting 'dst_ip'
     if (!(probe = probe_create()))
@@ -571,10 +571,10 @@ int main(int argc, char **argv)
     // Erlend - traceroute all done. Saving results to disk.
     // NB! Header row gets written when the file is created
     // via the bash-script.
-    puts("Entering serialize_csv");
+    // puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
-    puts("Finished serialize_csv");
-    // END ERLEND //
+    // puts("Finished serialize_csv");
+    //  END ERLEND //
 
     // Leave the program
 ERR_PT_LOOP:
