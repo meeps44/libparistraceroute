@@ -508,8 +508,8 @@ int asnLookupInit(char *filename)
     }
 
     fclose(f);
-    if (line)
-        free(line);
+    // if (line)
+    // free(line);
     return 0;
 }
 
