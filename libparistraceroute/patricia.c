@@ -423,7 +423,8 @@ void Deref_Prefix(prefix_t *prefix)
 	assert(prefix->ref_count >= 0);
 	if (prefix->ref_count <= 0)
 	{
-		Delete(prefix);
+		if (prefix)
+			Delete(prefix);
 		return;
 	}
 }
@@ -481,7 +482,8 @@ void Clear_Patricia(patricia_tree_t *patricia, void_fn_t func)
 			{
 				assert(Xrn->data == NULL);
 			}
-			Delete(Xrn);
+			if (Xrn)
+				Delete(Xrn);
 			patricia->num_active_node--;
 
 			if (l)
@@ -513,7 +515,8 @@ void Clear_Patricia(patricia_tree_t *patricia, void_fn_t func)
 void Destroy_Patricia(patricia_tree_t *patricia, void_fn_t func)
 {
 	Clear_Patricia(patricia, func);
-	Delete(patricia);
+	if (patricia)
+		Delete(patricia);
 	num_active_patricia--;
 }
 
@@ -997,7 +1000,8 @@ void patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
 #endif /* PATRICIA_DEBUG */
 		parent = node->parent;
 		Deref_Prefix(node->prefix);
-		Delete(node);
+		if (node)
+			Delete(node);
 		patricia->num_active_node--;
 
 		if (parent == NULL)
@@ -1039,7 +1043,8 @@ void patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
 			parent->parent->l = child;
 		}
 		child->parent = parent->parent;
-		Delete(parent);
+		if (parent)
+			Delete(parent);
 		patricia->num_active_node--;
 		return;
 	}
@@ -1061,7 +1066,8 @@ void patricia_remove(patricia_tree_t *patricia, patricia_node_t *node)
 	child->parent = parent;
 
 	Deref_Prefix(node->prefix);
-	Delete(node);
+	if (node)
+		Delete(node);
 	patricia->num_active_node--;
 
 	if (parent == NULL)
