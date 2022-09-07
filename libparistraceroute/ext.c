@@ -519,7 +519,9 @@ char *asnLookup(struct in6_addr *ipv6_address)
     //  struct in6_addr i6;
     //   unsigned char *example_address2 = "1900:2100::2a2d";
     //   inet_pton(AF_INET6, ipv6_address, &i6);
+    puts("ext.c: Entering asnlookup");
     char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
+    puts("ext.c: Finished asnlookup");
     // printf("Lookup result:\t%s\n", lookup_result);
     return lookup_result;
 }
