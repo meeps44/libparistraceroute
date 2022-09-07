@@ -339,12 +339,14 @@ int main(int argc, char **argv)
     const char *algorithm_name;
     const char *protocol_name;
     bool use_icmp, use_udp, use_tcp;
-    // erlend
+    // BEGIN ERLEND //
     int flow_label;
     int some_error = 1;
-    char *csv_file; // erlend
+    char *csv_file;
     uint16_t dport_tmp = 0;
-    // than 50 chars.
+    traceroute *t;
+    char *src_ip;
+    // END ERLEND //
 
     // Prepare the commande line options
     if (!(options = init_options(version)))
@@ -370,11 +372,14 @@ int main(int argc, char **argv)
     }
 
     options_parse(options, usage, argv);
-    // erlend - We assume that the flow-label is always the second-to-last argument
+
+    // BEGIN ERLEND //
+    // We assume that the flow-label is always the second-to-last argument
     flow_label = atoi(argv[argc - 2]);
     csv_file = argv[argc - 3];
-    // flow_label = atoi(argv[1]);
+    src_ip = argv[argc - 4];
     set_flow_label(flow_label);
+    // END ERLEND //
 
     // We assume that the target IP address is always the last argument
     dst_ip = argv[argc - 1];
@@ -414,13 +419,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "E: Invalid destination address %s\n", dst_ip);
         goto ERR_ADDRESS_IP_FROM_STRING;
     }
-
-    // BEGIN ERLEND //
-    // puts("paris_traceroute: starting memcpy");
-    struct in6_addr *glb_dst = init_destination();
-    memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
-    // puts("paris_traceroute: memcpy done");
-    //  END ERLEND //
 
     // Probe skeleton definition: IPv4/UDP probe targetting 'dst_ip'
     if (!(probe = probe_create()))
@@ -506,6 +504,27 @@ int main(int argc, char **argv)
     // Algorithm options (common options)
     options_traceroute_init(ptraceroute_options, &dst_addr);
 
+    // BEGIN ERLEND //
+    fprintf(stderr, "main.c: Creating destination object\n");
+    struct in6_addr *glb_dst = create_destination();
+    memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
+    fprintf(stderr, "main.c: Finished creating destination object\n");
+
+    fprintf(stderr, "main.c: Entering asnLookupInit\n");
+    asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
+    fprintf(stderr, "main.c: Finished asnLookupInit\n");
+
+    fprintf(stderr, "main.c: Creating traceroute object\n");
+    t = createTraceroute();
+    t->outgoing_flow_label = flow_label;
+    t->outgoing_tcp_port = dport_tmp;
+    fprintf(stderr, "main.c: Finished creating traceroute object\n");
+
+    fprintf(stderr, "main.c: Initializing traceroute object\n");
+    init_traceroute(src_ip, dst_ip);
+    fprintf(stderr, "main.c: Finished initializing traceroute object\n");
+    //  END ERLEND //
+
     // Create libparistraceroute loop
     if (!(loop = pt_loop_create(loop_handler, NULL)))
     {
@@ -539,17 +558,6 @@ int main(int argc, char **argv)
     exit_code = EXIT_SUCCESS;
 
     // BEGIN ERLEND //
-    traceroute *t = get_traceroute();
-    t->outgoing_flow_label = flow_label;
-    t->outgoing_tcp_port = dport_tmp;
-    // dst_ip
-    //  address_t instance:
-    // dst_addr
-    // puts("paris_traceroute: starting memcpy");
-    // struct in6_addr *glb_dst = get_destination();
-    // memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
-    // puts("paris_traceroute: memcpy done");
-
     /* Create path hash */
     struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
@@ -569,8 +577,7 @@ int main(int argc, char **argv)
     strcpy(t->path_id, output_buffer);
 
     // Erlend - traceroute all done. Saving results to disk.
-    // NB! Header row gets written when the file is created
-    // via the bash-script.
+    // NB! Header row gets written when the csv is created via the bash-script.
     // puts("Entering serialize_csv");
     serialize_csv(csv_file, t);
     // puts("Finished serialize_csv");
