@@ -428,7 +428,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     h->returned_flowlabel = returned_flowlabel;
 
                     /* Set hop ASN */
-                    fprintf(stderr, "sniffer.c: Starting asnLookup\n");
+                    // fprintf(stderr, "sniffer.c: Starting asnLookup\n");
                     char *asnlookup_result = asnLookup(&h->hop_address);
                     if (asnlookup_result != NULL)
                     {
@@ -443,7 +443,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                     {
                         fprintf(stderr, "Failed to append hop: Hop array is full\n");
                     }
-                    fprintf(stderr, "sniffer.c: Finished asnLookup\n");
+                    // fprintf(stderr, "sniffer.c: Finished asnLookup\n");
                 }
             }
             // END ERLEND //
