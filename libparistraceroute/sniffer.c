@@ -361,216 +361,12 @@ ERR_RECVMSG:
 
 #endif // USE_IPV6
 
-// ERLEND //
-// enum IPV6_HEADER_OPTS
-// {
-// NH_NNH = 59,      // No next header
-// NH_HBH_OPTS = 0,  // Hop-by-Hop Options
-// NH_DST_OPTS = 60, // Destination Options
-// NH_RH = 43,       // Routing Header
-// NH_FH = 44,       // Fragment Header
-// NH_AH = 51,       // Authentication Header
-// NH_ESPH = 50,     // Encapsulation Security Payload Header
-// NH_MH = 135,      // Mobility Header
-// NH_TCP = 6,
-// NH_UDP = 17,
-// NH_ICMPv6 = 58,
-// };
-
-// // Type codes: https://datatracker.ietf.org/doc/html/rfc4443
-// enum ICMP_TYPES
-// {
-// ICMP_ECHO_REQUEST = 128,
-// ICMP_ECHO_REPLY = 129,
-// ICMP_DESTINATION_UNREACHABLE = 1,
-// ICMP_PACKET_TOO_BIG = 2,
-// ICMP_TIME_EXCEEDED = 3,
-// ICMP_PARAMETER_PROBLEM = 4,
-// };
-
-// icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
-// {
-// puts("Entering parse_icmp6");
-// icmp6_header *h = calloc(1, sizeof(icmp6_header));
-// ipv6_header *inner_ipv6;
-// h->type = *icmp_first_byte;
-// h->code = *(icmp_first_byte + 1);
-// h->checksum = ((uint16_t) * (icmp_first_byte + 2) << 8) | *(icmp_first_byte + 3);
-// // Depending on the type there will be a value between bytes 5-9 as well, however
-// // as it is not used in our project it will not be parsed at this time.
-
-// switch (h->type)
-// {
-// case ICMP_TIME_EXCEEDED:
-// inner_ipv6 = parse_ipv6(icmp_first_byte + 8);
-// printf("Returned flow label:\t%x\n", inner_ipv6->flow_label);
-// break;
-// default:
-// puts("DEBUG:\ticmp_parse default");
-// printf("ICMP type:\t%x\n", h->type);
-// break;
-// }
-
-// return h;
-// }
-
-// ipv6_header *parse_ipv6(const uint8_t *first_byte)
-// {
-// ipv6_header *h = calloc(1, sizeof(ipv6_header));
-
-// // Fill IPv6 struct
-// h->version = (*first_byte >> 4);
-// h->traffic_class = ((uint16_t)(*first_byte & 0x0F) << 8) | (*(first_byte + 1) >> 4);
-// h->flow_label = ((uint32_t)(*(first_byte + 1) & 0x0F) << 16) | ((uint32_t) * (first_byte + 2) << 8) | *(first_byte + 3);
-// h->payload_length = (((uint16_t) * (first_byte + 4)) << 8) | *(first_byte + 5);
-// h->next_header = *(first_byte + 6);
-// h->hop_limit = *(first_byte + 7);
-
-// // Set source and destination
-// printf("Source:\t\n");
-// for (int i = 0, k = 0; i < 8; i++, k += 2)
-// {
-// h->source.address_short[i] = (((uint16_t) * (first_byte + 8 + k)) << 8) | *(first_byte + 8 + k + 1);
-// printf("%x ", h->source.address_short[i]);
-// }
-// puts("");
-// printf("Destination:\t\n");
-// for (int i = 0, k = 0; i < 8; i++, k += 2)
-// {
-// h->destination.address_short[i] = (((uint16_t) * (first_byte + 24 + k)) << 8) | *(first_byte + 24 + k + 1);
-// printf("%x ", h->destination.address_short[i]);
-// }
-// puts("");
-
-// printf("Version:\t%d\n", h->version);
-// printf("Traffic class:\t%x\n", h->traffic_class);
-// printf("Flow label:\t%x\n", h->flow_label);
-// printf("Payload length:\t%x\n", h->payload_length);
-// printf("Next header:\t%x\n", h->next_header);
-// printf("Hop limit:\t%x\n", h->hop_limit);
-// return h;
-// }
-
-// void parse_packet(const packet_t *p)
-// {
-// packet_fprintf(stdout, p);
-// puts("");
-// // uint8_t eh_length;
-// uint8_t *first_byte = packet_get_bytes(p);
-// int hl = 40; // Initial value = IPv6 Header Length
-
-// if ((*first_byte >> 4) == 6) // If IPv6
-// {
-// ipv6_header *ip6h = parse_ipv6(first_byte);
-// // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
-// puts("Returned from parse_ipv6");
-// printf("ip6h next_header:\t%x\n", ip6h->next_header);
-
-// switch (ip6h->next_header)
-// {
-// case NH_ICMPv6:
-// // icmp6_header *icmp6h = parse_icmp6(first_byte + hl);
-// puts("Calling parse_icmp6");
-// parse_icmp6(first_byte + hl);
-
-// // If parse_icmp6 returns a valid payload: parse inner ipv6
-// // and potentially, also inner tcp.
-// // What we want is the inner IPv6 flow-label.
-// break;
-// case NH_HBH_OPTS: // Hop-by-Hop Options
-// // uint8_t new_next_header = *(first_byte + hl);
-// // eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
-// // chl += (eh_length + 8);
-// break;
-// case NH_DST_OPTS: // Destination Options
-// break;
-// case NH_RH: // Routing Header
-// break;
-// case NH_FH: // Fragment Header
-// break;
-// case NH_AH: // Authentication Header
-// break;
-// case NH_ESPH: // Encapsulation Security Payload Header
-// break;
-// case NH_MH: // Mobility Header
-// break;
-// default:
-// puts("DEBUG:\tipv6_parse_default");
-// break;
-// };
-// }
-// }
-
-// address *createAddress(void)
-// {
-// address *a;
-// if (a = calloc(1, sizeof(address)))
-// {
-// perror("Error");
-// exit(1);
-// }
-
-// return a;
-// }
-
-// traceroute *createTraceroute(void)
-// {
-// traceroute *t;
-// if (t = calloc(1, sizeof(traceroute)) == NULL)
-// {
-// perror("Error");
-// exit(1);
-// }
-
-// return t;
-// }
-
-// hop *createHop(void)
-// {
-// hop *h;
-
-// if (h = calloc(1, sizeof(hop)) == NULL)
-// {
-// perror("Error");
-// exit(1);
-// }
-
-// return h;
-// }
-
-// /**
-// * @brief Appends hop-object to the next available spot in the
-// * hops-array. Returns -1 if the array is full.
-// *
-// * @param h
-// * @param t
-// * @return int
-// */
-// int appendHop(hop *h, traceroute *t)
-// {
-// int i;
-
-// for (i = 0; i < 35; i++)
-// {
-// if (t->hops[i] == NULL)
-// {
-// printf("Available spot found at index:\t%d\n", i);
-// t->hops[i] = h;
-// return 0;
-// }
-// }
-
-// return -1;
-// }
-// END ERLEND //
-
-int first_run = true;
-traceroute *t;
 void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
 {
     uint8_t recv_bytes[BUFLEN];
     ssize_t num_bytes = 0;
     packet_t *packet;
+    traceroute *t = get_traceroute();
 
     switch (protocol_id)
     {
@@ -608,118 +404,46 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             const uint8_t *first_byte = packet_get_bytes(packet);
 
             // BEGIN ERLEND //
-            // fprintf(stderr, "DEBUG: Calling parse_packet()\n");
-            // parse_packet(packet);
             ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
-            ipv6_header *inner_ipv6 = get_inner_ipv6_header(packet);
+            ipv6_header *inner_ipv6 = get_inner_ipv6_header(first_byte);
 
-            /* Convert inner destination IP to String */
-            // uint8_t inner_ipv6_destination_buffer[INET6_ADDRSTRLEN + 1];
-            // inet_ntop(AF_INET6, &t->source_ip, inner_ipv6_destination_buffer, INET6_ADDRSTRLEN);
-            // inner_ipv6_destination_buffer[46] = '\0';
-            /* Compare destination IP */
+            /* If the ICMPv6-payload is an IPv6-packet */
             if (inner_ipv6 != NULL)
             {
                 /* Get inner destination IP */
                 struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
+                /* Compare inner destination IP with our destination IP */
                 int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
-                // printf("Memcmp result: %d\n", cmp_result);
+                /* If they are equal: add hop to hoplist */
                 if (cmp_result == 0)
                 {
                     uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                    // printf("sniffer: inner ipv6 returned flowlabel: %d\n", returned_flowlabel);
+                    // char foo[INET6_ADDRSTRLEN + 1];
+                    // foo[46] = '\0';
+                    // memcpy(&foo[46], "\0", 1);
 
-                    char foo[INET6_ADDRSTRLEN + 1];
-                    memcpy(&foo[46], "\0", 1);
-                    // fprintf(stderr, "DEBUG: Returned from parse_packet()\n");
-                    // packet_dump(packet);
-
-                    char *asnlookup_result;
-                    hop *h;
-                    if (first_run)
-                    {
-                        asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
-                        t = createTraceroute();
-                        set_traceroute(t);
-                        t->timestamp = create_timestamp();
-                        /* Set source ip */
-                        printf("get_host_ip: %s\n", get_host_ip());
-                        inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
-                        inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
-                        printf("get_host_ip done. result: %s\n", foo);
-                        //  printf("Source IP:\n%s\n", foo);
-                        /* Set source ASN */
-                        // char asnlookup_buffer[200];
-                        asnlookup_result = asnLookup(&t->source_ip);
-                        if (asnlookup_result != NULL)
-                        {
-                            // strcpy(t->source_asn, asnLookup(&t->source_ip));
-                            // printf("source asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                            // printf("source asnlookup_result: %s\n", asnlookup_result);
-                            memcpy(t->source_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                            // printf("source asn: %s\n", t->source_asn);
-                        }
-                        else
-                        {
-                            strcpy(t->source_asn, "NULL");
-                        }
-                        // puts("set source ASN done");
-                        /* Set destination ip */
-                        t->destination_ip = inner_ipv6->destination;
-                        // puts("set destination ip done");
-                        inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
-                        // printf("Destination IP:\n%s\n", foo);
-                        /* Set destination ASN */
-                        asnlookup_result = asnLookup(&t->destination_ip);
-                        if (asnlookup_result != NULL)
-                        {
-                            // strcpy(t->destination_asn, asnLookup(&t->destination_ip));
-                            // printf("destination asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                            // printf("destination asnlookup_result: %s\n", asnlookup_result);
-                            memcpy(t->destination_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                            // printf("destination asn: %s\n", t->destination_asn);
-                        }
-                        else
-                        {
-                            strcpy(t->destination_asn, "NULL");
-                        }
-                        // puts("set destination ASN done");
-                        /* Set hop count */
-                        t->hop_count = 0;
-                        // puts("set hop_count done");
-                        first_run = false;
-                        // puts("set first_run done");
-                    }
-
-                    // puts("Starting createHop");
-                    h = createHop();
+                    hop *h = createHop();
                     h->hopnumber = t->hop_count + 1;
-                    // printf("sniffer createhop: hopnumber: %d\n", h->hopnumber);
                     h->hop_address = outer_ipv6->source;
                     h->returned_flowlabel = returned_flowlabel;
-                    // printf("sniffer createhop: returned flowlabel: %d\n", h->returned_flowlabel);
 
                     /* Set hop ASN */
-                    // puts("Starting asnLookup");
-                    asnlookup_result = asnLookup(&h->hop_address);
+                    // fprintf(stderr, "sniffer.c: Starting asnLookup\n");
+                    char *asnlookup_result = asnLookup(&h->hop_address);
                     if (asnlookup_result != NULL)
                     {
-                        // strcpy(t->source_asn, asnLookup(&t->source_ip));
-                        // printf("hop asnlookup_result strlen: %d\n", (int)asnlookup_strlen);
-                        // printf("hop asnlookup_result: %s\n", asnlookup_result);
                         memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                        // printf("hop asn: %s\n", h->hop_asn);
                     }
                     else
                     {
                         strcpy(h->hop_asn, "NULL");
                     }
-                    // puts("Finished asnLookup");
 
                     if (appendHop(h, t) == -1)
                     {
                         fprintf(stderr, "Failed to append hop: Hop array is full\n");
                     }
+                    // fprintf(stderr, "sniffer.c: Finished asnLookup\n");
                 }
             }
             // END ERLEND //

@@ -152,6 +152,13 @@ struct in6_addr *createAddress(void);
 traceroute *createTraceroute(void);
 
 /**
+ * @brief Initialize a traceroute object
+ *
+ * @return int 0 if successful, -1 on error.
+ */
+int init_traceroute(char *src_ip, char *dst_ip);
+
+/**
  * @brief Create a Hop object initalized to zero
  *
  * @return hop*
@@ -476,14 +483,14 @@ struct in6_addr *convert_address_string(char *ipv6_address_string);
  * @param p The raw IPv6 packet.
  * @return ipv6_header* Pointer to the inner IPv6-header.
  */
-ipv6_header *get_inner_ipv6_header(const packet_t *p);
+ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte);
 
 /**
- * @brief Init destination, creating a newly allocated struct in6_addr.
+ * @brief Create destination, Create a newly allocated struct in6_addr.
  *
  * @return struct in6_addr*
  */
-struct in6_addr *init_destination(void);
+struct in6_addr *create_destination(void);
 
 /**
  * @brief Get a pointer to the global destination object.
