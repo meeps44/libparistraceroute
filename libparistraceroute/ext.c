@@ -21,14 +21,12 @@
 struct in6_addr *dest_addr;
 struct in6_addr *create_destination(void)
 {
-    struct in6_addr *da;
-    if (da = calloc(1, sizeof(struct in6_addr)) == NULL)
+    if ((dest_addr = calloc(1, sizeof(struct in6_addr))) == NULL)
     {
         perror("create_destination: calloc error");
         exit(1);
     }
-    dest_addr = da;
-    return da;
+    return dest_addr;
 }
 
 struct in6_addr *get_destination(void)
