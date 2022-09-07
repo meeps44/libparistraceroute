@@ -418,8 +418,8 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 if (cmp_result == 0)
                 {
                     uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                    char foo[INET6_ADDRSTRLEN + 1];
-                    foo[46] = '\0';
+                    // char foo[INET6_ADDRSTRLEN + 1];
+                    // foo[46] = '\0';
                     // memcpy(&foo[46], "\0", 1);
 
                     hop *h = createHop();
