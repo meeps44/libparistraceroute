@@ -263,7 +263,7 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
             return NULL;
         };
     }
-    fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
+    // fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
     return NULL;
 }
 
