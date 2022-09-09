@@ -505,24 +505,24 @@ int main(int argc, char **argv)
     options_traceroute_init(ptraceroute_options, &dst_addr);
 
     // BEGIN ERLEND //
-    fprintf(stderr, "main.c: Creating destination object\n");
+    // fprintf(stderr, "main.c: Creating destination object\n");
     struct in6_addr *glb_dst = create_destination();
     memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
-    fprintf(stderr, "main.c: Finished creating destination object\n");
+    // fprintf(stderr, "main.c: Finished creating destination object\n");
 
-    fprintf(stderr, "main.c: Entering asnLookupInit\n");
+    // fprintf(stderr, "main.c: Entering asnLookupInit\n");
     asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
-    fprintf(stderr, "main.c: Finished asnLookupInit\n");
+    // fprintf(stderr, "main.c: Finished asnLookupInit\n");
 
-    fprintf(stderr, "main.c: Creating traceroute object\n");
+    // fprintf(stderr, "main.c: Creating traceroute object\n");
     t = createTraceroute();
     t->outgoing_flow_label = flow_label;
     t->outgoing_tcp_port = dport_tmp;
-    fprintf(stderr, "main.c: Finished creating traceroute object\n");
+    // fprintf(stderr, "main.c: Finished creating traceroute object\n");
 
-    fprintf(stderr, "main.c: Initializing traceroute object\n");
+    // fprintf(stderr, "main.c: Initializing traceroute object\n");
     init_traceroute(src_ip, dst_ip);
-    fprintf(stderr, "main.c: Finished initializing traceroute object\n");
+    // fprintf(stderr, "main.c: Finished initializing traceroute object\n");
     //  END ERLEND //
 
     // Create libparistraceroute loop
