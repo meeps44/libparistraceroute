@@ -59,13 +59,13 @@ int init_traceroute(char *src_ip, char *dst_ip)
     // fprintf(stderr, "get_host_ip: %s\n", get_host_ip());
     // fprintf(stderr, "get_host_ip: %s\n", get_host_ip());
     // inet_pton(AF_INET6, get_host_ip(), &t->source_ip);
-    fprintf(stderr, "ext.c (init_traceroute): Setting src IP\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Setting src IP\n");
     inet_pton(AF_INET6, src_ip, &t->source_ip);
     // inet_ntop(AF_INET6, &t->source_ip, foo, INET6_ADDRSTRLEN);
-    fprintf(stderr, "ext.c (init_traceroute): Set src IP done\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Set src IP done\n");
 
     /* Set source ASN */
-    fprintf(stderr, "ext.c (init_traceroute): Starting asnLookup\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Starting asnLookup\n");
     char *asnlookup_result = asnLookup(&t->source_ip);
     if (asnlookup_result != NULL)
     {
@@ -75,18 +75,18 @@ int init_traceroute(char *src_ip, char *dst_ip)
     {
         strcpy(t->source_asn, "NULL");
     }
-    fprintf(stderr, "ext.c (init_traceroute): Finished asnLookup\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Finished asnLookup\n");
 
     /* Set destination ip */
     // t->destination_ip = inner_ipv6->destination;
     // inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
-    fprintf(stderr, "ext.c (init_traceroute): Setting dst IP\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Setting dst IP\n");
     inet_pton(AF_INET6, dst_ip, &t->destination_ip);
     // inet_ntop(AF_INET6, &t->destination_ip, foo, INET6_ADDRSTRLEN);
-    fprintf(stderr, "ext.c (init_traceroute): Set dst IP done\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Set dst IP done\n");
 
     /* Set destination ASN */
-    fprintf(stderr, "ext.c (init_traceroute): Starting asnLookup\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Starting asnLookup\n");
     asnlookup_result = asnLookup(&t->destination_ip);
     if (asnlookup_result != NULL)
     {
@@ -96,7 +96,7 @@ int init_traceroute(char *src_ip, char *dst_ip)
     {
         strcpy(t->destination_asn, "NULL");
     }
-    fprintf(stderr, "ext.c (init_traceroute): Finished asnLookup\n");
+    // fprintf(stderr, "ext.c (init_traceroute): Finished asnLookup\n");
 
     /* Set hop count */
     t->hop_count = 0;
@@ -258,8 +258,8 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
         case NH_MH: // Mobility Header
             break;
         default:
-            fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default \
-            in switch statement. IPv6 Next Header is not ICMPv6");
+            // fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default
+            // in switch statement. IPv6 Next Header is not ICMPv6");
             return NULL;
         };
     }
@@ -487,9 +487,9 @@ char *asnLookup(struct in6_addr *ipv6_address)
     //  struct in6_addr i6;
     //   unsigned char *example_address2 = "1900:2100::2a2d";
     //   inet_pton(AF_INET6, ipv6_address, &i6);
-    puts("ext.c: Entering asnlookup");
+    // puts("ext.c: Entering asnlookup");
     char *lookup_result = lookup_addr(AF_INET6, *ipv6_address);
-    puts("ext.c: Finished asnlookup");
+    // puts("ext.c: Finished asnlookup");
     // printf("Lookup result:\t%s\n", lookup_result);
     return lookup_result;
 }
