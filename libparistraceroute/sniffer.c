@@ -418,10 +418,10 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
                 if (cmp_result == 0)
                 {
                     uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                    uint8_t inner_hop_limit = inner_ipv6->hop_limit;
-                    uint8_t outer_hop_limit = outer_ipv6->hop_limit;
-                    fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
-                    fprintf(stderr, "Outer hop limit: %d\n", outer_hop_limit);
+                    // uint8_t inner_hop_limit = inner_ipv6->hop_limit;
+                    // uint8_t outer_hop_limit = outer_ipv6->hop_limit;
+                    // fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
+                    // fprintf(stderr, "Outer hop limit: %d\n", outer_hop_limit);
                     // char foo[INET6_ADDRSTRLEN + 1];
                     // foo[46] = '\0';
                     // memcpy(&foo[46], "\0", 1);
