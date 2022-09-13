@@ -401,7 +401,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
         if (sniffer->recv_callback != NULL)
         {
             packet = packet_create_from_bytes(recv_bytes, num_bytes);
-            const uint8_t *first_byte = packet_get_bytes(packet);
+            // const uint8_t *first_byte = packet_get_bytes(packet);
 
             // BEGIN ERLEND //
             // ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
