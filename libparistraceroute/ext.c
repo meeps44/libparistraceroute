@@ -455,7 +455,7 @@ int asnLookupInit(char *filename)
                 break;
             case 3:
                 nmb = 1;
-                asn = malloc(sizeof(char) * 200);
+                asn = malloc(sizeof(char) * 300);
                 strcpy(asn, token);
 
                 /* Strip trailing newline */
@@ -507,10 +507,14 @@ int printHop(hop *h)
     if (h == NULL)
         return -1;
 
-    fprintf(stderr, "Returned flow label:\t%u\n", h->returned_flowlabel);
-    fprintf(stderr, "Hop number:\t%d\n", h->hopnumber);
-    fprintf(stderr, "Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
-    fprintf(stderr, "Hop ASN:\t%s\n", h->hop_asn);
+    // fprintf(stderr, "Returned flow label:\t%u\n", h->returned_flowlabel);
+    // fprintf(stderr, "Hop number:\t%d\n", h->hopnumber);
+    // fprintf(stderr, "Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
+    // fprintf(stderr, "Hop ASN:\t%s\n", h->hop_asn);
+    printf("Returned flow label:\t%u\n", h->returned_flowlabel);
+    printf("Hop number:\t%d\n", h->hopnumber);
+    printf("Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
+    printf("Hop ASN:\t%s\n", h->hop_asn);
     return 0;
 }
 
