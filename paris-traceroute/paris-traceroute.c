@@ -559,7 +559,6 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     /* Create path hash */
-    fprintf(stderr, "Entering create path hash\n");
     struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
@@ -576,14 +575,11 @@ int main(int argc, char **argv)
 
     output_buffer[20] = '\0';
     strcpy(t->path_id, output_buffer);
-    fprintf(stderr, "Finished create path hash\n");
 
     // Erlend - traceroute all done. Saving results to disk.
     // NB! Header row gets written when the csv is created via the bash-script.
     // puts("Entering serialize_csv");
-    fprintf(stderr, "Entering serialize_csv\n");
     serialize_csv(csv_file, t);
-    fprintf(stderr, "Finished serialize_csv\n");
     // puts("Finished serialize_csv");
     //  END ERLEND //
 
