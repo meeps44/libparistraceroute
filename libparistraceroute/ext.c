@@ -281,7 +281,6 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte)
 ipv6_header *parse_ipv6(const uint8_t *first_byte)
 {
     ipv6_header *h = calloc(1, sizeof(ipv6_header));
-    // char presentation_buffer[INET6_ADDRSTRLEN];
 
     // Fill IPv6 struct
     h->version = (*first_byte >> 4);
@@ -303,6 +302,7 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     // memcpy(dst_ip_tmp, h->destination.__in6_u.__u6_addr8, 16);
     // dst_ip_tmp[16] = '\0';
 #ifdef EXT_DEBUG
+    char presentation_buffer[INET6_ADDRSTRLEN];
     printf("parse_ipv6: Destination IP:\n%s\n", inet_ntop(AF_INET6, &h->destination, presentation_buffer, 48));
     printf("Version:\t%d\n", h->version);
     printf("Traffic class:\t%x\n", h->traffic_class);
@@ -494,13 +494,27 @@ char *asnLookup(struct in6_addr *ipv6_address)
     return lookup_result;
 }
 
+const char *printAddress(struct in6_addr *i6)
+{
+    char *addr_buffer = malloc(sizeof(char) * INET6_ADDRSTRLEN);
+    return inet_ntop(AF_INET6, i6, addr_buffer, INET6_ADDRSTRLEN);
+}
+
 int printHop(hop *h)
 {
-    char hop_addr[100];
+    char hop_addr[INET6_ADDRSTRLEN];
 
+    if (h == NULL)
+        return -1;
+
+    // fprintf(stderr, "Returned flow label:\t%u\n", h->returned_flowlabel);
+    // fprintf(stderr, "Hop number:\t%d\n", h->hopnumber);
+    // fprintf(stderr, "Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
+    // fprintf(stderr, "Hop ASN:\t%s\n", h->hop_asn);
     printf("Returned flow label:\t%u\n", h->returned_flowlabel);
     printf("Hop number:\t%d\n", h->hopnumber);
-    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, sizeof(struct in6_addr)));
+    printf("Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
+    printf("Hop ASN:\t%s\n", h->hop_asn);
     return 0;
 }
 
@@ -508,6 +522,9 @@ int printTraceroute(traceroute *t)
 {
     char src_addr[100];
     char dst_addr[100];
+
+    if (t == NULL)
+        return -1;
 
     printf("Outgoing tcp port:\t%d\n", t->outgoing_tcp_port);
     printf("Timestamp:\t%d\n", t->outgoing_tcp_port);
