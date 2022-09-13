@@ -764,9 +764,9 @@ bool network_process_recvq(network_t *network)
     probe_reply_set_reply(probe_reply, reply);
 
     // BEGIN ERLEND //
-    ipv6_header *outer_ipv6 = parse_ipv6(probe->packet->buffer);
-    ipv6_header *inner_ipv6 = get_inner_ipv6_header(reply->packet->buffer);
-    struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
+    // ipv6_header *outer_ipv6 = parse_ipv6(probe->packet->buffer);
+    ipv6_header *inner_ipv6 = get_inner_ipv6_header(reply->packet->buffer->data);
+    // struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
     uint32_t returned_flowlabel = inner_ipv6->flow_label;
     uint8_t inner_hop_limit = inner_ipv6->hop_limit;
     fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
