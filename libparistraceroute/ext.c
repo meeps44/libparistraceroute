@@ -509,8 +509,8 @@ int printHop(hop *h)
 
     fprintf(stderr, "Returned flow label:\t%u\n", h->returned_flowlabel);
     fprintf(stderr, "Hop number:\t%d\n", h->hopnumber);
-    fprintf(stderr, "Hop ASN:\t%d\n", h->hop_asn);
     fprintf(stderr, "Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
+    fprintf(stderr, "Hop ASN:\t%d\n", h->hop_asn);
     return 0;
 }
 

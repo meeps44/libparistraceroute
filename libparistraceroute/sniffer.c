@@ -366,7 +366,7 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
     uint8_t recv_bytes[BUFLEN];
     ssize_t num_bytes = 0;
     packet_t *packet;
-    traceroute *t = get_traceroute();
+    // traceroute *t = get_traceroute(); // ERLEND
 
     switch (protocol_id)
     {
@@ -404,52 +404,52 @@ void sniffer_process_packets(sniffer_t *sniffer, uint8_t protocol_id)
             const uint8_t *first_byte = packet_get_bytes(packet);
 
             // BEGIN ERLEND //
-            ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
-            ipv6_header *inner_ipv6 = get_inner_ipv6_header(first_byte);
+            // ipv6_header *outer_ipv6 = parse_ipv6(first_byte);
+            // ipv6_header *inner_ipv6 = get_inner_ipv6_header(first_byte);
 
-            /* If the ICMPv6-payload is an IPv6-packet */
-            if (inner_ipv6 != NULL)
-            {
-                /* Get inner destination IP */
-                struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
-                /* Compare inner destination IP with our destination IP */
-                int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
-                /* If they are equal: add hop to hoplist */
-                if (cmp_result == 0)
-                {
-                    uint32_t returned_flowlabel = inner_ipv6->flow_label;
-                    // uint8_t inner_hop_limit = inner_ipv6->hop_limit;
-                    // uint8_t outer_hop_limit = outer_ipv6->hop_limit;
-                    // fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
-                    // fprintf(stderr, "Outer hop limit: %d\n", outer_hop_limit);
-                    // char foo[INET6_ADDRSTRLEN + 1];
-                    // foo[46] = '\0';
-                    // memcpy(&foo[46], "\0", 1);
+            ///* If the ICMPv6-payload is an IPv6-packet */
+            // if (inner_ipv6 != NULL)
+            //{
+            ///* Get inner destination IP */
+            // struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
+            ///* Compare inner destination IP with our destination IP */
+            // int cmp_result = memcmp(&inner_ipv6_destination, get_destination(), sizeof(struct in6_addr));
+            ///* If they are equal: add hop to hoplist */
+            // if (cmp_result == 0)
+            //{
+            // uint32_t returned_flowlabel = inner_ipv6->flow_label;
+            //// uint8_t inner_hop_limit = inner_ipv6->hop_limit;
+            //// uint8_t outer_hop_limit = outer_ipv6->hop_limit;
+            //// fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
+            //// fprintf(stderr, "Outer hop limit: %d\n", outer_hop_limit);
+            //// char foo[INET6_ADDRSTRLEN + 1];
+            //// foo[46] = '\0';
+            //// memcpy(&foo[46], "\0", 1);
 
-                    hop *h = createHop();
-                    h->hopnumber = t->hop_count + 1;
-                    h->hop_address = outer_ipv6->source;
-                    h->returned_flowlabel = returned_flowlabel;
+            // hop *h = createHop();
+            // h->hopnumber = t->hop_count + 1;
+            // h->hop_address = outer_ipv6->source;
+            // h->returned_flowlabel = returned_flowlabel;
 
-                    /* Set hop ASN */
-                    // fprintf(stderr, "sniffer.c: Starting asnLookup\n");
-                    char *asnlookup_result = asnLookup(&h->hop_address);
-                    if (asnlookup_result != NULL)
-                    {
-                        memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-                    }
-                    else
-                    {
-                        strcpy(h->hop_asn, "NULL");
-                    }
+            ///* Set hop ASN */
+            //// fprintf(stderr, "sniffer.c: Starting asnLookup\n");
+            // char *asnlookup_result = asnLookup(&h->hop_address);
+            // if (asnlookup_result != NULL)
+            //{
+            // memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+            //}
+            // else
+            //{
+            // strcpy(h->hop_asn, "NULL");
+            //}
 
-                    if (appendHop(h, t) == -1)
-                    {
-                        fprintf(stderr, "Failed to append hop: Hop array is full\n");
-                    }
-                    // fprintf(stderr, "sniffer.c: Finished asnLookup\n");
-                }
-            }
+            // if (appendHop(h, t) == -1)
+            //{
+            // fprintf(stderr, "Failed to append hop: Hop array is full\n");
+            //}
+            //// fprintf(stderr, "sniffer.c: Finished asnLookup\n");
+            //}
+            //}
             // END ERLEND //
 
             if (!(sniffer->recv_callback(packet, sniffer->recv_param)))

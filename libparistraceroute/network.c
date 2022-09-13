@@ -774,7 +774,6 @@ bool network_process_recvq(network_t *network)
     h->hopnumber = probe_ipv6->hop_limit;
     h->hop_address = outer_ipv6->source;
     h->returned_flowlabel = returned_flowlabel;
-    printHop(h);
 
     /* Set hop ASN */
     char *asnlookup_result = asnLookup(&h->hop_address);
@@ -786,6 +785,7 @@ bool network_process_recvq(network_t *network)
     {
         strcpy(h->hop_asn, "NULL");
     }
+    printHop(h);
 
     if (appendHop(h, t) == -1)
     {
