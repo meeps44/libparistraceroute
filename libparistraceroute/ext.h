@@ -507,6 +507,6 @@ struct in6_addr *get_destination(void);
  * the presentation form of the IPv6-address.
  * On success, inet_ntop() returns a non-null pointer to dst.  NULL is returned if there was an error, with errno set to indicate the error.
  */
-char *printAddress(struct in6_addr *i6);
+const char *printAddress(struct in6_addr *i6);
 
 #endif
