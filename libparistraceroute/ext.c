@@ -498,9 +498,12 @@ int printHop(hop *h)
 {
     char hop_addr[100];
 
-    printf("Returned flow label:\t%u\n", h->returned_flowlabel);
-    printf("Hop number:\t%d\n", h->hopnumber);
-    printf("Destination address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, sizeof(struct in6_addr)));
+    if (h == NULL)
+        return -1;
+
+    fprintf(stderr, "Returned flow label:\t%u\n", h->returned_flowlabel);
+    fprintf(stderr, "Hop number:\t%d\n", h->hopnumber);
+    fprintf(stderr, "Destination address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, sizeof(struct in6_addr)));
     return 0;
 }
 
@@ -508,6 +511,9 @@ int printTraceroute(traceroute *t)
 {
     char src_addr[100];
     char dst_addr[100];
+
+    if (t == NULL)
+        return -1;
 
     printf("Outgoing tcp port:\t%d\n", t->outgoing_tcp_port);
     printf("Timestamp:\t%d\n", t->outgoing_tcp_port);

@@ -764,13 +764,22 @@ bool network_process_recvq(network_t *network)
     probe_reply_set_reply(probe_reply, reply);
 
     // BEGIN ERLEND //
-    // ipv6_header *outer_ipv6 = parse_ipv6(probe->packet->buffer);
+    ipv6_header *probe_ipv6 = parse_ipv6(probe->packet->buffer->data);
+    fprintf(stderr, "Probe outgoing hop limit: %d\n", probe_ipv6->hop_limit);
+    ipv6_header *outer_ipv6 = parse_ipv6(reply->packet->buffer->data);
     ipv6_header *inner_ipv6 = get_inner_ipv6_header(reply->packet->buffer->data);
     // struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
     uint32_t returned_flowlabel = inner_ipv6->flow_label;
     uint8_t inner_hop_limit = inner_ipv6->hop_limit;
     fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
     fprintf(stderr, "Inner flow label: %d\n", returned_flowlabel);
+
+    hop *h = createHop();
+    // h->hopnumber = t->hop_count + 1;
+    h->hopnumber = probe_ipv6->hop_limit;
+    h->hop_address = outer_ipv6->source;
+    h->returned_flowlabel = returned_flowlabel;
+    printHop(h);
     // END ERLEND //
 
     // Notify the instance which has build the probe that we've got the corresponding reply
