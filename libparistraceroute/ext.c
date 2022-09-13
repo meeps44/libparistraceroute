@@ -455,7 +455,7 @@ int asnLookupInit(char *filename)
                 break;
             case 3:
                 nmb = 1;
-                asn = malloc(sizeof(char) * 300);
+                asn = malloc(sizeof(char) * 200);
                 strcpy(asn, token);
 
                 /* Strip trailing newline */
