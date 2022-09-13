@@ -764,37 +764,33 @@ bool network_process_recvq(network_t *network)
     probe_reply_set_reply(probe_reply, reply);
 
     // BEGIN ERLEND //
+    traceroute *t = get_traceroute();
     ipv6_header *probe_ipv6 = parse_ipv6(probe->packet->buffer->data);
-    fprintf(stderr, "Probe outgoing hop limit: %d\n", probe_ipv6->hop_limit);
-
     ipv6_header *outer_ipv6 = parse_ipv6(reply->packet->buffer->data);
-    uint32_t outer_ipv6_flowlabel = outer_ipv6->flow_label;
-    fprintf(stderr, "Outer flow label: %d\n", outer_ipv6_flowlabel);
-    const char *o_src = printAddress(&outer_ipv6->source);
-    if (o_src != NULL)
-        fprintf(stderr, "Outer source ip: %s\n", o_src);
-    else
-        fprintf(stderr, "Outer source ip: NULL\n");
-
-    const char *o_dst = printAddress(&outer_ipv6->destination);
-    if (o_dst != NULL)
-        fprintf(stderr, "Outer destination ip: %s\n", o_dst);
-    else
-        fprintf(stderr, "Outer destination ip: NULL\n");
-
     ipv6_header *inner_ipv6 = get_inner_ipv6_header(reply->packet->buffer->data);
-    // struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
     uint32_t returned_flowlabel = inner_ipv6->flow_label;
-    uint8_t inner_hop_limit = inner_ipv6->hop_limit;
-    fprintf(stderr, "Inner hop limit: %d\n", inner_hop_limit);
-    fprintf(stderr, "Inner flow label: %d\n", returned_flowlabel);
 
     hop *h = createHop();
-    // h->hopnumber = t->hop_count + 1;
     h->hopnumber = probe_ipv6->hop_limit;
     h->hop_address = outer_ipv6->source;
     h->returned_flowlabel = returned_flowlabel;
     printHop(h);
+
+    /* Set hop ASN */
+    char *asnlookup_result = asnLookup(&h->hop_address);
+    if (asnlookup_result != NULL)
+    {
+        memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+    }
+    else
+    {
+        strcpy(h->hop_asn, "NULL");
+    }
+
+    if (appendHop(h, t) == -1)
+    {
+        fprintf(stderr, "Failed to append hop: Hop array is full\n");
+    }
     // END ERLEND //
 
     // Notify the instance which has build the probe that we've got the corresponding reply

@@ -497,7 +497,6 @@ char *asnLookup(struct in6_addr *ipv6_address)
 const char *printAddress(struct in6_addr *i6)
 {
     char *addr_buffer = malloc(sizeof(char) * INET6_ADDRSTRLEN);
-    // fprintf(stderr, "Converted IPv6-address:\t%s\n", inet_ntop(AF_INET6, i6, addr_buffer, sizeof(struct in6_addr)));
     return inet_ntop(AF_INET6, i6, addr_buffer, INET6_ADDRSTRLEN);
 }
 
@@ -510,8 +509,8 @@ int printHop(hop *h)
 
     fprintf(stderr, "Returned flow label:\t%u\n", h->returned_flowlabel);
     fprintf(stderr, "Hop number:\t%d\n", h->hopnumber);
-    // fprintf(stderr, "Destination address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, sizeof(struct in6_addr)));
-    fprintf(stderr, "Destination address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
+    fprintf(stderr, "Hop ASN:\t%d\n", h->hop_asn);
+    fprintf(stderr, "Hop address:\t%s\n", inet_ntop(AF_INET6, &h->hop_address, hop_addr, INET6_ADDRSTRLEN));
     return 0;
 }
 
