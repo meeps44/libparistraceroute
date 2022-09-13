@@ -770,15 +770,15 @@ bool network_process_recvq(network_t *network)
     ipv6_header *outer_ipv6 = parse_ipv6(reply->packet->buffer->data);
     uint32_t outer_ipv6_flowlabel = outer_ipv6->flow_label;
     fprintf(stderr, "Outer flow label: %d\n", outer_ipv6_flowlabel);
-    char *o_src = printAddress(outer_ipv6->source);
+    char *o_src = printAddress(&outer_ipv6->source);
     if (o_src != NULL)
-        fprintf(stderr, "Outer source ip: %s\n", printAddress(outer_ipv6->source));
+        fprintf(stderr, "Outer source ip: %s\n", o_src);
     else
         fprintf(stderr, "Outer source ip: NULL\n");
 
-    char *o_dst = printAddress(outer_ipv6->destination);
+    char *o_dst = printAddress(&outer_ipv6->destination);
     if (o_dst != NULL)
-        fprintf(stderr, "Outer destination ip: %s\n", printAddress(outer_ipv6->destination));
+        fprintf(stderr, "Outer destination ip: %s\n", o_dst);
     else
         fprintf(stderr, "Outer destination ip: NULL\n");
 
