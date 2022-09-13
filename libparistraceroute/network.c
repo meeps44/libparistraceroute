@@ -776,37 +776,40 @@ bool network_process_recvq(network_t *network)
     fprintf(stderr, "Entering inner parse_ipv6\n");
     ipv6_header *inner_ipv6 = get_inner_ipv6_header(reply->packet->buffer->data);
     fprintf(stderr, "Finished inner parse_ipv6\n");
-    uint32_t returned_flowlabel = inner_ipv6->flow_label;
-
-    fprintf(stderr, "Entering createHop\n");
-    hop *h = createHop();
-    fprintf(stderr, "Finished createHop\n");
-    h->hopnumber = probe_ipv6->hop_limit;
-    h->hop_address = outer_ipv6->source;
-    h->returned_flowlabel = returned_flowlabel;
-
-    /* Set hop ASN */
-    fprintf(stderr, "Entering asnLookup\n");
-    char *asnlookup_result = asnLookup(&h->hop_address);
-    fprintf(stderr, "Finished asnLookup\n");
-    if (asnlookup_result != NULL)
+    if (inner_ipv6 != NULL)
     {
-        memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
-    }
-    else
-    {
-        strcpy(h->hop_asn, "NULL");
-    }
-    fprintf(stderr, "Entering printHop\n");
-    printHop(h);
-    fprintf(stderr, "Finished printHop\n");
+        uint32_t returned_flowlabel = inner_ipv6->flow_label;
 
-    fprintf(stderr, "Entering appendHop\n");
-    if (appendHop(h, t) == -1)
-    {
-        fprintf(stderr, "Failed to append hop: Hop array is full\n");
+        fprintf(stderr, "Entering createHop\n");
+        hop *h = createHop();
+        fprintf(stderr, "Finished createHop\n");
+        h->hopnumber = probe_ipv6->hop_limit;
+        h->hop_address = outer_ipv6->source;
+        h->returned_flowlabel = returned_flowlabel;
+
+        /* Set hop ASN */
+        fprintf(stderr, "Entering asnLookup\n");
+        char *asnlookup_result = asnLookup(&h->hop_address);
+        fprintf(stderr, "Finished asnLookup\n");
+        if (asnlookup_result != NULL)
+        {
+            memcpy(h->hop_asn, asnlookup_result, strlen(asnlookup_result) + 1);
+        }
+        else
+        {
+            strcpy(h->hop_asn, "NULL");
+        }
+        fprintf(stderr, "Entering printHop\n");
+        printHop(h);
+        fprintf(stderr, "Finished printHop\n");
+
+        fprintf(stderr, "Entering appendHop\n");
+        if (appendHop(h, t) == -1)
+        {
+            fprintf(stderr, "Failed to append hop: Hop array is full\n");
+        }
+        fprintf(stderr, "Finished appendHop\n");
     }
-    fprintf(stderr, "Finished appendHop\n");
     // END ERLEND //
 
     // Notify the instance which has build the probe that we've got the corresponding reply
