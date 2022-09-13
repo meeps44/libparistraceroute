@@ -499,4 +499,14 @@ struct in6_addr *create_destination(void);
  */
 struct in6_addr *get_destination(void);
 
+/**
+ * @brief Converts a struct in6_addr to a printable string.
+ *
+ * @param i6 A pointer to a struct in6_addr.
+ * @return char* A pointer to the newly malloced string containing
+ * the presentation form of the IPv6-address.
+ * On success, inet_ntop() returns a non-null pointer to dst.  NULL is returned if there was an error, with errno set to indicate the error.
+ */
+char *printAddress(struct in6_addr *i6);
+
 #endif

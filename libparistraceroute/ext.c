@@ -494,6 +494,13 @@ char *asnLookup(struct in6_addr *ipv6_address)
     return lookup_result;
 }
 
+char *printAddress(struct in6_addr *i6)
+{
+    char *addr_buffer = malloc(sizeof(char) * INET6_ADDRSTRLEN);
+    // fprintf(stderr, "Converted IPv6-address:\t%s\n", inet_ntop(AF_INET6, i6, addr_buffer, sizeof(struct in6_addr)));
+    return inet_ntop(AF_INET6, i6, addr_buffer, sizeof(struct in6_addr));
+}
+
 int printHop(hop *h)
 {
     char hop_addr[100];

@@ -766,7 +766,22 @@ bool network_process_recvq(network_t *network)
     // BEGIN ERLEND //
     ipv6_header *probe_ipv6 = parse_ipv6(probe->packet->buffer->data);
     fprintf(stderr, "Probe outgoing hop limit: %d\n", probe_ipv6->hop_limit);
+
     ipv6_header *outer_ipv6 = parse_ipv6(reply->packet->buffer->data);
+    uint32_t outer_ipv6_flowlabel = outer_ipv6->flow_label;
+    fprintf(stderr, "Outer flow label: %d\n", outer_ipv6_flowlabel);
+    char *o_src = printAddress(outer_ipv6->source);
+    if (o_src != NULL)
+        fprintf(stderr, "Outer source ip: %s\n", printAddress(outer_ipv6->source));
+    else
+        fprintf(stderr, "Outer source ip: NULL\n");
+
+    char *o_dst = printAddress(outer_ipv6->destination);
+    if (o_dst != NULL)
+        fprintf(stderr, "Outer destination ip: %s\n", printAddress(outer_ipv6->destination));
+    else
+        fprintf(stderr, "Outer destination ip: NULL\n");
+
     ipv6_header *inner_ipv6 = get_inner_ipv6_header(reply->packet->buffer->data);
     // struct in6_addr inner_ipv6_destination = inner_ipv6->destination;
     uint32_t returned_flowlabel = inner_ipv6->flow_label;
