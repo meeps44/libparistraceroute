@@ -380,7 +380,7 @@ int main(int argc, char **argv)
     // We assume that the flow-label is always the second-to-last argument
     csv_file = argv[argc - 3];
     src_ip = argv[argc - 4];
-    // n_iterations = atoi(argv[argc - 5]);
+    n_iterations = atoi(argv[argc - 5]);
     // END ERLEND //
 
     // We assume that the target IP address is always the last argument
@@ -422,15 +422,14 @@ int main(int argc, char **argv)
 
         while ((read = getline(&ip_line, &len, hitlist)) != -1)
         {
-            dst_ip = ip_line;
-            /* Strip newline */
-            dst_ip[strcspn(dst_ip, "\n")] = 0;
-            algorithm_name = algorithm_names[0];
-            protocol_name = protocol_names[0];
-
             // BEGIN ERLEND
             for (int i = 0; i < n_iterations; i++)
             {
+                dst_ip = ip_line;
+                /* Strip newline */
+                dst_ip[strcspn(dst_ip, "\n")] = 0;
+                algorithm_name = algorithm_names[0];
+                protocol_name = protocol_names[0];
                 // Checking if there is any conflicts between options passed in the commandline
                 if (!check_options(is_icmp, is_tcp, is_udp, is_ipv4, is_ipv6, dst_port[3], src_port[3], protocol_name, algorithm_name))
                 {
