@@ -380,7 +380,7 @@ int main(int argc, char **argv)
     // We assume that the flow-label is always the second-to-last argument
     csv_file = argv[argc - 3];
     src_ip = argv[argc - 4];
-    n_iterations = argv[argc - 5];
+    n_iterations = atoi(argv[argc - 5]);
     // END ERLEND //
 
     // We assume that the target IP address is always the last argument
