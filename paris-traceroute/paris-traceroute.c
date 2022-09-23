@@ -330,7 +330,7 @@ int main(int argc, char **argv)
     traceroute_options_t traceroute_options;
     traceroute_options_t *ptraceroute_options;
     mda_options_t mda_options;
-    probe_t *probe;
+    probe_t *probe = NULL;
     pt_loop_t *loop = NULL;
     int family;
     address_t dst_addr;
