@@ -613,6 +613,10 @@ int main(int argc, char **argv)
             free(ip_line);
         }
     }
+    if (flow_label_line)
+    {
+        free(flow_label_line);
+    }
     // END ERLEND//
 
     // Leave the program
