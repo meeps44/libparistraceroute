@@ -347,7 +347,7 @@ int main(int argc, char **argv)
     uint16_t dport_tmp = 0;
     traceroute *t;
     char *src_ip;
-    int n_iterations;
+    int n_iterations = 4;
     // END ERLEND //
 
     // Prepare the commande line options
@@ -380,7 +380,7 @@ int main(int argc, char **argv)
     // We assume that the flow-label is always the second-to-last argument
     csv_file = argv[argc - 3];
     src_ip = argv[argc - 4];
-    n_iterations = atoi(argv[argc - 5]);
+    // n_iterations = atoi(argv[argc - 5]);
     // END ERLEND //
 
     // We assume that the target IP address is always the last argument
