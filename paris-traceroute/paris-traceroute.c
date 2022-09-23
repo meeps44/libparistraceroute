@@ -404,6 +404,8 @@ int main(int argc, char **argv)
     while ((read = getline(&ip_line, &len, hitlist)) != -1)
     {
         dst_ip = ip_line;
+        /* Strip newline */
+        dst_ip[strcspn(dst_ip, "\n")] = 0;
         algorithm_name = algorithm_names[0];
         protocol_name = protocol_names[0];
         // Checking if there is any conflicts between options passed in the commandline
