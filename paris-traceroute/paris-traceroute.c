@@ -619,6 +619,8 @@ int main(int argc, char **argv)
     {
         free(flow_label_line);
     }
+    /* Exiting here to avoid double free */
+    exit(exit_code);
     // END ERLEND//
 
     // Leave the program
