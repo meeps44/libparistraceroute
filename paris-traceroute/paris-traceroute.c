@@ -340,6 +340,7 @@ int main(int argc, char **argv)
     const char *protocol_name;
     bool use_icmp, use_udp, use_tcp;
     // BEGIN ERLEND //
+    char *flow_label_string;
     int flow_label;
     int some_error = 1;
     char *csv_file;
@@ -376,10 +377,8 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     // We assume that the flow-label is always the second-to-last argument
-    flow_label = atoi(argv[argc - 2]);
     csv_file = argv[argc - 3];
     src_ip = argv[argc - 4];
-    set_flow_label(flow_label);
     // END ERLEND //
 
     // We assume that the target IP address is always the last argument
@@ -391,209 +390,228 @@ int main(int argc, char **argv)
     /* Open hitlist, calculate the number of lines and execute loop once for each line.
     We are assuming that the hitlist is a newline-separated list of IPv6-addresses. */
     asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
-    FILE *hitlist = fopen(argv[argc - 1], "r");
-    if (hitlist == NULL)
+    FILE *flow_label_list = fopen(argv[argc - 2], "r");
+    if (flow_label_list == NULL)
     {
-        fprintf(stderr, "Error: unable to open file\n");
+        fprintf(stderr, "Error: unable to open flow label list\n");
         exit(1);
     }
-    char *ip_line = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    while ((read = getline(&ip_line, &len, hitlist)) != -1)
+    char *flow_label_line = NULL;
+    size_t fl_len = 0;
+    ssize_t fl_read;
+    while ((fl_read = getline(&flow_label_line, &fl_len, flow_label_list)) != -1)
     {
-        dst_ip = ip_line;
+        flow_label_string = flow_label_line;
         /* Strip newline */
-        dst_ip[strcspn(dst_ip, "\n")] = 0;
-        algorithm_name = algorithm_names[0];
-        protocol_name = protocol_names[0];
-        // Checking if there is any conflicts between options passed in the commandline
-        if (!check_options(is_icmp, is_tcp, is_udp, is_ipv4, is_ipv6, dst_port[3], src_port[3], protocol_name, algorithm_name))
+        flow_label_string[strcspn(flow_label_string, "\n")] = 0;
+        /* Convert to int */
+        flow_label = atoi(flow_label_string);
+        set_flow_label(flow_label);
+
+        FILE *hitlist = fopen(argv[argc - 1], "r");
+        if (hitlist == NULL)
         {
-            goto ERR_CHECK_OPTIONS;
+            fprintf(stderr, "Error: unable to open hitlist\n");
+            exit(1);
         }
+        char *ip_line = NULL;
+        size_t len = 0;
+        ssize_t read;
 
-        use_icmp = is_icmp || strcmp(protocol_name, "icmp") == 0;
-        use_tcp = is_tcp || strcmp(protocol_name, "tcp") == 0;
-        use_udp = is_udp || strcmp(protocol_name, "udp") == 0;
-
-        // If not any ip version is set, call address_guess_family.
-        // If only one is set to true, set family to AF_INET or AF_INET6
-        if (is_ipv4)
+        while ((read = getline(&ip_line, &len, hitlist)) != -1)
         {
-            family = AF_INET;
-        }
-        else if (is_ipv6)
-        {
-            family = AF_INET6;
-        }
-        else
-        {
-            // Get address family if not defined by the user
-            if (!address_guess_family(dst_ip, &family))
-                goto ERR_ADDRESS_GUESS_FAMILY;
-        }
+            dst_ip = ip_line;
+            /* Strip newline */
+            dst_ip[strcspn(dst_ip, "\n")] = 0;
+            algorithm_name = algorithm_names[0];
+            protocol_name = protocol_names[0];
+            // Checking if there is any conflicts between options passed in the commandline
+            if (!check_options(is_icmp, is_tcp, is_udp, is_ipv4, is_ipv6, dst_port[3], src_port[3], protocol_name, algorithm_name))
+            {
+                goto ERR_CHECK_OPTIONS;
+            }
 
-        // Translate the string IP / FQDN into an address_t * instance
-        if (address_from_string(family, dst_ip, &dst_addr) != 0)
-        {
-            fprintf(stderr, "E: Invalid destination address %s\n", dst_ip);
-            goto ERR_ADDRESS_IP_FROM_STRING;
-        }
+            use_icmp = is_icmp || strcmp(protocol_name, "icmp") == 0;
+            use_tcp = is_tcp || strcmp(protocol_name, "tcp") == 0;
+            use_udp = is_udp || strcmp(protocol_name, "udp") == 0;
 
-        // Probe skeleton definition: IPv4/UDP probe targetting 'dst_ip'
-        if (!(probe = probe_create()))
-        {
-            fprintf(stderr, "E: Cannot create probe skeleton");
-            goto ERR_PROBE_CREATE;
-        }
-
-        // Prepare the probe skeleton
-        probe_set_protocols(
-            probe,
-            get_ip_protocol_name(family),                          // "ipv4"   | "ipv6"
-            get_protocol_name(family, use_icmp, use_tcp, use_udp), // "icmpv4" | "icmpv6" | "tcp" | "udp"
-            NULL);
-
-        probe_set_field(probe, ADDRESS("dst_ip", &dst_addr));
-
-        if (send_time[3])
-        {
-            if (send_time[0] <= 10)
-            { // seconds
-                probe_set_delay(probe, DOUBLE("delay", send_time[0]));
+            // If not any ip version is set, call address_guess_family.
+            // If only one is set to true, set family to AF_INET or AF_INET6
+            if (is_ipv4)
+            {
+                family = AF_INET;
+            }
+            else if (is_ipv6)
+            {
+                family = AF_INET6;
             }
             else
-            { // milli-seconds
-                probe_set_delay(probe, DOUBLE("delay", 0.001 * send_time[0]));
-            }
-        }
-
-        // ICMPv* do not support src_port and dst_port fields nor payload.
-        if (!use_icmp)
-        {
-            uint16_t sport = 0,
-                     dport = 0;
-
-            if (use_udp)
             {
-                // Option -U sets port to 53 (DNS) if dst_port is not explicitely set
-                sport = src_port[3] ? src_port[0] : UDP_DEFAULT_SRC_PORT;
-                dport = dst_port[3] ? dst_port[0] : (is_udp ? UDP_DST_PORT_USING_U : UDP_DEFAULT_DST_PORT);
-            }
-            else if (use_tcp)
-            {
-                // Option -T sets port to 80 (http) if dst_port is not explicitely set
-                sport = src_port[3] ? src_port[0] : TCP_DEFAULT_SRC_PORT;
-                dport = dst_port[3] ? dst_port[0] : (is_tcp ? TCP_DST_PORT_USING_T : TCP_DEFAULT_DST_PORT);
+                // Get address family if not defined by the user
+                if (!address_guess_family(dst_ip, &family))
+                    goto ERR_ADDRESS_GUESS_FAMILY;
             }
 
-            // Update ports
-            probe_set_fields(
+            // Translate the string IP / FQDN into an address_t * instance
+            if (address_from_string(family, dst_ip, &dst_addr) != 0)
+            {
+                fprintf(stderr, "E: Invalid destination address %s\n", dst_ip);
+                goto ERR_ADDRESS_IP_FROM_STRING;
+            }
+
+            // Probe skeleton definition: IPv4/UDP probe targetting 'dst_ip'
+            if (!(probe = probe_create()))
+            {
+                fprintf(stderr, "E: Cannot create probe skeleton");
+                goto ERR_PROBE_CREATE;
+            }
+
+            // Prepare the probe skeleton
+            probe_set_protocols(
                 probe,
-                I16("src_port", sport),
-                I16("dst_port", dport),
+                get_ip_protocol_name(family),                          // "ipv4"   | "ipv6"
+                get_protocol_name(family, use_icmp, use_tcp, use_udp), // "icmpv4" | "icmpv6" | "tcp" | "udp"
                 NULL);
 
-            dport_tmp = dport; // Erlend
+            probe_set_field(probe, ADDRESS("dst_ip", &dst_addr));
 
-            // Resize payload (it will be use to set our customized checksum in the {TCP, UDP} layer)
-            probe_payload_resize(probe, 2);
+            if (send_time[3])
+            {
+                if (send_time[0] <= 10)
+                { // seconds
+                    probe_set_delay(probe, DOUBLE("delay", send_time[0]));
+                }
+                else
+                { // milli-seconds
+                    probe_set_delay(probe, DOUBLE("delay", 0.001 * send_time[0]));
+                }
+            }
+
+            // ICMPv* do not support src_port and dst_port fields nor payload.
+            if (!use_icmp)
+            {
+                uint16_t sport = 0,
+                         dport = 0;
+
+                if (use_udp)
+                {
+                    // Option -U sets port to 53 (DNS) if dst_port is not explicitely set
+                    sport = src_port[3] ? src_port[0] : UDP_DEFAULT_SRC_PORT;
+                    dport = dst_port[3] ? dst_port[0] : (is_udp ? UDP_DST_PORT_USING_U : UDP_DEFAULT_DST_PORT);
+                }
+                else if (use_tcp)
+                {
+                    // Option -T sets port to 80 (http) if dst_port is not explicitely set
+                    sport = src_port[3] ? src_port[0] : TCP_DEFAULT_SRC_PORT;
+                    dport = dst_port[3] ? dst_port[0] : (is_tcp ? TCP_DST_PORT_USING_T : TCP_DEFAULT_DST_PORT);
+                }
+
+                // Update ports
+                probe_set_fields(
+                    probe,
+                    I16("src_port", sport),
+                    I16("dst_port", dport),
+                    NULL);
+
+                dport_tmp = dport; // Erlend
+
+                // Resize payload (it will be use to set our customized checksum in the {TCP, UDP} layer)
+                probe_payload_resize(probe, 2);
+            }
+
+            // Algorithm options (dedicated options)
+            if (strcmp(algorithm_name, "paris-traceroute") == 0)
+            {
+                traceroute_options = traceroute_get_default_options();
+                ptraceroute_options = &traceroute_options;
+                algorithm_options = &traceroute_options;
+                algorithm_name = "traceroute";
+            }
+            else if ((strcmp(algorithm_name, "mda") == 0) || options_mda_get_is_set())
+            {
+                mda_options = mda_get_default_options();
+                ptraceroute_options = &mda_options.traceroute_options;
+                algorithm_options = &mda_options;
+                options_mda_init(&mda_options);
+            }
+            else
+            {
+                fprintf(stderr, "E: Unknown algorithm");
+                goto ERR_UNKNOWN_ALGORITHM;
+            }
+
+            // Algorithm options (common options)
+            options_traceroute_init(ptraceroute_options, &dst_addr);
+
+            // BEGIN ERLEND //
+            struct in6_addr *glb_dst = create_destination();
+            memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
+            t = createTraceroute();
+            t->outgoing_flow_label = flow_label;
+            t->outgoing_tcp_port = dport_tmp;
+            init_traceroute(src_ip, dst_ip);
+            //  END ERLEND //
+
+            // Create libparistraceroute loop
+            if (!(loop = pt_loop_create(loop_handler, NULL)))
+            {
+                fprintf(stderr, "E: Cannot create libparistraceroute loop");
+                goto ERR_LOOP_CREATE;
+            }
+
+            // Set network options (network and verbose)
+            options_network_init(loop->network, is_debug);
+            options_pt_loop_init(loop);
+
+            printf("%s to %s (", algorithm_name, dst_ip);
+            address_dump(&dst_addr);
+            printf("), %u hops max, %u bytes packets\n",
+                   ptraceroute_options->max_ttl,
+                   (unsigned int)packet_get_size(probe->packet));
+
+            // Add an algorithm instance in the main loop
+            if (!pt_add_instance(loop, algorithm_name, algorithm_options, probe))
+            {
+                fprintf(stderr, "E: Cannot add the chosen algorithm");
+                goto ERR_INSTANCE;
+            }
+
+            // Wait for events. They will be catched by handler_user()
+            if (pt_loop(loop) < 0)
+            {
+                fprintf(stderr, "E: Main loop interrupted");
+                goto ERR_PT_LOOP;
+            }
+            exit_code = EXIT_SUCCESS;
+
+            // BEGIN ERLEND //
+            /* Create path hash */
+            struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
+            for (int i = 0; i < t->hop_count; i++)
+            {
+                a[i] = t->hops[i].hop_address;
+            }
+            uint8_t *path_hash = hashPath(a, t->hop_count);
+            char output_buffer[21];
+
+            /* Create string-representation of path hash digest */
+            for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
+            {
+                sprintf(output_buffer + (i * 2), "%02x", path_hash[i]);
+            }
+
+            output_buffer[20] = '\0';
+            strcpy(t->path_id, output_buffer);
+
+            /* Traceroute all done. Saving results to disk. */
+            serialize_csv(csv_file, t);
+            //  END ERLEND //
         }
-
-        // Algorithm options (dedicated options)
-        if (strcmp(algorithm_name, "paris-traceroute") == 0)
+        fclose(hitlist);
+        if (ip_line)
         {
-            traceroute_options = traceroute_get_default_options();
-            ptraceroute_options = &traceroute_options;
-            algorithm_options = &traceroute_options;
-            algorithm_name = "traceroute";
+            free(ip_line);
         }
-        else if ((strcmp(algorithm_name, "mda") == 0) || options_mda_get_is_set())
-        {
-            mda_options = mda_get_default_options();
-            ptraceroute_options = &mda_options.traceroute_options;
-            algorithm_options = &mda_options;
-            options_mda_init(&mda_options);
-        }
-        else
-        {
-            fprintf(stderr, "E: Unknown algorithm");
-            goto ERR_UNKNOWN_ALGORITHM;
-        }
-
-        // Algorithm options (common options)
-        options_traceroute_init(ptraceroute_options, &dst_addr);
-
-        // BEGIN ERLEND //
-        struct in6_addr *glb_dst = create_destination();
-        memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
-        t = createTraceroute();
-        t->outgoing_flow_label = flow_label;
-        t->outgoing_tcp_port = dport_tmp;
-        init_traceroute(src_ip, dst_ip);
-        //  END ERLEND //
-
-        // Create libparistraceroute loop
-        if (!(loop = pt_loop_create(loop_handler, NULL)))
-        {
-            fprintf(stderr, "E: Cannot create libparistraceroute loop");
-            goto ERR_LOOP_CREATE;
-        }
-
-        // Set network options (network and verbose)
-        options_network_init(loop->network, is_debug);
-        options_pt_loop_init(loop);
-
-        printf("%s to %s (", algorithm_name, dst_ip);
-        address_dump(&dst_addr);
-        printf("), %u hops max, %u bytes packets\n",
-               ptraceroute_options->max_ttl,
-               (unsigned int)packet_get_size(probe->packet));
-
-        // Add an algorithm instance in the main loop
-        if (!pt_add_instance(loop, algorithm_name, algorithm_options, probe))
-        {
-            fprintf(stderr, "E: Cannot add the chosen algorithm");
-            goto ERR_INSTANCE;
-        }
-
-        // Wait for events. They will be catched by handler_user()
-        if (pt_loop(loop) < 0)
-        {
-            fprintf(stderr, "E: Main loop interrupted");
-            goto ERR_PT_LOOP;
-        }
-        exit_code = EXIT_SUCCESS;
-
-        // BEGIN ERLEND //
-        /* Create path hash */
-        struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
-        for (int i = 0; i < t->hop_count; i++)
-        {
-            a[i] = t->hops[i].hop_address;
-        }
-        uint8_t *path_hash = hashPath(a, t->hop_count);
-        char output_buffer[21];
-
-        /* Create string-representation of path hash digest */
-        for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
-        {
-            sprintf(output_buffer + (i * 2), "%02x", path_hash[i]);
-        }
-
-        output_buffer[20] = '\0';
-        strcpy(t->path_id, output_buffer);
-
-        /* Traceroute all done. Saving results to disk. */
-        serialize_csv(csv_file, t);
-        //  END ERLEND //
-    }
-    fclose(hitlist);
-    if (ip_line)
-    {
-        free(ip_line);
     }
     // END ERLEND//
 
