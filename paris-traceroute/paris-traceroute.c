@@ -605,6 +605,7 @@ int main(int argc, char **argv)
 
             /* Traceroute all done. Saving results to disk. */
             serialize_csv(csv_file, t);
+            network_free(loop->network);
             //  END ERLEND //
         }
         fclose(hitlist);
@@ -613,6 +614,7 @@ int main(int argc, char **argv)
             free(ip_line);
         }
     }
+    fclose(flow_label_list);
     if (flow_label_line)
     {
         free(flow_label_line);
