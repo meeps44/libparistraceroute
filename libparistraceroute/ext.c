@@ -136,8 +136,6 @@ struct in6_addr *convert_address_string(char *ipv6_address_string)
 char *get_host_ip()
 {
     char *dst = malloc(sizeof(char) * 40);
-    // struct in6_addr *i6 = malloc(sizeof(struct in6_addr));
-
     FILE *f;
     char *line = NULL;
     size_t len = 0;
@@ -193,8 +191,8 @@ char *get_host_ip()
             // printf("Converted successfully from string to struct in6_addr\n");
             //}
             fclose(f);
-            // if (line)
-            // free(line);
+            if (line)
+                free(line);
             // printf("get_host_ip: The global IPv6-address is:\t%s\n", dst);
             return dst;
         }
@@ -203,8 +201,8 @@ char *get_host_ip()
 
     perror("Global IPv6-address not found\n");
     fclose(f);
-    // if (line)
-    // free(line);
+    if (line)
+        free(line);
 
     return NULL;
 }
@@ -436,8 +434,6 @@ int asnLookupInit(char *filename)
 
     while ((read = getline(&line, &len, f)) != -1)
     {
-        // printf("Retrieved line of length %zu:\n", read);
-        // printf("%s", line);
         token = strtok(line, " ");
         int nmb = 1;
         while (token)
@@ -446,12 +442,10 @@ int asnLookupInit(char *filename)
             {
             case 1:
                 address = token;
-                // printf("address: %s\n", address);
                 inet_pton(AF_INET6, address, my_addr);
                 break;
             case 2:
                 mask = atoi(token);
-                // printf("mask: %d\n", mask);
                 break;
             case 3:
                 nmb = 1;
@@ -460,10 +454,7 @@ int asnLookupInit(char *filename)
 
                 /* Strip trailing newline */
                 asn[strcspn(asn, "\n")] = 0;
-
-                //  printf("asn: %s\n", asn);
-                //  Insert into patricia-tree
-                //  insert(AF_INET6, (struct in6_addr) * my_addr, mask, asn);
+                /* Insert into Patricia-tree */
                 insert(AF_INET6, *my_addr, mask, asn);
                 break;
             default:
@@ -476,8 +467,10 @@ int asnLookupInit(char *filename)
     }
 
     fclose(f);
-    // if (line)
-    // free(line);
+    if (line)
+    {
+        free(line);
+    }
     return 0;
 }
 
