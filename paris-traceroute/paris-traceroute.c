@@ -612,6 +612,7 @@ int main(int argc, char **argv)
                 serialize_csv(csv_file, t);
                 pt_loop_free(loop);
                 network_free(loop->network);
+                probe_free(probe);
                 //  END ERLEND //
             }
         }
