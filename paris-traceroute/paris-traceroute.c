@@ -612,11 +612,17 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Writing to file\n");
                 serialize_csv(csv_file, t);
                 fprintf(stderr, "Finished writing to file\n");
-                fprintf(stderr, "Freeing memory\n");
+                // fprintf(stderr, "Freeing memory\n");
+                fprintf(stderr, "Freeing pt_loop\n");
                 pt_loop_free(loop);
+                fprintf(stderr, "Finished freeing pt_loop\n");
+                fprintf(stderr, "Freeing network\n");
                 network_free(loop->network);
-                probe_free(probe);
-                fprintf(stderr, "Finsihed freeing memory\n");
+                fprintf(stderr, "Finished freeing network\n");
+                // fprintf(stderr, "Freeing probe\n");
+                // probe_free(probe);
+                // fprintf(stderr, "Finished freeing probe\n");
+                // fprintf(stderr, "Finsihed freeing memory\n");
                 //  END ERLEND //
             }
         }
