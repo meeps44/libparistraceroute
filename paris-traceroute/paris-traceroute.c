@@ -609,10 +609,14 @@ int main(int argc, char **argv)
                 strcpy(t->path_id, output_buffer);
 
                 /* Traceroute all done. Saving results to disk. */
+                fprintf(stderr, "Writing to file\n");
                 serialize_csv(csv_file, t);
+                fprintf(stderr, "Finished writing to file\n");
+                fprintf(stderr, "Freeing memory\n");
                 pt_loop_free(loop);
                 network_free(loop->network);
                 probe_free(probe);
+                fprintf(stderr, "Finsihed freeing memory\n");
                 //  END ERLEND //
             }
         }
