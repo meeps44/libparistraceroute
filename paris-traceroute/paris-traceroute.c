@@ -610,6 +610,7 @@ int main(int argc, char **argv)
 
                 /* Traceroute all done. Saving results to disk. */
                 serialize_csv(csv_file, t);
+                pt_loop_free(loop);
                 network_free(loop->network);
                 //  END ERLEND //
             }
