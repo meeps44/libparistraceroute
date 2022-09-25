@@ -620,10 +620,8 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Finished freeing traceroute\n");
                 free(a);
 
-                // fprintf(stderr, "Freeing network\n");
-                // network_free(loop->network);
-                // fprintf(stderr, "Finished freeing network\n");
                 fprintf(stderr, "Freeing pt_loop\n");
+                // Network is freed inside pt_loop_free
                 pt_loop_free(loop);
                 fprintf(stderr, "Finished freeing pt_loop\n");
                 fprintf(stderr, "Freeing probe\n");
@@ -644,6 +642,7 @@ int main(int argc, char **argv)
         free(flow_label_line);
     }
     /* Exiting here to avoid double free */
+    free(version);
     exit(exit_code);
     // END ERLEND//
 
