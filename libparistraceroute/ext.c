@@ -237,14 +237,18 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
             {
             case ICMP_TIME_EXCEEDED:
                 inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
-                free(ip6h);
-                free(icmp6);
+                if (ip6h)
+                    free(ip6h);
+                if (icmp6)
+                    free(icmp6);
                 return inner_ipv6;
             default:
                 // fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED.
                 //  ICMP type is:\t%x\n", icmp6->type);
-                free(ip6h);
-                free(icmp6);
+                if (ip6h)
+                    free(ip6h);
+                if (icmp6)
+                    free(icmp6);
                 return NULL;
             }
             break;
@@ -268,8 +272,10 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
         default:
             // fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default
             // in switch statement. IPv6 Next Header is not ICMPv6");
-            free(ip6h);
-            free(icmp6);
+            if (ip6h)
+                free(ip6h);
+            if (icmp6)
+                free(icmp6);
             return NULL;
         };
     }
