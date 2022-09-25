@@ -620,9 +620,9 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Finished freeing traceroute\n");
                 free(a);
 
-                fprintf(stderr, "Freeing network\n");
-                network_free(loop->network);
-                fprintf(stderr, "Finished freeing network\n");
+                // fprintf(stderr, "Freeing network\n");
+                // network_free(loop->network);
+                // fprintf(stderr, "Finished freeing network\n");
                 fprintf(stderr, "Freeing pt_loop\n");
                 pt_loop_free(loop);
                 fprintf(stderr, "Finished freeing pt_loop\n");

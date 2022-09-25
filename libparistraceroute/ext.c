@@ -462,7 +462,6 @@ int asnLookupInit(char *filename)
                 asn[strcspn(asn, "\n")] = 0;
                 /* Insert into Patricia-tree */
                 insert(AF_INET6, *my_addr, mask, asn);
-                free(asn); // Erlend
                 break;
             default:
                 puts("Error: default");
