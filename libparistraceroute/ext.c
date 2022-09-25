@@ -18,6 +18,12 @@
 
 #define DEBUG_ON
 
+void free_traceroute(traceroute *t)
+{
+    free(t->timestamp);
+    free(t);
+}
+
 struct in6_addr *dest_addr;
 struct in6_addr *create_destination(void)
 {
@@ -423,7 +429,7 @@ int asnLookupInit(char *filename)
     char *address;
     int mask = 0;
     char *asn;
-    struct in6_addr *my_addr = calloc(1, sizeof(struct in6_addr));
+    struct in6_addr *my_addr = calloc(1, sizeof(struct in6_addr)); // Do not free!
 
     f = fopen(filename, "r");
     if (f == NULL)
@@ -456,6 +462,7 @@ int asnLookupInit(char *filename)
                 asn[strcspn(asn, "\n")] = 0;
                 /* Insert into Patricia-tree */
                 insert(AF_INET6, *my_addr, mask, asn);
+                free(asn); // Erlend
                 break;
             default:
                 puts("Error: default");

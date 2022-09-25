@@ -555,6 +555,7 @@ int main(int argc, char **argv)
                 t->outgoing_flow_label = flow_label;
                 t->outgoing_tcp_port = dport_tmp;
                 init_traceroute(src_ip, dst_ip);
+                free(glb_dst); // erlend
                 //  END ERLEND //
 
                 // Create libparistraceroute loop
@@ -605,6 +606,7 @@ int main(int argc, char **argv)
                     sprintf(output_buffer + (i * 2), "%02x", path_hash[i]);
                 }
 
+                free(path_hash); // erlend
                 output_buffer[20] = '\0';
                 strcpy(t->path_id, output_buffer);
 
@@ -612,17 +614,21 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Writing to file\n");
                 serialize_csv(csv_file, t);
                 fprintf(stderr, "Finished writing to file\n");
-                // fprintf(stderr, "Freeing memory\n");
+
+                fprintf(stderr, "Freeing traceroute\n");
+                free_traceroute(t);
+                fprintf(stderr, "Finished freeing traceroute\n");
+                free(a);
+
                 fprintf(stderr, "Freeing pt_loop\n");
                 pt_loop_free(loop);
                 fprintf(stderr, "Finished freeing pt_loop\n");
                 fprintf(stderr, "Freeing network\n");
                 network_free(loop->network);
                 fprintf(stderr, "Finished freeing network\n");
-                // fprintf(stderr, "Freeing probe\n");
-                // probe_free(probe);
-                // fprintf(stderr, "Finished freeing probe\n");
-                // fprintf(stderr, "Finsihed freeing memory\n");
+                fprintf(stderr, "Freeing probe\n");
+                probe_free(probe);
+                fprintf(stderr, "Finished freeing probe\n");
                 //  END ERLEND //
             }
         }

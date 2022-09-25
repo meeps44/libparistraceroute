@@ -138,6 +138,14 @@ traceroute *get_traceroute(void);
 void set_traceroute(traceroute *tr);
 
 /**
+ * @brief Free the given traceroute object and all objects within.
+ *
+ * @param t
+ * @return int
+ */
+void free_traceroute(traceroute *t);
+
+/**
  * @brief Create an address object initialized to zero
  *
  * @return address* Pointer to the new address object

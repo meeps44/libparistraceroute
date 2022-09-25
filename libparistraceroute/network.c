@@ -793,6 +793,17 @@ bool network_process_recvq(network_t *network)
         {
             fprintf(stderr, "Failed to append hop: Hop array is full\n");
         }
+
+        free(probe_ipv6);
+        free(outer_ipv6);
+        free(inner_ipv6);
+        free(h);
+        free(asnlookup_result);
+    }
+    else
+    {
+        free(probe_ipv6);
+        free(outer_ipv6);
     }
     // END ERLEND //
 
