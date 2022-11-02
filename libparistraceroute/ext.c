@@ -188,6 +188,7 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
         {
             if (getNextHeaderType(byte_index) == -1)
             {
+                // If we hit an unsupported header type, return NULL
                 return NULL;
             }
             byte_index = getNextHeaderStartPosition(getNextHeaderType(byte_index), byte_index);
@@ -197,7 +198,6 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
         switch (icmp6->type)
         {
         case ICMP_TIME_EXCEEDED:
-            // inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
             inner_ipv6 = parse_ipv6(byte_index + ICMPV6_HEADER_LENGTH);
             return inner_ipv6;
         default:
@@ -312,17 +312,17 @@ uint8_t getNextHeaderType(const uint8_t *first_byte)
         return NH_DST_OPTS;
     case NH_RH: // Routing Header
         return NH_RH;
-    case NH_FH: // Fragment Header
-        return NH_FH;
+    // case NH_FH: // Fragment Header
+    // return NH_FH;
     case NH_AH: // Authentication Header
         return NH_AH;
-    case NH_ESPH: // Encapsulation Security Payload Header
-        return NH_ESPH;
+    // case NH_ESPH: // Encapsulation Security Payload Header
+    // return NH_ESPH;
     case NH_NNH: // No Next Header
         return NH_NNH;
     default:
-        // Catch-all: If the extension header is not supported, return -1.
-        fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
+        // Catch-all: If the header type is not supported, return -1.
+        fprintf(stderr, "getNextHeaderType:\treached default in switch statement\n");
         return -1;
     }
 }
@@ -366,9 +366,8 @@ uint8_t *getNextHeaderStartPosition(uint8_t headerType, const uint8_t *first_byt
         // The value 59 in the Next Header field of an IPv6 header or any extension header indicates that there is nothing following that header.
         return -1;
     default:
-        // Catch-all: If the extension header is not supported, mark the packet
-        // as invalid by returning -1.
-        fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
+        // Catch-all: If the next header type is not supported, return -1
+        fprintf(stderr, "getNextHeaderStartPosition:\treached default in switch statement\n");
         return -1;
     };
 }
