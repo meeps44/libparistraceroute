@@ -191,7 +191,13 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
                 // If we hit an unsupported header type, return NULL
                 return NULL;
             }
+
             byte_index = getNextHeaderStartPosition(getNextHeaderType(byte_index), byte_index);
+
+            if (byte_index == NULL)
+            {
+                return NULL;
+            }
         }
 
         icmp6 = parse_icmp6(byte_index);
@@ -300,7 +306,7 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     return h;
 }
 
-uint8_t getNextHeaderType(const uint8_t *first_byte)
+int getNextHeaderType(const uint8_t *first_byte)
 {
     switch (*first_byte)
     {
@@ -327,7 +333,7 @@ uint8_t getNextHeaderType(const uint8_t *first_byte)
     }
 }
 
-uint8_t *getNextHeaderStartPosition(uint8_t headerType, const uint8_t *first_byte)
+uint8_t *getNextHeaderStartPosition(int headerType, const uint8_t *first_byte)
 {
     switch (headerType)
     {
@@ -350,7 +356,7 @@ uint8_t *getNextHeaderStartPosition(uint8_t headerType, const uint8_t *first_byt
         // Should never occur, ICMPv6 limits its message body size, per rfc4443:
         // "The ICMP payload is as much of invoking packet as possible without
         // the ICMPv6 packet exceeding the minimum IPv6 MTU."
-        return -1;
+        return NULL;
     case NH_AH:                                           // Authentication Header
         uint8_t eh_length = 12 + (*(first_byte + 1) * 4); // Payload Length - multiply by 4 to convert from 32-bit words to 8-bit bytes.
         // This 8-bit field specifies the length of AH in 32-bit words (4-byte units), minus "2".  Thus, for example, if an integrity algorithm
@@ -361,14 +367,14 @@ uint8_t *getNextHeaderStartPosition(uint8_t headerType, const uint8_t *first_byt
         // We can safely assume that the Encapsulating Security Header is not used
         // since there is no exchange of cryptographics keys between our vantage point
         // and the intermediary hop.
-        return -1;
+        return NULL;
     case NH_NNH: // No Next Header
         // The value 59 in the Next Header field of an IPv6 header or any extension header indicates that there is nothing following that header.
-        return -1;
+        return NULL;
     default:
         // Catch-all: If the next header type is not supported, return -1
         fprintf(stderr, "getNextHeaderStartPosition:\treached default in switch statement\n");
-        return -1;
+        return NULL;
     };
 }
 
