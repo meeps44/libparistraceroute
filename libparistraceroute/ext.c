@@ -222,12 +222,16 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
         case NH_MH: // Mobility Header
             break;
         default:
-            // fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default
-            // in switch statement. IPv6 Next Header is not ICMPv6");
+#ifdef EXT_DEBUG
+            fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default
+            in switch statement. IPv6 Next Header is not ICMPv6");
+#endif
             return NULL;
         };
     }
-    // fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
+#ifdef EXT_DEBUG
+    fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
+#endif
     return NULL;
 }
 
@@ -485,10 +489,24 @@ int printTraceroute(traceroute *t)
 
 char *createFileName(struct tm *now) // (Might not be needed)
 {
-    // TODO: Implement malloc guards (check malloc return value for errors)
     char *fileName = malloc(sizeof(char) * 100);
+    if (fileName == NULL)
+    {
+        perror("createFileName memory allocation error");
+        exit(1);
+    }
     char *hostname = malloc(sizeof(char) * 30);
+    if (hostname == NULL)
+    {
+        perror("createFileName memory allocation error");
+        exit(1);
+    }
     char *timestamp = malloc(sizeof(char) * 50);
+    if (timestamp == NULL)
+    {
+        perror("createFileName memory allocation error");
+        exit(1);
+    }
     gethostname(hostname, 30);
 
     // Output timestamp in format "YYYY-MM-DD-hh_mm_ss : "
