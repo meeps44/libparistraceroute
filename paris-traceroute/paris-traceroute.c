@@ -551,14 +551,18 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     /* Create path hash */
-    struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
+    // struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
+    addr_tuple *address_tuples = malloc(sizeof(addr_tuple) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
-        a[i] = t->hops[i].hop_address;
+        // a[i] = t->hops[i].hop_address;
+        address_tuples[i].hop_address = t->hops[i].hop_address;
+        address_tuples[i].hopnumber = t->hops[i].hopnumber;
     }
-    uint8_t *path_hash = hashPath(a, t->hop_count);
+    // uint8_t *path_hash = hashPath(a, t->hop_count);
+    uint8_t *path_hash = hashPathTuple(address_tuples, t->hop_count);
+    free(address_tuples);
     char output_buffer[21];
-
     /* Create string-representation of path hash digest */
     for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
     {

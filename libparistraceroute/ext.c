@@ -491,6 +491,22 @@ uint8_t *hashPath(struct in6_addr arr[], int arraySize)
     return obuf;
 }
 
+uint8_t *hashPathTuple(addr_tuple arr[], int arraySize)
+{
+    unsigned char *obuf = malloc(sizeof(uint8_t) * 20);
+    SHA_CTX shactx;
+
+    SHA1_Init(&shactx);
+    for (int i = 0; i < arraySize; i++)
+    {
+        SHA1_Update(&shactx, &arr[i].hop_address, sizeof(struct in6_addr));
+        SHA1_Update(&shactx, &arr[i].hopnumber, sizeof(uint8_t));
+    }
+    SHA1_Final(obuf, &shactx); // digest now contains the 20-byte SHA-1 hash
+
+    return obuf;
+}
+
 int asnLookupInit(char *filename)
 {
     patricia_init(false);

@@ -53,6 +53,12 @@ typedef struct ipv6_header_s
     struct in6_addr destination;
 } ipv6_header;
 
+typedef struct addr_tuple_s
+{
+    u_int8_t hopnumber;
+    struct in6_addr hop_address; // uint32_t __u6_addr32[4], uint8_t	__u6_addr8[16], uint16_t __u6_addr16[8]
+} addr_tuple;
+
 /**
  * @brief Inits ASN-lookup by loading asn2prefix and creating patricia-tree
  *
@@ -456,4 +462,16 @@ int getNextHeaderType(const uint8_t *first_byte);
  */
 uint8_t *getNextHeaderStartPosition(int headerType, const uint8_t *first_byte);
 
+/**
+ * @brief Creates a hash of all the address_tuples in a path and returns the resulting
+ * digest.
+ *
+ * @param arr Ordered list of address pointers that combined comprise a path.
+ * @param arraySize Size of the addr_tuple array.
+ * @return  Pointer to the newly created SHA1 digest.
+ *
+ * NB! Code must be linked with libopenSSL in order for this to work.
+ * Linkage example: gcc sha1-in-c.c -lcrypto
+ */
+uint8_t *hashPathTuple(addr_tuple arr[], int arraySize);
 #endif
