@@ -450,7 +450,7 @@ const char *printAddress(struct in6_addr *i6);
  * @return int Value from the IPV6_HEADER_OPTS-enum. Returns -1 if the
  * header type is not supported.
  */
-int getNextHeaderType(const uint8_t *first_byte);
+int getNextHeaderType(uint8_t *first_byte);
 
 /**
  * @brief Get the memory address of the first byte in the next header.
@@ -460,7 +460,7 @@ int getNextHeaderType(const uint8_t *first_byte);
  * @return uint8_t* Memory address of the first byte in the next header.
  * Returns NULL if the header is invalid.
  */
-uint8_t *getNextHeaderStartPosition(int headerType, const uint8_t *first_byte);
+uint8_t *getNextHeaderStartPosition(int headerType, uint8_t *first_byte);
 
 /**
  * @brief Creates a hash of all the address_tuples in a path and returns the resulting
