@@ -417,7 +417,7 @@ struct in6_addr *convert_address_string(char *ipv6_address_string);
  * @param p The raw IPv6 packet.
  * @return ipv6_header* Pointer to the inner IPv6-header.
  */
-ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte);
+ipv6_header *get_inner_ipv6_header(uint8_t *first_byte);
 
 /**
  * @brief Create destination, Create a newly allocated struct in6_addr.
