@@ -182,52 +182,76 @@ ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte)
 
     if ((*first_byte >> 4) == 6) // If IPv6
     {
-        ipv6_header *ip6h = parse_ipv6(first_byte);
-        // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
-#ifdef EXT_DEBUG
-        puts("parse_packet: Returned from parse_ipv6");
-        printf("parse_packet: ip6h next_header:\t%x\n", ip6h->next_header);
-#endif
+        uint8_t *byte_index = first_byte + IPV6_HEADER_LENGTH;
 
-        switch (ip6h->next_header)
+        while (getNextHeaderType(byte_index) != NH_ICMPv6)
         {
-        case NH_ICMPv6:
-            icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
-            switch (icmp6->type)
+            if (getNextHeaderType(byte_index) == -1)
             {
-            case ICMP_TIME_EXCEEDED:
-                inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
-                return inner_ipv6;
-            default:
-                // fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED.
-                //  ICMP type is:\t%x\n", icmp6->type);
                 return NULL;
             }
-            break;
-        case NH_HBH_OPTS: // Hop-by-Hop Options
-            // uint8_t new_next_header = *(first_byte + hl);
-            // eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
-            // chl += (eh_length + 8);
-            break;
-        case NH_DST_OPTS: // Destination Options
-            break;
-        case NH_RH: // Routing Header
-            break;
-        case NH_FH: // Fragment Header
-            break;
-        case NH_AH: // Authentication Header
-            break;
-        case NH_ESPH: // Encapsulation Security Payload Header
-            break;
-        case NH_MH: // Mobility Header
-            break;
+            byte_index = getNextHeaderStartPosition(getNextHeaderType(byte_index), byte_index);
+        }
+
+        icmp6 = parse_icmp6(byte_index);
+        switch (icmp6->type)
+        {
+        case ICMP_TIME_EXCEEDED:
+            // inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+            inner_ipv6 = parse_ipv6(byte_index + ICMPV6_HEADER_LENGTH);
+            return inner_ipv6;
         default:
 #ifdef EXT_DEBUG
-            fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default
-            in switch statement. IPv6 Next Header is not ICMPv6");
+            fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED. ICMP type is:\t%x\n", icmp6->type);
 #endif
             return NULL;
-        };
+        }
+
+        // ipv6_header *ip6h = parse_ipv6(first_byte);
+        // // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
+        // #ifdef EXT_DEBUG
+        // puts("parse_packet: Returned from parse_ipv6");
+        // printf("parse_packet: ip6h next_header:\t%x\n", ip6h->next_header);
+        // #endif
+        // switch (ip6h->next_header)
+        //{
+        // case NH_ICMPv6:
+        // icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
+        // switch (icmp6->type)
+        //{
+        // case ICMP_TIME_EXCEEDED:
+        // inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+        // return inner_ipv6;
+        // default:
+        //// fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED.
+        ////  ICMP type is:\t%x\n", icmp6->type);
+        // return NULL;
+        //}
+        // break;
+        // case NH_HBH_OPTS: // Hop-by-Hop Options
+        //// uint8_t new_next_header = *(first_byte + hl);
+        //// eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
+        //// chl += (eh_length + 8);
+        // break;
+        // case NH_DST_OPTS: // Destination Options
+        // break;
+        // case NH_RH: // Routing Header
+        // break;
+        // case NH_FH: // Fragment Header
+        // break;
+        // case NH_AH: // Authentication Header
+        // break;
+        // case NH_ESPH: // Encapsulation Security Payload Header
+        // break;
+        // case NH_MH: // Mobility Header
+        // break;
+        // default:
+        //#ifdef EXT_DEBUG
+        // fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default
+        // in switch statement. IPv6 Next Header is not ICMPv6");
+        //#endif
+        // return NULL;
+        //};
     }
 #ifdef EXT_DEBUG
     fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
@@ -276,45 +300,132 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     return h;
 }
 
-void parse_packet(const packet_t *p)
+uint8_t getNextHeaderType(const uint8_t *first_byte)
 {
-    packet_fprintf(stdout, p);
-    puts("");
-    uint8_t *first_byte = packet_get_bytes(p);
-    int hl = 40; // Initial value = IPv6 Header Length
-
-    if ((*first_byte >> 4) == 6) // If IPv6
+    switch (*first_byte)
     {
-        ipv6_header *ip6h = parse_ipv6(first_byte);
-        // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
-        switch (ip6h->next_header)
-        {
-        case NH_ICMPv6:
-            parse_icmp6(first_byte + hl);
-            break;
-        case NH_HBH_OPTS: // Hop-by-Hop Options
-            // uint8_t new_next_header = *(first_byte + hl);
-            // eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
-            // chl += (eh_length + 8);
-            break;
-        case NH_DST_OPTS: // Destination Options
-            break;
-        case NH_RH: // Routing Header
-            break;
-        case NH_FH: // Fragment Header
-            break;
-        case NH_AH: // Authentication Header
-            break;
-        case NH_ESPH: // Encapsulation Security Payload Header
-            break;
-        case NH_MH: // Mobility Header
-            break;
-        default:
-            fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
-            break;
-        };
+    case NH_ICMPv6:
+        return NH_ICMPv6;
+    case NH_HBH_OPTS: // Hop-by-Hop Options
+        return NH_HBH_OPTS;
+    case NH_DST_OPTS: // Destination Options
+        return NH_DST_OPTS;
+    case NH_RH: // Routing Header
+        return NH_RH;
+    case NH_FH: // Fragment Header
+        return NH_FH;
+    case NH_AH: // Authentication Header
+        return NH_AH;
+    case NH_ESPH: // Encapsulation Security Payload Header
+        return NH_ESPH;
+    case NH_NNH: // No Next Header
+        return NH_NNH;
+    default:
+        // Catch-all: If the extension header is not supported, return -1.
+        fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
+        return -1;
     }
 }
+
+uint8_t *getNextHeaderStartPosition(uint8_t headerType, const uint8_t *first_byte)
+{
+    switch (headerType)
+    {
+    case NH_ICMPv6:
+        return first_byte + 40;
+    case NH_HBH_OPTS: // Hop-by-Hop Options
+        // Length of the Hop-by-Hop Options header in 8-octet units, not including the first 8 octets.
+        uint8_t eh_length = 8 + *(first_byte + 1); // The extension header length is always in the second octet of the EH.
+        return eh_length;
+    case NH_DST_OPTS: // Destination Options
+        // 8-bit unsigned integer.  Length of the Destination Options header in 8-octet units, not including the first 8 octets.
+        uint8_t eh_length = 8 + *(first_byte + 1); // The extension header length is always in the second octet of the EH.
+        return eh_length;
+    case NH_RH: // Routing Header
+        //  8-bit unsigned integer.  Length of the Routing header in 8-octet units, not including the first 8 octets.
+        // The minimum length of the routing header is 8 octets (8 bytes).
+        uint8_t eh_length = 8 + *(first_byte + 1); // The extension header length is always in the second octet of the EH.
+        return eh_length;
+    case NH_FH: // Fragment Header
+        // Should never occur, ICMPv6 limits its message body size, per rfc4443:
+        // "The ICMP payload is as much of invoking packet as possible without
+        // the ICMPv6 packet exceeding the minimum IPv6 MTU."
+        return -1;
+    case NH_AH:                                           // Authentication Header
+        uint8_t eh_length = 12 + (*(first_byte + 1) * 4); // Payload Length - multiply by 4 to convert from 32-bit words to 8-bit bytes.
+        // This 8-bit field specifies the length of AH in 32-bit words (4-byte units), minus "2".  Thus, for example, if an integrity algorithm
+        // yields a 96-bit authentication value, this length field will be "4" (3 32-bit word fixed fields plus 3 32-bit words for the ICV, minus 2).
+        // For IPv6, the total length of the header must be a multiple of 8-octet units. Padding is added if necessary.
+        return eh_length;
+    case NH_ESPH: // Encapsulation Security Payload Header
+        // We can safely assume that the Encapsulating Security Header is not used
+        // since there is no exchange of cryptographics keys between our vantage point
+        // and the intermediary hop.
+        return -1;
+    case NH_NNH: // No Next Header
+        // The value 59 in the Next Header field of an IPv6 header or any extension header indicates that there is nothing following that header.
+        return -1;
+    default:
+        // Catch-all: If the extension header is not supported, mark the packet
+        // as invalid by returning -1.
+        fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
+        return -1;
+    };
+}
+
+// int parse_packet(const packet_t *p)
+// {
+// packet_fprintf(stdout, p);
+// puts("");
+// uint8_t *first_byte = packet_get_bytes(p);
+// uint8_t *byte_index;
+// int hl = 40; // Initial value = IPv6 Header Length
+
+// if ((*first_byte >> 4) == 6) // If IPv6
+// {
+// ipv6_header *ip6h = parse_ipv6(first_byte);
+// // icmp6_header *icmp6h; // Necessary due to https://ittutoria.net/question/a-label-can-only-be-part-of-a-statement-and-a-declaration-is-not-a-statement/
+
+// while (getNextHeaderType(byte_index) != NH_ICMPv6)
+// {
+// if (getNextHeaderType(byte_index) == -1)
+// {
+// fprintf(stderr, "Parse_packet: invalid packet\n");
+// return;
+// }
+// byte_index = getNextHeaderStartPosition(getNextHeaderType(byte_index), byte_index);
+// }
+
+// parse_icmp6(byte_index);
+
+// // switch (ip6h->next_header)
+// // {
+// // case NH_ICMPv6:
+// // parse_icmp6(first_byte + hl);
+// // break;
+// // case NH_HBH_OPTS: // Hop-by-Hop Options
+// // // uint8_t new_next_header = *(first_byte + hl);
+// // // eh_length = *(first_byte + hl + 1); // The extension header length is always in the second octet of the EH.
+// // // chl += (eh_length + 8);
+// // break;
+// // case NH_DST_OPTS: // Destination Options
+// // break;
+// // case NH_RH: // Routing Header
+// // break;
+// // case NH_FH: // Fragment Header
+// // break;
+// // case NH_AH: // Authentication Header
+// // break;
+// // case NH_ESPH: // Encapsulation Security Payload Header
+// // break;
+// // case NH_MH: // Mobility Header
+// // break;
+// // default:
+// // fprintf(stderr, "parse_packet:\treached ipv6_parse_default in switch statement");
+// // break;
+// // };
+// }
+// }
 
 struct in6_addr *createAddress()
 {

@@ -77,12 +77,12 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte);
  */
 ipv6_header *parse_ipv6(const uint8_t *first_byte);
 
-/**
- * @brief Parses a packet into its component headers.
- *
- * @param p
- */
-void parse_packet(const packet_t *p);
+///**
+//* @brief Parses a packet into its component headers.
+//*
+//* @param p
+//*/
+// int parse_packet(const packet_t *p);
 
 typedef struct hop
 {
