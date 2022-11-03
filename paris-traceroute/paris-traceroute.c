@@ -365,11 +365,13 @@ int main(int argc, char **argv)
     */
 
     // added by erlend:
+    /*
     if (some_error != 1)
     {
         fprintf(stderr, "%s: destination required\n", basename(argv[0]));
         goto ERR_OPT_PARSE;
     }
+    */
 
     options_parse(options, usage, argv);
 
@@ -551,15 +553,12 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     /* Create path hash */
-    // struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
     addr_tuple *address_tuples = malloc(sizeof(addr_tuple) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
-        // a[i] = t->hops[i].hop_address;
         address_tuples[i].hop_address = t->hops[i].hop_address;
         address_tuples[i].hopnumber = t->hops[i].hopnumber;
     }
-    // uint8_t *path_hash = hashPath(a, t->hop_count);
     uint8_t *path_hash = hashPathTuple(address_tuples, t->hop_count);
     free(address_tuples);
     char output_buffer[21];
@@ -572,7 +571,7 @@ int main(int argc, char **argv)
     output_buffer[20] = '\0';
     strcpy(t->path_id, output_buffer);
 
-    // Erlend - traceroute all done. Saving results to disk.
+    /* Traceroute all done. Saving results to disk. */
     serialize_csv(csv_file, t);
     //  END ERLEND //
 
