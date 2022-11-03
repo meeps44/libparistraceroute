@@ -215,21 +215,20 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
             case NH_HBH_OPTS: // Hop-by-Hop Options
                 // Length of the Hop-by-Hop Options header in 8-octet units, not including the first 8 octets.
                 nh = *nh_first_byte;
-                h_len = 8 + *(nh_first_byte + 1);
-                nh_first_byte += h_len; // The extension header length is always in the second octet of the EH.
+                h_len = 8 + *(nh_first_byte + 1); // The extension header length is always in the second octet of the EH.
+                nh_first_byte += h_len;
                 break;
             case NH_DST_OPTS: // Destination Options
-                // 8-bit unsigned integer.  Length of the Destination Options header in 8-octet units, not including the first 8 octets.
                 nh = *nh_first_byte;
-                h_len = 8 + *(nh_first_byte + 1);
-                nh_first_byte += h_len; // The extension header length is always in the second octet of the EH.
+                // 8-bit unsigned integer.  Length of the Destination Options header in 8-octet units, not including the first 8 octets.
+                h_len = 8 + *(nh_first_byte + 1); // The extension header length is always in the second octet of the EH.
+                nh_first_byte += h_len;
                 break;
             case NH_RH: // Routing Header
                 //  8-bit unsigned integer.  Length of the Routing header in 8-octet units, not including the first 8 octets.
-                // The minimum length of the routing header is 8 octets (8 bytes).
                 nh = *nh_first_byte;
-                h_len = 8 + *(nh_first_byte + 1);
-                nh_first_byte += h_len; // The extension header length is always in the second octet of the EH.
+                h_len = 8 + *(nh_first_byte + 1); // The extension header length is always in the second octet of the EH.
+                nh_first_byte += h_len;
                 break;
             case NH_FH: // Fragment Header
                 // Should never occur, ICMPv6 limits its message body size, per rfc4443:
@@ -238,11 +237,12 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
                 return NULL;
             case NH_AH: // Authentication Header
                 nh = *nh_first_byte;
-                h_len = 12 + (*(nh_first_byte + 1) * 4); // Payload Length - multiply by 4 to convert from 32-bit words to 8-bit bytes.
-                nh_first_byte += h_len;                  // The extension header length is always in the second octet of the EH.
+                // Payload Length:
                 // This 8-bit field specifies the length of AH in 32-bit words (4-byte units), minus "2".  Thus, for example, if an integrity algorithm
                 // yields a 96-bit authentication value, this length field will be "4" (3 32-bit word fixed fields plus 3 32-bit words for the ICV, minus 2).
                 // For IPv6, the total length of the header must be a multiple of 8-octet units. Padding is added if necessary.
+                h_len = 8 + (*(nh_first_byte + 1) * 4); // multiply by 4 to convert from 32-bit words to 8-bit bytes.
+                nh_first_byte += h_len;
                 break;
             case NH_ESPH: // Encapsulation Security Payload Header
                 return NULL;
