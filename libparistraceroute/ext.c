@@ -308,6 +308,8 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
 
 int getNextHeaderType(uint8_t *first_byte)
 {
+    fprintf(stderr, "getNextHeaderType:\tfirst_byte value: %d\n", *first_byte);
+    fprintf(stderr, "getNextHeaderType:\tfirst_byte value + 1: %d\n", *(first_byte + 1));
     switch (*first_byte)
     {
     case NH_ICMPv6:
