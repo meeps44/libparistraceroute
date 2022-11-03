@@ -341,7 +341,6 @@ int main(int argc, char **argv)
     bool use_icmp, use_udp, use_tcp;
     // BEGIN ERLEND //
     int flow_label;
-    // int some_error = 1;
     char *csv_file;
     uint16_t dport_tmp = 0;
     traceroute *t;
@@ -356,18 +355,8 @@ int main(int argc, char **argv)
     }
 
     // Retrieve values passed in the command-line
-    // erlend
     /*
     if (options_parse(options, usage, argv) != 1) {
-        fprintf(stderr, "%s: destination required\n", basename(argv[0]));
-        goto ERR_OPT_PARSE;
-    }
-    */
-
-    // added by erlend:
-    /*
-    if (some_error != 1)
-    {
         fprintf(stderr, "%s: destination required\n", basename(argv[0]));
         goto ERR_OPT_PARSE;
     }
