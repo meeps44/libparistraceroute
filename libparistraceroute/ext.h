@@ -83,13 +83,6 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte);
  */
 ipv6_header *parse_ipv6(const uint8_t *first_byte);
 
-///**
-//* @brief Parses a packet into its component headers.
-//*
-//* @param p
-//*/
-// int parse_packet(const packet_t *p);
-
 typedef struct hop
 {
     uint8_t hopnumber;
@@ -442,25 +435,6 @@ struct in6_addr *get_destination(void);
  * On success, inet_ntop() returns a non-null pointer to dst.  NULL is returned if there was an error, with errno set to indicate the error.
  */
 const char *printAddress(struct in6_addr *i6);
-
-// /**
-// * @brief Get the Next Header type as defined in the IPV6_HEADER_OPTS-enum.
-// *
-// * @param first_byte
-// * @return int Value from the IPV6_HEADER_OPTS-enum. Returns -1 if the
-// * header type is not supported.
-// */
-// int getNextHeader(uint8_t *first_byte);
-
-// /**
-// * @brief Get the memory address of the first byte in the next header.
-// *
-// * @param headerType Value from the IPV6_HEADER_OPTS-enum.
-// * @param first_byte Pointer to the first byte of the header.
-// * @return uint8_t* Memory address of the first byte in the next header.
-// * Returns NULL if the header is invalid.
-// */
-// uint8_t *getNextHeaderStartPosition(int headerType, uint8_t *first_byte);
 
 /**
  * @brief Creates a hash of all the address_tuples in a path and returns the resulting
