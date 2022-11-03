@@ -341,7 +341,7 @@ int main(int argc, char **argv)
     bool use_icmp, use_udp, use_tcp;
     // BEGIN ERLEND //
     int flow_label;
-    int some_error = 1;
+    // int some_error = 1;
     char *csv_file;
     uint16_t dport_tmp = 0;
     traceroute *t;
@@ -591,7 +591,7 @@ ERR_ADDRESS_GUESS_FAMILY:
     if (errno)
         perror(gai_strerror(errno));
 ERR_CHECK_OPTIONS:
-ERR_OPT_PARSE:
+// ERR_OPT_PARSE:
 ERR_INIT_OPTIONS:
     free(version);
     exit(exit_code);
