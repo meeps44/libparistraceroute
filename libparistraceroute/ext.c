@@ -251,7 +251,7 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
                 return NULL;
             default:
 #ifdef EXT_DEBUG
-                fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default \ 
+                fprintf(stderr, "get_inner_ipv6_header:\tError: reached ipv6_parse_default \
                 in switch statement. IPv6 Next Header is not ICMPv6");
 #endif
                 return NULL;
