@@ -175,8 +175,8 @@ char *get_host_ip()
 
 ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
 {
-    int IPV6_HEADER_LENGTH = 40;
-    int ICMPV6_HEADER_LENGTH = 8;
+    // const int IPV6_HEADER_LENGTH = 40;
+    const int ICMPV6_HEADER_LENGTH = 8;
     icmp6_header *icmp6;
     ipv6_header *inner_ipv6;
 
