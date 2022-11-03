@@ -443,24 +443,24 @@ struct in6_addr *get_destination(void);
  */
 const char *printAddress(struct in6_addr *i6);
 
-/**
- * @brief Get the Next Header type as defined in the IPV6_HEADER_OPTS-enum.
- *
- * @param first_byte
- * @return int Value from the IPV6_HEADER_OPTS-enum. Returns -1 if the
- * header type is not supported.
- */
-int getNextHeader(uint8_t *first_byte);
+// /**
+// * @brief Get the Next Header type as defined in the IPV6_HEADER_OPTS-enum.
+// *
+// * @param first_byte
+// * @return int Value from the IPV6_HEADER_OPTS-enum. Returns -1 if the
+// * header type is not supported.
+// */
+// int getNextHeader(uint8_t *first_byte);
 
-/**
- * @brief Get the memory address of the first byte in the next header.
- *
- * @param headerType Value from the IPV6_HEADER_OPTS-enum.
- * @param first_byte Pointer to the first byte of the header.
- * @return uint8_t* Memory address of the first byte in the next header.
- * Returns NULL if the header is invalid.
- */
-uint8_t *getNextHeaderStartPosition(int headerType, uint8_t *first_byte);
+// /**
+// * @brief Get the memory address of the first byte in the next header.
+// *
+// * @param headerType Value from the IPV6_HEADER_OPTS-enum.
+// * @param first_byte Pointer to the first byte of the header.
+// * @return uint8_t* Memory address of the first byte in the next header.
+// * Returns NULL if the header is invalid.
+// */
+// uint8_t *getNextHeaderStartPosition(int headerType, uint8_t *first_byte);
 
 /**
  * @brief Creates a hash of all the address_tuples in a path and returns the resulting
