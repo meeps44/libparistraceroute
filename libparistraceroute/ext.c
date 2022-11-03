@@ -182,22 +182,36 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
 
     if ((*first_byte >> 4) == 6) // If IPv6
     {
-        uint8_t *byte_index = first_byte + IPV6_HEADER_LENGTH;
+        /* Point byte_index to IPv6 next-header field */
+        uint8_t *byte_index = first_byte + 12;
 
-        while (getNextHeaderType(byte_index) != NH_ICMPv6)
+        if ((getNextHeader(byte_index) != NH_ICMPv6))
         {
-            if (getNextHeaderType(byte_index) == -1)
-            {
-                // If we hit an unsupported header type, return NULL
-                return NULL;
-            }
+            /* Point byte_index to the end of the IPv6-header.
+            IPv6-header length = 40 bytes. */
+            byte_index += 28;
 
-            byte_index = getNextHeaderStartPosition(getNextHeaderType(byte_index), byte_index);
-
-            if (byte_index == NULL)
+            while (getNextHeader(byte_index) != NH_ICMPv6)
             {
-                return NULL;
+                if (getNextHeader(byte_index) == -1)
+                {
+                    // If we hit an unsupported header, return NULL
+                    return NULL;
+                }
+
+                byte_index = getNextHeaderStartPosition(getNextHeader(byte_index), byte_index);
+
+                if (byte_index == NULL)
+                {
+                    return NULL;
+                }
             }
+        }
+        else
+        {
+            /* Point byte_index to the end of the IPv6-header.
+            IPv6-header length = 40 bytes. */
+            byte_index += 28;
         }
 
         icmp6 = parse_icmp6(byte_index);
@@ -306,10 +320,9 @@ ipv6_header *parse_ipv6(const uint8_t *first_byte)
     return h;
 }
 
-int getNextHeaderType(uint8_t *first_byte)
+int getNextHeader(uint8_t *first_byte)
 {
-    fprintf(stderr, "getNextHeaderType:\tfirst_byte value: %d\n", *first_byte);
-    fprintf(stderr, "getNextHeaderType:\tfirst_byte value + 1: %d\n", *(first_byte + 1));
+    fprintf(stderr, "getNextHeader:\tfirst_byte value: %d\n", *first_byte);
     switch (*first_byte)
     {
     case NH_ICMPv6:
@@ -320,17 +333,13 @@ int getNextHeaderType(uint8_t *first_byte)
         return NH_DST_OPTS;
     case NH_RH: // Routing Header
         return NH_RH;
-    // case NH_FH: // Fragment Header
-    // return NH_FH;
     case NH_AH: // Authentication Header
         return NH_AH;
-    // case NH_ESPH: // Encapsulation Security Payload Header
-    // return NH_ESPH;
     case NH_NNH: // No Next Header
         return NH_NNH;
     default:
         // Catch-all: If the header type is not supported, return -1.
-        fprintf(stderr, "getNextHeaderType:\treached default in switch statement\n");
+        fprintf(stderr, "getNextHeader:\treached default in switch statement\n");
         return -1;
     }
 }
@@ -341,9 +350,6 @@ uint8_t *getNextHeaderStartPosition(int headerType, uint8_t *first_byte)
 
     switch (headerType)
     {
-    case NH_ICMPv6:
-        nh_pos = first_byte + 40;
-        return nh_pos;
     case NH_HBH_OPTS: // Hop-by-Hop Options
         // Length of the Hop-by-Hop Options header in 8-octet units, not including the first 8 octets.
         nh_pos = 8 + first_byte + 1; // The extension header length is always in the second octet of the EH.
