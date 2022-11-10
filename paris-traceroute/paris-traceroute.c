@@ -341,7 +341,6 @@ int main(int argc, char **argv)
     bool use_icmp, use_udp, use_tcp;
     // BEGIN ERLEND //
     int flow_label;
-    int some_error = 1;
     char *csv_file;
     uint16_t dport_tmp = 0;
     traceroute *t;
@@ -356,20 +355,12 @@ int main(int argc, char **argv)
     }
 
     // Retrieve values passed in the command-line
-    // erlend
     /*
     if (options_parse(options, usage, argv) != 1) {
         fprintf(stderr, "%s: destination required\n", basename(argv[0]));
         goto ERR_OPT_PARSE;
     }
     */
-
-    // added by erlend:
-    if (some_error != 1)
-    {
-        fprintf(stderr, "%s: destination required\n", basename(argv[0]));
-        goto ERR_OPT_PARSE;
-    }
 
     options_parse(options, usage, argv);
 
@@ -505,24 +496,16 @@ int main(int argc, char **argv)
     options_traceroute_init(ptraceroute_options, &dst_addr);
 
     // BEGIN ERLEND //
-    // fprintf(stderr, "main.c: Creating destination object\n");
     struct in6_addr *glb_dst = create_destination();
     memcpy(glb_dst, &dst_addr.ip, sizeof(struct in6_addr));
-    // fprintf(stderr, "main.c: Finished creating destination object\n");
 
-    // fprintf(stderr, "main.c: Entering asnLookupInit\n");
     asnLookupInit("/root/git/libparistraceroute/routeviews-rv6-pfx2as.txt");
-    // fprintf(stderr, "main.c: Finished asnLookupInit\n");
 
-    // fprintf(stderr, "main.c: Creating traceroute object\n");
     t = createTraceroute();
     t->outgoing_flow_label = flow_label;
     t->outgoing_tcp_port = dport_tmp;
-    // fprintf(stderr, "main.c: Finished creating traceroute object\n");
 
-    // fprintf(stderr, "main.c: Initializing traceroute object\n");
     init_traceroute(src_ip, dst_ip);
-    // fprintf(stderr, "main.c: Finished initializing traceroute object\n");
     //  END ERLEND //
 
     // Create libparistraceroute loop
@@ -559,14 +542,15 @@ int main(int argc, char **argv)
 
     // BEGIN ERLEND //
     /* Create path hash */
-    struct in6_addr *a = malloc(sizeof(struct in6_addr) * t->hop_count);
+    addr_tuple *address_tuples = malloc(sizeof(addr_tuple) * t->hop_count);
     for (int i = 0; i < t->hop_count; i++)
     {
-        a[i] = t->hops[i].hop_address;
+        address_tuples[i].hop_address = t->hops[i].hop_address;
+        address_tuples[i].hopnumber = t->hops[i].hopnumber;
     }
-    uint8_t *path_hash = hashPath(a, t->hop_count);
+    uint8_t *path_hash = hashPathTuple(address_tuples, t->hop_count);
+    free(address_tuples);
     char output_buffer[21];
-
     /* Create string-representation of path hash digest */
     for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
     {
@@ -576,11 +560,8 @@ int main(int argc, char **argv)
     output_buffer[20] = '\0';
     strcpy(t->path_id, output_buffer);
 
-    // Erlend - traceroute all done. Saving results to disk.
-    // NB! Header row gets written when the csv is created via the bash-script.
-    // puts("Entering serialize_csv");
+    /* Traceroute all done. Saving results to disk. */
     serialize_csv(csv_file, t);
-    // puts("Finished serialize_csv");
     //  END ERLEND //
 
     // Leave the program
@@ -599,7 +580,7 @@ ERR_ADDRESS_GUESS_FAMILY:
     if (errno)
         perror(gai_strerror(errno));
 ERR_CHECK_OPTIONS:
-ERR_OPT_PARSE:
+// ERR_OPT_PARSE:
 ERR_INIT_OPTIONS:
     free(version);
     exit(exit_code);

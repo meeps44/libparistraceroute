@@ -53,6 +53,12 @@ typedef struct ipv6_header_s
     struct in6_addr destination;
 } ipv6_header;
 
+typedef struct addr_tuple_s
+{
+    u_int8_t hopnumber;
+    struct in6_addr hop_address; // uint32_t __u6_addr32[4], uint8_t	__u6_addr8[16], uint16_t __u6_addr16[8]
+} addr_tuple;
+
 /**
  * @brief Inits ASN-lookup by loading asn2prefix and creating patricia-tree
  *
@@ -77,13 +83,6 @@ icmp6_header *parse_icmp6(const uint8_t *icmp_first_byte);
  */
 ipv6_header *parse_ipv6(const uint8_t *first_byte);
 
-/**
- * @brief Parses a packet into its component headers.
- *
- * @param p
- */
-void parse_packet(const packet_t *p);
-
 typedef struct hop
 {
     uint8_t hopnumber;
@@ -94,33 +93,16 @@ typedef struct hop
 
 typedef struct traceroute
 {
-    // For easy route comparison - make a hash of the (source_ip, dest_ip, outgoing_flow_label)-tuple and add it
-    // as a variable to the struct?
-    /*
-        "outgoing_tcp_port": "443",
-        "flow_label": "1048575",
-        "timestamp": "2022-05-07 15:50:47.559550",
-        "source": "2a03:b0c0:1:d0::b45:6001",
-        "source_asn": "14061",
-        "destination": "2600:9000:20a5:f800:10:15f0:8cc0:93a1",
-        "destination_asn": "16509",
-        "path_id": "c0f8ed8a7c1f3d725bd89de7ed7eced0b9dcc67b",
-    */
     uint16_t outgoing_tcp_port;
     int outgoing_flow_label;
     char *timestamp;
-    // address *source_ip;
     struct in6_addr source_ip;
     char source_asn[200];
-    // address *destination_ip;
     struct in6_addr destination_ip;
     char destination_asn[200];
     char path_id[SHA_DIGEST_LENGTH + 1]; // +1 for terminating null-character
-    // uint8_t path_id[SHA_DIGEST_LENGTH + 1]; // +1 for terminating null-character
     uint8_t hop_count;
     hop hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
-    // Could also be a list of *hop-pointers
-
 } traceroute;
 
 /**
@@ -207,21 +189,6 @@ uint8_t *hashPath(struct in6_addr arr[], int arraySize);
 char *asnLookup(struct in6_addr *ipv6_address);
 
 /**
- * @brief Parses a raw IPv6-packet and saves the result to a parsed_packet struct.
- *
- * @param packet
- * @return parsed_packet*
- */
-// parsed_packet *parseIPv6(packet_t packet);
-
-/**
- * @brief Prints each individual field of a parsed_packet to STDOUT.
- *
- * @param p
- */
-// void printParsedPacket(parsed_packet *p);
-
-/**
  * @brief Get the Flow Label value of a parsed_packet.
  *
  * @param p
@@ -266,14 +233,6 @@ int printTraceroute(traceroute *t);
 int printHop(hop *h);
 
 /**
- * @brief Convert a traceroute object to JSON.
- *
- * @param t
- * @return char*
- */
-char *tracerouteToJSON(traceroute *t);
-
-/**
  * @brief Gets the current time (GMT)
  *
  * @return A struct representation of the current time in GMT
@@ -289,17 +248,6 @@ struct tm *getCurrentTime(void);
  * @return int
  */
 int appendHop(hop *h, traceroute *t);
-
-///**
-//* @brief Appends an address-object to the next available spot in the
-//* hops-array. Returns -1 if the array is full, 0 if executed correctly.
-//*
-//* @param a
-//* @param t
-//* @return int Returns -1 if the array is full, 0 if executed correctly with no
-//* errors.
-//*/
-// int appendAddress(address *a, traceroute *t, uint8_t hopnumber, uint32_t returned_flowlabel);
 
 /**
  * @brief Loads a .pt-file into memory and converts its content into an
@@ -412,16 +360,6 @@ int readTracerouteArrayFromFile(char *filename, traceroute *tr_arr[], int arrayS
  */
 int serialize_csv(char *fileName, traceroute *t);
 
-///**
-//* @brief Deserializes a traceroute-object in CSV-format from file.
-//*
-//* @param fileName
-//* @param t
-//* @param offset
-//* @return int
-//*/
-// int deserialize_csv(char *fileName, traceroute *t, long offset);
-
 /**
  * @brief Serializes a traceroute object and writes it to file as a
  * raw sequence of bytes.
@@ -431,16 +369,6 @@ int serialize_csv(char *fileName, traceroute *t);
  * @return int
  */
 int serialize_bytes(char *fileName, traceroute *t);
-
-///**
-//* @brief Deserializes a traceroute object from a raw sequence of bytes.
-//*
-//* @param fileName
-//* @param t
-//* @param offset
-//* @return int
-//*/
-// int deserialize_bytes(char *fileName, traceroute *t, long offset);
 
 /**
  * @brief Creates a timestamp of the current time represented
@@ -475,7 +403,6 @@ struct in6_addr *convert_address_string(char *ipv6_address_string);
  * @param i6 Pointer to the IPv6-address to be hashed.
  * @return int
  */
-// int update_path_hash(traceroute *t, address *i6);
 
 /**
  * @brief Get the inner ipv6 header object
@@ -483,7 +410,7 @@ struct in6_addr *convert_address_string(char *ipv6_address_string);
  * @param p The raw IPv6 packet.
  * @return ipv6_header* Pointer to the inner IPv6-header.
  */
-ipv6_header *get_inner_ipv6_header(const uint8_t *first_byte);
+ipv6_header *get_inner_ipv6_header(uint8_t *first_byte);
 
 /**
  * @brief Create destination, Create a newly allocated struct in6_addr.
@@ -509,4 +436,16 @@ struct in6_addr *get_destination(void);
  */
 const char *printAddress(struct in6_addr *i6);
 
+/**
+ * @brief Creates a hash of all the address_tuples in a path and returns the resulting
+ * digest.
+ *
+ * @param arr Ordered list of address pointers that combined comprise a path.
+ * @param arraySize Size of the addr_tuple array.
+ * @return  Pointer to the newly created SHA1 digest.
+ *
+ * NB! Code must be linked with libopenSSL in order for this to work.
+ * Linkage example: gcc sha1-in-c.c -lcrypto
+ */
+uint8_t *hashPathTuple(addr_tuple arr[], int arraySize);
 #endif
