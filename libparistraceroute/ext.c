@@ -585,9 +585,12 @@ int serialize_csv(char *fileName, traceroute *t)
         }
     }
 
-    /* Write to file */
-    static const char *HOP_FORMAT_OUT = "%d, %d, %s, %s, ";
-    static const char *HOP_FORMAT_LAST = "%d, %d, %s, %s";
+    /* Output format definitions */
+    static const char *STRING_FORMAT_OUT = "%s ";
+    static const char *NUMBER_FORMAT_OUT = "%d ";
+    static const char *STRING_FORMAT_LAST = "%s, ";
+    static const char *STRING_FORMAT_LAST_COLUMN = "%s";
+    static const char *NUMBER_FORMAT_LAST = "%d, ";
     static const char *TR_FORMAT_OUT = "%d, %d, %s, %s, %s, %s, %s, %s, %d, ";
 
     char src_addr[INET6_ADDRSTRLEN + 1];
@@ -614,6 +617,7 @@ int serialize_csv(char *fileName, traceroute *t)
             t->path_id,
             t->hop_count);
 
+    /* Write hop addresses */
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
@@ -622,38 +626,60 @@ int serialize_csv(char *fileName, traceroute *t)
         if (i < t->hop_count - 1)
         {
             /* Write to file */
-            fprintf(file, HOP_FORMAT_OUT,
-                    t->hops[i].hopnumber,
-                    t->hops[i].returned_flowlabel,
-                    hop_addr,
-                    t->hops[i].hop_asn);
-#ifdef EXT_DEBUG
-            /* Write to stdout */
-            printf(HOP_FORMAT_OUT,
-                   t->hops[i].hopnumber,
-                   t->hops[i].returned_flowlabel,
-                   hop_addr,
-                   t->hops[i].hop_asn);
-#endif
+            fprintf(file, STRING_FORMAT_OUT, hop_addr);
         }
         else
         {
             /* Write to file */
-            fprintf(file, HOP_FORMAT_LAST,
-                    t->hops[i].hopnumber,
-                    t->hops[i].returned_flowlabel,
-                    hop_addr,
-                    t->hops[i].hop_asn);
-#ifdef EXT_DEBUG
-            /* Write to stdout */
-            printf(HOP_FORMAT_LAST,
-                   t->hops[i].hopnumber,
-                   t->hops[i].returned_flowlabel,
-                   hop_addr,
-                   t->hops[i].hop_asn);
-#endif
+            fprintf(file, STRING_FORMAT_LAST, hop_addr);
         }
     }
+
+    /* Write hop numbers */
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        if (i < t->hop_count - 1)
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_OUT, t->hops[i].hopnumber);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_LAST, t->hops[i].hopnumber);
+        }
+    }
+
+    /* Write returned flow labels*/
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        if (i < t->hop_count - 1)
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_OUT, t->hops[i].returned_flowlabel);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_LAST, t->hops[i].returned_flowlabel);
+        }
+    }
+
+    /* Write hop ASN */
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        if (i < t->hop_count - 1)
+        {
+            /* Write to file */
+            fprintf(file, STRING_FORMAT_OUT, t->hops[i].hop_asn);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, STRING_FORMAT_LAST_COLUMN, t->hops[i].hop_asn);
+        }
+    }
+
     fprintf(file, "\n");
     flock(fileno(file), LOCK_UN); // unlock file
     fclose(file);
