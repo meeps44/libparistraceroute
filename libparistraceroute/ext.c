@@ -204,6 +204,16 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
                 case ICMP_TIME_EXCEEDED:
                     inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
                     return inner_ipv6;
+                case ICMP_DESTINATION_UNREACHABLE:
+                    if (icmp6->code == 4)
+                    {
+                        inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+                        return inner_ipv6;
+                    }
+                    else
+                    {
+                        return NULL;
+                    }
                 default:
 #ifdef EXT_DEBUG
                     fprintf(stderr, "get_inner_ipv6_header: Error: ICMP type is not ICMP_TIME_EXCEEDED. \
