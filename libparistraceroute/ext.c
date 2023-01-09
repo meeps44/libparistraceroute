@@ -46,13 +46,14 @@ traceroute *createTraceroute()
     return t;
 }
 
-int init_traceroute(char *src_ip, char *dst_ip)
+int init_traceroute(long start_time, char *src_ip, char *dst_ip)
 {
     if (t == NULL)
         return -1;
 
     /* Set timestamp */
-    t->timestamp = create_timestamp();
+    // t->timestamp = create_timestamp();
+    t->start_time = start_time;
 
     /* Set source ip */
     inet_pton(AF_INET6, src_ip, &t->source_ip);
@@ -723,14 +724,37 @@ int db_create_table(sqlite3 *db)
     char *sql;
 
     /* Create table */
+    /*
+    traceroute struct:
+    {
+        long start_time;
+        uint16_t outgoing_tcp_port;
+        int outgoing_flow_label;
+        struct in6_addr source_ip;
+        char source_asn[200];
+        struct in6_addr destination_ip;
+        char destination_asn[200];
+        char path_id[SHA_DIGEST_LENGTH + 1]; // +1 for terminating null-character
+        uint8_t hop_count;
+        hop hops[HOP_MAX]; // maximum hop length is 35. any hops longer than that do not get included.
+    }
+    */
+
     sql = "CREATE TABLE TRACEROUTES("
-          "NAME           TEXT    NOT NULL,"
-          "AGE            INT     NOT NULL,"
-          "ADDRESS        TEXT,"
-          "SALARY         REAL );";
+          "START_TIME                INT      NOT NULL,"
+          "SOURCE_TCP_PORT           INT      NOT NULL,"
+          "SOURCE_FLOW_LABEL         INT      NOT NULL,"
+          "SOURCE_IP                 TEXT     NOT NULL,"
+          "SOURCE_ASN                TEXT     NOT NULL,"
+          "DESTINATION_IP            TEXT     NOT NULL,"
+          "DESTINATION_ASN           TEXT     NOT NULL,"
+          "PATH_HASH                 TEXT     NOT NULL,"
+          "HOP_COUNT                 INT      NOT NULL,"
+          "HOP_IP_ADDRESSES          TEXT     NOT NULL,"
+          "HOPS_RETURNED_FLOW_LABELS TEXT     NOT NULL,"
+          "HOPS_ASNS                 TEXT     NOT NULL);";
     if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &errMsg)) != SQLITE_OK)
     {
-
         fprintf(stderr, "DB table creation failed: %s\n", errMsg);
         return result_code;
     }
