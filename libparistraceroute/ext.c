@@ -739,12 +739,13 @@ int db_create_table(sqlite3 *db)
     return result_code;
 }
 
-static int db_callback(void *unused, int argc, char **argv, char **column_name)
+static int db_callback(void *unused, int column_count, char **data, char **columns)
 {
     int i;
-    for (i = 0; i < argc; i++)
+    for (i = 0; i < column_count; i++)
     {
-        printf("%s = %s\n", column_name[i], argv[i] ? argv[i] : "NULL");
+        // For each column in the row, print its data
+        printf("%s = %s\n", columns[i], data[i] ? data[i] : "NULL");
     }
     printf("\n");
     return 0;
