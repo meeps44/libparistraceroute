@@ -686,6 +686,84 @@ int serialize_csv(char *fileName, traceroute *t)
     return 0;
 }
 
+sqlite3 *db_open_and_init(char *filename)
+{
+    sqlite3 *db;
+    char *errMsg;
+    int result_code;
+    char *sql;
+
+    result_code = sqlite3_open(filename, &db);
+    if (result_code)
+    {
+        fprintf(stderr, "Can't open database %s\n", sqlite3_errmsg(db));
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        fprintf(stderr, "Database opened successfully\n");
+    }
+
+    /*
+        From the documentation:
+        "This function registers an internal busy handler that keeps attempting to acquire a busy lock until the total specified time has passed.
+        Because this function registers an internal busy handler, any current busy handler is removed.
+        The timeout value can be explicitly removed by setting a timeout value of zero."
+    */
+    /* Set busy timeout */
+    sqlite3_busy_timeout(db, 120000); // 120 seconds
+
+    return db;
+}
+
+int db_create_table(sqlite3 *db)
+{
+    char *errMsg;
+    int result_code;
+    char *sql;
+
+    /* Create table */
+    sql = "CREATE TABLE TRACEROUTES("
+          "NAME           TEXT    NOT NULL,"
+          "AGE            INT     NOT NULL,"
+          "ADDRESS        TEXT,"
+          "SALARY         REAL );";
+    if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &errMsg)) != SQLITE_OK)
+    {
+
+        fprintf(stderr, "DB table creation failed: %s\n", errMsg);
+        return result_code;
+    }
+
+    fprintf(stderr, "DB table created successfully\n");
+    return result_code;
+}
+
+static int db_callback(void *unused, int argc, char **argv, char **column_name)
+{
+    int i;
+    for (i = 0; i < argc; i++)
+    {
+        printf("%s = %s\n", column_name[i], argv[i] ? argv[i] : "NULL");
+    }
+    printf("\n");
+    return 0;
+}
+
+int db_insert(sqlite3 *db, traceroute *t)
+{
+    char *errMsg;
+    int result_code;
+    char *sql;
+    /* Insert into table */
+    sql = "INSERT INTO TRACEROUTES (NAME,AGE,ADDRESS,SALARY) "
+          "";
+    if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &errMsg)) != SQLITE_OK)
+    {
+        fprintf(stderr, "DB command execution failed: %s\n", errMsg);
+    }
+}
+
 int serialize_bytes(char *fileName, traceroute *t)
 {
     FILE *file;

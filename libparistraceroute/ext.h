@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <openssl/sha.h> // SHA1
 #include <netinet/in.h>  //in6_addr
+#include <sqlite3.h>
 #include "packet.h"
 
 #define HOP_MAX 35
