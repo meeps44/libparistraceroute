@@ -97,7 +97,7 @@ typedef struct traceroute
     long start_time;
     uint16_t outgoing_tcp_port;
     int outgoing_flow_label;
-    // char *timestamp;
+    char *timestamp;
     struct in6_addr source_ip;
     char source_asn[200];
     struct in6_addr destination_ip;
