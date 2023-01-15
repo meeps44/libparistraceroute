@@ -791,11 +791,11 @@ int db_close(sqlite3 *db)
 
     if ((result_code = sqlite3_close(db)) != SQLITE_OK)
     {
-        fprintf(stderr, "Debug: DB connection close failed: %s\n");
+        fprintf(stderr, "Debug: DB connection failed to close successfully\n");
     }
     else
     {
-        fprintf(stderr, "Debug: DB connection closed successfully: %s\n");
+        fprintf(stderr, "Debug: DB connection closed successfully\n");
     }
     return result_code;
 }
