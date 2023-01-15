@@ -689,12 +689,21 @@ int serialize_csv(char *fileName, traceroute *t)
 
 char *inet_addr_to_string(struct in6_addr *addr)
 {
-    const size_t BUFFERSIZE = INET6_ADDRSTRLEN + 1;
+    const size_t BUFFERSIZE = INET6_ADDRSTRLEN + 3;
     char *addr_str = malloc(sizeof(char) * BUFFERSIZE);
 
+    /* Insert opening string quotation mark */
+    strncat(addr_str, "\"", 2);
+
     /* Convert address to string */
-    inet_ntop(AF_INET6, addr, addr_str, BUFFERSIZE);
-    memcpy(&addr_str[46], "\0", 1);
+    inet_ntop(AF_INET6, addr, (addr_str + 1), BUFFERSIZE);
+
+    /* Insert closing string quotation mark */
+    strncat(addr_str, "\"", 2);
+
+    /* Remove final whitespace */
+    addr_str[BUFFERSIZE - 1] = '\0';
+    // memcpy(&addr_str[46], "\0", 1);
 
     return addr_str;
 }
