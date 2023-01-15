@@ -796,6 +796,7 @@ int db_insert(sqlite3 *db, traceroute *t)
     char *hnts = hop_numbers_to_string(t);
     char *hrfts = hop_returned_flowlabels_to_string(t);
     char *hats = hop_asns_to_string(t);
+    char *hash = path_id_to_string(t->path_id);
 
     fprintf(stderr, "Debug: db_insert strings:\n%s\n%s\n%s\n%s\n%s\n%s\n",
             src_ip, dst_ip, hiats, hnts, hrfts, hats);
@@ -821,7 +822,7 @@ int db_insert(sqlite3 *db, traceroute *t)
             t->source_asn,
             dst_ip,
             t->destination_asn,
-            t->path_id,
+            hash,
             t->hop_count,
             hiats,
             hnts,
@@ -865,6 +866,7 @@ int db_insert(sqlite3 *db, traceroute *t)
         free(hnts);
         free(hrfts);
         free(hats);
+        free(hash);
         fprintf(stderr, "Debug: DB insert failed: %s\n", error_message);
         return result_code;
     }
@@ -874,9 +876,20 @@ int db_insert(sqlite3 *db, traceroute *t)
     free(hnts);
     free(hrfts);
     free(hats);
+    free(hash);
 
     fprintf(stderr, "Debug: DB insert completed successfully: %s\n", error_message);
     return result_code;
+}
+
+char *path_id_to_string(char *path_id)
+{
+    char *s_buffer = malloc(sizeof(char) * 23);
+    s_buffer[0] = '\"';
+    memcpy((s_buffer + 1), path_id, 20);
+    s_buffer[strlen(s_buffer) - 2] = '\"';
+    s_buffer[strlen(s_buffer) - 1] = '\0';
+    return s_buffer;
 }
 
 char *hop_ip_addresses_to_string(traceroute *t)

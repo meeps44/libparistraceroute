@@ -469,6 +469,8 @@ char *hop_returned_flowlabels_to_string(traceroute *t);
 
 char *hop_asns_to_string(traceroute *t);
 
+char *path_id_to_string(char *path_id);
+
 int serialize_bytes(char *fileName, traceroute *t);
 
 #endif
