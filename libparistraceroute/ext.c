@@ -851,7 +851,7 @@ int db_insert(sqlite3 *db, traceroute *t)
             t->source_asn,
             dst_ip,
             t->destination_asn,
-            t->path_id,
+            hash,
             t->hop_count,
             hiats,
             hnts,
@@ -884,11 +884,12 @@ int db_insert(sqlite3 *db, traceroute *t)
 
 char *path_id_to_string(char *path_id)
 {
-    char *s_buffer = malloc(sizeof(char) * 23);
+    const int BUFFERSIZE = 24;
+    char *s_buffer = malloc(sizeof(char) * BUFFERSIZE);
     s_buffer[0] = '\"';
     memcpy((s_buffer + 1), path_id, 20);
-    s_buffer[strlen(s_buffer) - 2] = '\"';
-    s_buffer[strlen(s_buffer) - 1] = '\0';
+    s_buffer[BUFFERSIZE - 2] = '\"';
+    s_buffer[BUFFERSIZE - 1] = '\0';
     return s_buffer;
 }
 
