@@ -723,6 +723,9 @@ sqlite3 *db_open_and_init(char *filename)
     /* Set busy timeout */
     sqlite3_busy_timeout(db, 120000); // 120 seconds
 
+    /* Create traceoute_data table */
+    db_create_table(db);
+
     return db;
 }
 
@@ -733,7 +736,7 @@ int db_create_table(sqlite3 *db)
     char *sql;
 
     /* Create table */
-    sql = "CREATE TABLE TRACEROUTE_DATA("
+    sql = "CREATE TABLE IF NOT EXISTS TRACEROUTE_DATA("
           "START_TIME                INT      NOT NULL,"
           "SOURCE_TCP_PORT           INT      NOT NULL,"
           "SOURCE_FLOW_LABEL         INT      NOT NULL,"
@@ -747,13 +750,17 @@ int db_create_table(sqlite3 *db)
           "HOP_NUMBERS               TEXT     NOT NULL,"
           "HOP_RETURNED_FLOW_LABELS  TEXT     NOT NULL,"
           "HOP_ASNS                  TEXT     NOT NULL);";
+    fprintf(stderr, "Creating DB table\n");
     if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &error_message)) != SQLITE_OK)
     {
-        fprintf(stderr, "Debug: DB table creation failed: %s\n", error_message);
+        fprintf(stderr, "Debug: Create DB table error: %s\n", error_message);
         return result_code;
     }
+    else
+    {
+        fprintf(stderr, "Debug: DB table created successfully\n");
+    }
 
-    fprintf(stderr, "Debug: DB table created successfully\n");
     return result_code;
 }
 
