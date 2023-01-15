@@ -785,6 +785,21 @@ int db_callback(void *unused, int column_count, char **data, char **columns)
     return 0;
 }
 
+int db_close(sqlite3 *db)
+{
+    int result_code;
+
+    if ((result_code = sqlite3_close(db)) != SQLITE_OK)
+    {
+        fprintf(stderr, "Debug: DB connection close failed: %s\n");
+    }
+    else
+    {
+        fprintf(stderr, "Debug: DB connection closed successfully: %s\n");
+    }
+    return result_code;
+}
+
 int db_insert(sqlite3 *db, traceroute *t)
 {
     char *error_message;
@@ -878,7 +893,7 @@ int db_insert(sqlite3 *db, traceroute *t)
     free(hats);
     free(hash);
 
-    fprintf(stderr, "Debug: DB insert completed successfully: %s\n", error_message);
+    fprintf(stderr, "Debug: DB insert completed successfully\n");
     return result_code;
 }
 

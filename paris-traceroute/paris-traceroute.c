@@ -569,7 +569,9 @@ int main(int argc, char **argv)
     /* Traceroute all done. Saving results to disk. */
     // serialize_csv(csv_file, t);
     db_insert(db, t);
-    sqlite3_close(db);
+    fprintf(stderr, "Debug: Closing DB connection\n");
+    // sqlite3_close(db);
+    db_close(db);
     //  END ERLEND //
 
     // Leave the program
