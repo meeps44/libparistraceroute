@@ -874,6 +874,10 @@ char *hop_ip_addresses_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char hop_addr[INET6_ADDRSTRLEN];
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
+
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string */
@@ -882,6 +886,9 @@ char *hop_ip_addresses_to_string(traceroute *t)
         strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
         strncat(s_buffer, " ", 2);
     }
+
+    /* Insert closing string quotation mark */
+    strncat(s_buffer, "\"", 2);
 
     /* Remove final whitespace */
     s_buffer[strlen(s_buffer) - 1] = '\0';
@@ -892,6 +899,9 @@ char *hop_numbers_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char i_buffer[100];
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert hop number to string */
@@ -900,6 +910,9 @@ char *hop_numbers_to_string(traceroute *t)
         strncat(s_buffer, i_buffer, 2048);
         strncat(s_buffer, " ", 2);
     }
+
+    /* Insert closing string quotation mark */
+    strncat(s_buffer, "\"", 2);
 
     /* Remove final whitespace */
     s_buffer[strlen(s_buffer) - 1] = '\0';
@@ -910,6 +923,9 @@ char *hop_returned_flowlabels_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char i_buffer[100];
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert hop number to string */
@@ -919,6 +935,9 @@ char *hop_returned_flowlabels_to_string(traceroute *t)
         strncat(s_buffer, " ", 2);
     }
 
+    /* Insert closing string quotation mark */
+    strncat(s_buffer, "\"", 2);
+
     /* Remove final whitespace */
     s_buffer[strlen(s_buffer) - 1] = '\0';
     return s_buffer;
@@ -927,11 +946,17 @@ char *hop_returned_flowlabels_to_string(traceroute *t)
 char *hop_asns_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
     for (int i = 0; i < t->hop_count; i++)
     {
         strncat(s_buffer, t->hops->hop_asn, 2048);
         strncat(s_buffer, " ", 2);
     }
+
+    /* Insert closing string quotation mark */
+    strncat(s_buffer, "\"", 2);
 
     /* Remove final whitespace */
     s_buffer[strlen(s_buffer) - 1] = '\0';
