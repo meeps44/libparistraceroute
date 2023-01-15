@@ -896,11 +896,11 @@ char *hop_ip_addresses_to_string(traceroute *t)
         strncat(s_buffer, " ", 2);
     }
 
-    /* Insert closing string quotation mark */
-    strncat(s_buffer, "\"", 2);
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
 
     /* Remove final whitespace */
-    s_buffer[strlen(s_buffer) - 1] = '\0';
+    // s_buffer[strlen(s_buffer) - 1] = '\0';
     return s_buffer;
 }
 
@@ -920,11 +920,8 @@ char *hop_numbers_to_string(traceroute *t)
         strncat(s_buffer, " ", 2);
     }
 
-    /* Insert closing string quotation mark */
-    strncat(s_buffer, "\"", 2);
-
-    /* Remove final whitespace */
-    s_buffer[strlen(s_buffer) - 1] = '\0';
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
     return s_buffer;
 }
 
@@ -945,10 +942,10 @@ char *hop_returned_flowlabels_to_string(traceroute *t)
     }
 
     /* Insert closing string quotation mark */
-    strncat(s_buffer, "\"", 2);
+    // strncat(s_buffer, "\"", 2);
 
-    /* Remove final whitespace */
-    s_buffer[strlen(s_buffer) - 1] = '\0';
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
     return s_buffer;
 }
 
@@ -964,11 +961,8 @@ char *hop_asns_to_string(traceroute *t)
         strncat(s_buffer, " ", 2);
     }
 
-    /* Insert closing string quotation mark */
-    strncat(s_buffer, "\"", 2);
-
-    /* Remove final whitespace */
-    s_buffer[strlen(s_buffer) - 1] = '\0';
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
     return s_buffer;
 }
 
