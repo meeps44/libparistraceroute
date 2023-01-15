@@ -798,8 +798,8 @@ int db_insert(sqlite3 *db, traceroute *t)
     char *hats = hop_asns_to_string(t);
     char *hash = path_id_to_string(t->path_id);
 
-    fprintf(stderr, "Debug: db_insert strings:\n%s\n%s\n%s\n%s\n%s\n%s\n",
-            src_ip, dst_ip, hiats, hnts, hrfts, hats);
+    fprintf(stderr, "Debug: db_insert strings:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+            src_ip, dst_ip, hiats, hnts, hrfts, hats, hash);
     fprintf(stderr,
             "INSERT INTO TRACEROUTE_DATA (START_TIME,\
     SOURCE_TCP_PORT,\
@@ -884,7 +884,7 @@ int db_insert(sqlite3 *db, traceroute *t)
 
 char *path_id_to_string(char *path_id)
 {
-    const int BUFFERSIZE = 24;
+    const int BUFFERSIZE = 23;
     char *s_buffer = malloc(sizeof(char) * BUFFERSIZE);
     s_buffer[0] = '\"';
     memcpy((s_buffer + 1), path_id, 20);
