@@ -687,6 +687,18 @@ int serialize_csv(char *fileName, traceroute *t)
     return 0;
 }
 
+char *inet_addr_to_string(struct in6_addr *addr)
+{
+    const size_t BUFFERSIZE = INET6_ADDRSTRLEN + 1;
+    char *addr_str = malloc(sizeof(char) * BUFFERSIZE);
+
+    /* Convert address to string */
+    inet_ntop(AF_INET6, addr, addr_str, BUFFERSIZE);
+    memcpy(&addr_str[46], "\0", 1);
+
+    return addr_str;
+}
+
 sqlite3 *db_open_and_init(char *filename)
 {
     sqlite3 *db;
@@ -765,6 +777,9 @@ int db_insert(sqlite3 *db, traceroute *t)
     char *error_message;
     int result_code;
     char sql[4096];
+    char *src_ip = inet_addr_to_string(&t->source_ip);
+    char *dst_ip = inet_addr_to_string(&t->destination_ip);
+
     sprintf(sql,
             "INSERT INTO TRACEROUTE_DATA (START_TIME,\
     SOURCE_TCP_PORT,\
@@ -779,13 +794,13 @@ int db_insert(sqlite3 *db, traceroute *t)
     HOP_NUMBERS,\
     HOP_RETURNED_FLOW_LABELS,\
     HOP_ASNS) \
-    VALUES (%d,%d,%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s);",
+    VALUES (%ld,%d,%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s);",
             t->start_time,
             t->outgoing_tcp_port,
             t->outgoing_flow_label,
-            t->source_ip,
+            src_ip,
             t->source_asn,
-            t->destination_ip,
+            dst_ip,
             t->destination_asn,
             t->path_id,
             t->hop_count,
@@ -796,26 +811,22 @@ int db_insert(sqlite3 *db, traceroute *t)
     /* Insert into table */
     if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &error_message)) != SQLITE_OK)
     {
+        free(src_ip);
+        free(dst_ip);
         fprintf(stderr, "Debug: DB command execution failed: %s\n", error_message);
         return result_code;
     }
+    free(src_ip);
+    free(dst_ip);
+
     fprintf(stderr, "Debug: Insert to DB completed successfully: %s\n", error_message);
     return result_code;
-}
-
-// Unused
-// TODO: Implement if needed
-static char **hop_to_strings(traceroute *t)
-{
-    char **hop_elements = malloc(sizeof(char *) * 4);
-    return hop_elements;
 }
 
 static char *hop_ip_addresses_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char hop_addr[INET6_ADDRSTRLEN];
-    int buffer_index = 0;
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string */
@@ -869,10 +880,9 @@ static char *hop_returned_flowlabels_to_string(traceroute *t)
 static char *hop_asns_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
-    char i_buffer[100];
     for (int i = 0; i < t->hop_count; i++)
     {
-        strncat(s_buffer, t->hops->hop_asn, sizeof(t->hops->hop_asn));
+        strncat(s_buffer, t->hops->hop_asn, 4096);
         strncat(s_buffer, " ", 2);
     }
 

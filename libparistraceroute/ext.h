@@ -450,4 +450,25 @@ const char *printAddress(struct in6_addr *i6);
  * Linkage example: gcc sha1-in-c.c -lcrypto
  */
 uint8_t *hashPathTuple(addr_tuple arr[], int arraySize);
+
+char *inet_addr_to_string(struct in6_addr *addr);
+
+sqlite3 *db_open_and_init(char *filename);
+
+int db_create_table(sqlite3 *db);
+
+static int db_callback(void *unused, int column_count, char **data, char **columns);
+
+int db_insert(sqlite3 *db, traceroute *t);
+
+static char *hop_ip_addresses_to_string(traceroute *t);
+
+static char *hop_numbers_to_string(traceroute *t);
+
+static char *hop_returned_flowlabels_to_string(traceroute *t);
+
+static char *hop_asns_to_string(traceroute *t);
+
+int serialize_bytes(char *fileName, traceroute *t);
+
 #endif
