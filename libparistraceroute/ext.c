@@ -788,6 +788,37 @@ int db_insert(sqlite3 *db, traceroute *t)
     char *hrfts = hop_returned_flowlabels_to_string(t);
     char *hats = hop_asns_to_string(t);
 
+    fprintf(stderr, "Debug: db_insert strings:\n%s\n%s\n%s\n%s\n%s\n%s\n",
+            src_ip, dst_ip, hiats, hnts, hrfts, hats);
+    fprintf(stderr,
+            "INSERT INTO TRACEROUTE_DATA (START_TIME,\
+    SOURCE_TCP_PORT,\
+    SOURCE_FLOW_LABEL,\
+    SOURCE_IP,\
+    SOURCE_ASN,\
+    DESTINATION_IP,\
+    DESTINATION_ASN,\
+    PATH_HASH,\
+    HOP_COUNT,\
+    HOP_IP_ADDRESSES,\
+    HOP_NUMBERS,\
+    HOP_RETURNED_FLOW_LABELS,\
+    HOP_ASNS) \
+    VALUES (%ld,%d,%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s);",
+            t->start_time,
+            t->outgoing_tcp_port,
+            t->outgoing_flow_label,
+            src_ip,
+            t->source_asn,
+            dst_ip,
+            t->destination_asn,
+            t->path_id,
+            t->hop_count,
+            hiats,
+            hnts,
+            hrfts,
+            hats);
+
     sprintf(sql,
             "INSERT INTO TRACEROUTE_DATA (START_TIME,\
     SOURCE_TCP_PORT,\
@@ -825,7 +856,7 @@ int db_insert(sqlite3 *db, traceroute *t)
         free(hnts);
         free(hrfts);
         free(hats);
-        fprintf(stderr, "Debug: DB command execution failed: %s\n", error_message);
+        fprintf(stderr, "Debug: DB insert failed: %s\n", error_message);
         return result_code;
     }
     free(src_ip);
@@ -835,7 +866,7 @@ int db_insert(sqlite3 *db, traceroute *t)
     free(hrfts);
     free(hats);
 
-    fprintf(stderr, "Debug: Insert to DB completed successfully: %s\n", error_message);
+    fprintf(stderr, "Debug: DB insert completed successfully: %s\n", error_message);
     return result_code;
 }
 
