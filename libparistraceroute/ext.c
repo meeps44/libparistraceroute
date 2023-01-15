@@ -970,7 +970,7 @@ char *hop_asns_to_string(traceroute *t)
     strncat(s_buffer, "\"", 2);
     for (int i = 0; i < t->hop_count; i++)
     {
-        strncat(s_buffer, t->hops->hop_asn, 2048);
+        strncat(s_buffer, t->hops[i].hop_asn, 2048);
         strncat(s_buffer, " ", 2);
     }
 
