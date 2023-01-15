@@ -702,10 +702,7 @@ char *inet_addr_to_string(struct in6_addr *addr)
 sqlite3 *db_open_and_init(char *filename)
 {
     sqlite3 *db;
-    char *error_message;
     int result_code;
-    char *sql;
-
     result_code = sqlite3_open(filename, &db);
     if (result_code)
     {
@@ -760,7 +757,7 @@ int db_create_table(sqlite3 *db)
     return result_code;
 }
 
-static int db_callback(void *unused, int column_count, char **data, char **columns)
+int db_callback(void *unused, int column_count, char **data, char **columns)
 {
     int i;
     for (i = 0; i < column_count; i++)
@@ -779,6 +776,10 @@ int db_insert(sqlite3 *db, traceroute *t)
     char sql[4096];
     char *src_ip = inet_addr_to_string(&t->source_ip);
     char *dst_ip = inet_addr_to_string(&t->destination_ip);
+    char *hiats = hop_ip_addresses_to_string(t);
+    char *hnts = hop_numbers_to_string(t);
+    char *hrfts = hop_returned_flowlabels_to_string(t);
+    char *hats = hop_asns_to_string(t);
 
     sprintf(sql,
             "INSERT INTO TRACEROUTE_DATA (START_TIME,\
@@ -804,26 +805,34 @@ int db_insert(sqlite3 *db, traceroute *t)
             t->destination_asn,
             t->path_id,
             t->hop_count,
-            hop_ip_addresses_to_string(t),
-            hop_numbers_to_string(t),
-            hop_returned_flowlabels_to_string(t),
-            hop_asns_to_string(t));
+            hiats,
+            hnts,
+            hrfts,
+            hats);
     /* Insert into table */
     if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &error_message)) != SQLITE_OK)
     {
         free(src_ip);
         free(dst_ip);
+        free(hiats);
+        free(hnts);
+        free(hrfts);
+        free(hats);
         fprintf(stderr, "Debug: DB command execution failed: %s\n", error_message);
         return result_code;
     }
     free(src_ip);
     free(dst_ip);
+    free(hiats);
+    free(hnts);
+    free(hrfts);
+    free(hats);
 
     fprintf(stderr, "Debug: Insert to DB completed successfully: %s\n", error_message);
     return result_code;
 }
 
-static char *hop_ip_addresses_to_string(traceroute *t)
+char *hop_ip_addresses_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char hop_addr[INET6_ADDRSTRLEN];
@@ -841,7 +850,7 @@ static char *hop_ip_addresses_to_string(traceroute *t)
     return s_buffer;
 }
 
-static char *hop_numbers_to_string(traceroute *t)
+char *hop_numbers_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char i_buffer[100];
@@ -850,7 +859,7 @@ static char *hop_numbers_to_string(traceroute *t)
         /* Convert hop number to string */
         sprintf(i_buffer, "%d", t->hops[i].hopnumber);
         /* Concat hop number with string buffer */
-        strncat(s_buffer, i_buffer, strlen(i_buffer));
+        strncat(s_buffer, i_buffer, 2048);
         strncat(s_buffer, " ", 2);
     }
 
@@ -859,7 +868,7 @@ static char *hop_numbers_to_string(traceroute *t)
     return s_buffer;
 }
 
-static char *hop_returned_flowlabels_to_string(traceroute *t)
+char *hop_returned_flowlabels_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char i_buffer[100];
@@ -868,7 +877,7 @@ static char *hop_returned_flowlabels_to_string(traceroute *t)
         /* Convert hop number to string */
         sprintf(i_buffer, "%d", t->hops[i].returned_flowlabel);
         /* Concat hop number with string buffer */
-        strncat(s_buffer, i_buffer, strlen(i_buffer));
+        strncat(s_buffer, i_buffer, 2048);
         strncat(s_buffer, " ", 2);
     }
 
@@ -877,12 +886,12 @@ static char *hop_returned_flowlabels_to_string(traceroute *t)
     return s_buffer;
 }
 
-static char *hop_asns_to_string(traceroute *t)
+char *hop_asns_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     for (int i = 0; i < t->hop_count; i++)
     {
-        strncat(s_buffer, t->hops->hop_asn, 4096);
+        strncat(s_buffer, t->hops->hop_asn, 2048);
         strncat(s_buffer, " ", 2);
     }
 

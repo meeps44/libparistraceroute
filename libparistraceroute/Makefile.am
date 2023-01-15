@@ -88,8 +88,7 @@ nobase_libparistraceroute_@LIBRARY_VERSION@_la_HEADERS =  \
                         cJSON.h \
                         hashmap.h \
                         patricia_wrapper.h \
-                        patricia.h \
-                        sqlite3.h
+                        patricia.h
 
 nodist_nobase_libparistraceroute_@LIBRARY_VERSION@_la_HEADERS = \
     config.h

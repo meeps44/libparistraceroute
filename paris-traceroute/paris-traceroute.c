@@ -342,7 +342,7 @@ int main(int argc, char **argv)
     bool use_icmp, use_udp, use_tcp;
     // BEGIN ERLEND //
     int flow_label;
-    char *csv_file;
+    // char *csv_file;
     char *db_file;
     uint16_t dport_tmp = 0;
     traceroute *t;
@@ -373,7 +373,7 @@ int main(int argc, char **argv)
     db_file = argv[argc - 3];
     // csv_file = argv[argc - 3];
     src_ip = argv[argc - 4];
-    start_time = argv[argc - 5];
+    start_time = atoi(argv[argc - 5]);
     set_flow_label(flow_label);
     sqlite3 *db = db_open_and_init(db_file);
     // END ERLEND //
