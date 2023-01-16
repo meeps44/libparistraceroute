@@ -807,7 +807,7 @@ void db_close(sqlite3 *db)
     sqlite3_close(db);
 }
 
-int db_insert(sqlite3 *db, traceroute *t, char *src_ip, char dst_ip)
+int db_insert(sqlite3 *db, traceroute *t, char *src_ip, char *dst_ip)
 {
     char *error_message;
     int result_code;

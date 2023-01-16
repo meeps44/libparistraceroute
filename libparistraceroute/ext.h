@@ -459,7 +459,7 @@ int db_create_table(sqlite3 *db);
 
 int db_callback(void *unused, int column_count, char **data, char **columns);
 
-int db_insert(sqlite3 *db, traceroute *t, char *src_ip, char dst_ip);
+int db_insert(sqlite3 *db, traceroute *t, char *src_ip, char *dst_ip);
 
 char *hop_ip_addresses_to_string(traceroute *t);
 
