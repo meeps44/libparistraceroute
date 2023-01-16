@@ -572,6 +572,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Debug: Closing DB connection\n");
     // sqlite3_close(db);
     db_close(db);
+    fprintf(stderr, "Debug: All done! Freeing memory and calling exit()\n");
     //  END ERLEND //
 
     // Leave the program
