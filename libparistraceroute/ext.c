@@ -807,11 +807,13 @@ void db_close(sqlite3 *db)
     sqlite3_close(db);
 }
 
-int db_insert(sqlite3 *db, traceroute *t)
+int db_insert(sqlite3 *db, traceroute *t, char *src_ip, char dst_ip)
 {
     char *error_message;
     int result_code;
     char sql[4096];
+
+    /*
     char src_ip[INET6_ADDRSTRLEN + 2];
     char dst_ip[INET6_ADDRSTRLEN + 2];
     // char *src_ip = inet_addr_to_string(&t->source_ip);
@@ -824,6 +826,7 @@ int db_insert(sqlite3 *db, traceroute *t)
     // src_ip[strlen(src_ip) + 1] = '\0';
     dst_ip[strlen(dst_ip)] = '\"';
     // dst_ip[strlen(dst_ip) + 1] = '\0';
+    */
     char *hiats = hop_ip_addresses_to_string(t);
     char *hnts = hop_numbers_to_string(t);
     char *hrfts = hop_returned_flowlabels_to_string(t);
