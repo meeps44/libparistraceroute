@@ -471,7 +471,7 @@ char *hop_asns_to_string(traceroute *t);
 
 char *path_id_to_string(char *path_id);
 
-int db_close(sqlite3 *db);
+void db_close(sqlite3 *db);
 
 int serialize_bytes(char *fileName, traceroute *t);
 
