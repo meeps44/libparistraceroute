@@ -700,10 +700,10 @@ char *inet_addr_to_string(struct in6_addr *addr)
     // inet_ntop(AF_INET6, addr, (addr_str + 1), BUFFERSIZE);
 
     /* Insert closing string quotation mark */
-    addr_str[BUFFERSIZE - 2] = '\"';
+    addr_str[BUFFERSIZE - 3] = '\"';
 
     /* Remove final whitespace */
-    addr_str[BUFFERSIZE - 1] = '\0';
+    addr_str[BUFFERSIZE - 2] = '\0';
 
     return addr_str;
 }
