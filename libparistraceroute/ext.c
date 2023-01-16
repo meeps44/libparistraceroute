@@ -812,6 +812,7 @@ int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in)
     char *error_message;
     int result_code;
     char sql[4096];
+    size_t s_len;
 
     char src_ip[INET6_ADDRSTRLEN + 2];
     char dst_ip[INET6_ADDRSTRLEN + 2];
@@ -819,10 +820,12 @@ int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in)
     dst_ip[0] = '\"';
     strcpy((src_ip + 1), src_ip_in);
     strcpy((dst_ip + 1), dst_ip_in);
-    src_ip[strlen(src_ip)] = '\"';
-    src_ip[strlen(src_ip) + 1] = '\0';
-    dst_ip[strlen(dst_ip)] = '\"';
-    dst_ip[strlen(dst_ip) + 1] = '\0';
+    s_len = strlen(src_ip);
+    src_ip[s_len] = '\"';
+    src_ip[s_len + 1] = '\0';
+    s_len = strlen(dst_ip);
+    dst_ip[s_len] = '\"';
+    dst_ip[s_len + 1] = '\0';
     /*
     // char *src_ip = inet_addr_to_string(&t->source_ip);
     // char *dst_ip = inet_addr_to_string(&t->destination_ip);
