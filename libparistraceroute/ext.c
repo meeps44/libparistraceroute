@@ -807,15 +807,23 @@ void db_close(sqlite3 *db)
     sqlite3_close(db);
 }
 
-int db_insert(sqlite3 *db, traceroute *t, char *src_ip, char *dst_ip)
+int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in)
 {
     char *error_message;
     int result_code;
     char sql[4096];
 
-    /*
     char src_ip[INET6_ADDRSTRLEN + 2];
     char dst_ip[INET6_ADDRSTRLEN + 2];
+    src_ip[0] = '\"';
+    dst_ip[0] = '\"';
+    strcpy((src_ip + 1), src_ip_in);
+    strcpy((dst_ip + 1), dst_ip_in);
+    src_ip[strlen(src_ip)] = '\"';
+    src_ip[strlen(src_ip) + 1] = '\0';
+    dst_ip[strlen(dst_ip)] = '\"';
+    dst_ip[strlen(dst_ip) + 1] = '\0';
+    /*
     // char *src_ip = inet_addr_to_string(&t->source_ip);
     // char *dst_ip = inet_addr_to_string(&t->destination_ip);
     src_ip[0] = '\"';
