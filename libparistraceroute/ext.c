@@ -957,6 +957,7 @@ char *hop_ip_addresses_to_string(traceroute *t)
         inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
         /* Add to large string buffer */
         // strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
+        fprintf(stderr, "Debug: hop_ip_addresses_to_string: hop address: %s\n", hop_addr);
         strcat(s_buffer, hop_addr);
         strcat(s_buffer, " ");
         // strncat(s_buffer, " ", 2);
