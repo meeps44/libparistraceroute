@@ -820,10 +820,10 @@ int db_insert(sqlite3 *db, traceroute *t)
     dst_ip[0] = '\"';
     inet_ntop(AF_INET6, &t->source_ip, (src_ip + 1), INET6_ADDRSTRLEN);
     inet_ntop(AF_INET6, &t->destination_ip, (dst_ip + 1), INET6_ADDRSTRLEN);
-    src_ip[strlen(src_ip)] = '\"';
-    src_ip[strlen(src_ip) + 1] = '\0';
-    dst_ip[strlen(dst_ip)] = '\"';
-    dst_ip[strlen(dst_ip) + 1] = '\0';
+    src_ip[strlen(src_ip) - 1] = '\"';
+    // src_ip[strlen(src_ip) + 1] = '\0';
+    dst_ip[strlen(dst_ip) - 1] = '\"';
+    // dst_ip[strlen(dst_ip) + 1] = '\0';
     char *hiats = hop_ip_addresses_to_string(t);
     char *hnts = hop_numbers_to_string(t);
     char *hrfts = hop_returned_flowlabels_to_string(t);
