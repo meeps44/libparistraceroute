@@ -697,6 +697,7 @@ char *inet_addr_to_string(struct in6_addr *addr)
 
     /* Convert address to string */
     inet_ntop(AF_INET6, addr, (addr_str + 1), INET6_ADDRSTRLEN);
+    fprintf(stderr, "Debug: inet_addr_to_string addr_str: %s\n", addr_str);
     // inet_ntop(AF_INET6, addr, (addr_str + 1), BUFFERSIZE);
 
     /* Insert closing string quotation mark */
@@ -811,8 +812,18 @@ int db_insert(sqlite3 *db, traceroute *t)
     char *error_message;
     int result_code;
     char sql[4096];
-    char *src_ip = inet_addr_to_string(&t->source_ip);
-    char *dst_ip = inet_addr_to_string(&t->destination_ip);
+    char src_ip[INET6_ADDRSTRLEN + 2];
+    char dst_ip[INET6_ADDRSTRLEN + 2];
+    // char *src_ip = inet_addr_to_string(&t->source_ip);
+    // char *dst_ip = inet_addr_to_string(&t->destination_ip);
+    inet_ntop(AF_INET6, &t->source_ip, (src_ip + 1), INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, &t->destination_ip, (dst_ip + 1), INET6_ADDRSTRLEN);
+    src_ip[0] = '\"';
+    src_ip[INET6_ADDRSTRLEN] = '\"';
+    src_ip[INET6_ADDRSTRLEN + 1] = '\0';
+    dst_ip[0] = '\"';
+    dst_ip[INET6_ADDRSTRLEN] = '\"';
+    dst_ip[INET6_ADDRSTRLEN + 1] = '\0';
     char *hiats = hop_ip_addresses_to_string(t);
     char *hnts = hop_numbers_to_string(t);
     char *hrfts = hop_returned_flowlabels_to_string(t);
@@ -881,8 +892,8 @@ int db_insert(sqlite3 *db, traceroute *t)
     /* Insert into table */
     if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &error_message)) != SQLITE_OK)
     {
-        free(src_ip);
-        free(dst_ip);
+        // free(src_ip);
+        // free(dst_ip);
         free(hiats);
         free(hnts);
         free(hrfts);
@@ -891,8 +902,8 @@ int db_insert(sqlite3 *db, traceroute *t)
         fprintf(stderr, "Debug: DB insert failed: %s\n", error_message);
         return result_code;
     }
-    free(src_ip);
-    free(dst_ip);
+    // free(src_ip);
+    // free(dst_ip);
     free(hiats);
     free(hnts);
     free(hrfts);
