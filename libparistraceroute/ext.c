@@ -948,7 +948,7 @@ char *hop_ip_addresses_to_string(traceroute *t)
     size_t s_len = 0;
 
     /* Insert opening string quotation mark */
-    s_buffer[0] = "\"";
+    s_buffer[0] = '\"';
     // strncat(s_buffer, "\"", 2);
 
     for (int i = 0; i < t->hop_count; i++)
@@ -956,7 +956,8 @@ char *hop_ip_addresses_to_string(traceroute *t)
         /* Convert address to string */
         inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
         /* Add to large string buffer */
-        strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
+        // strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
+        strcat(s_buffer, hop_addr);
         strcat(s_buffer, " ");
         // strncat(s_buffer, " ", 2);
     }
