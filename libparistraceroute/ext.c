@@ -846,6 +846,7 @@ int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in)
 
     fprintf(stderr, "Debug: db_insert strings:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
             src_ip, dst_ip, hiats, hnts, hrfts, hats, hash);
+    /*
     fprintf(stderr,
             "INSERT INTO TRACEROUTE_DATA (START_TIME,\
     SOURCE_TCP_PORT,\
@@ -874,6 +875,7 @@ int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in)
             hnts,
             hrfts,
             hats);
+    */
 
     sprintf(sql,
             "INSERT INTO TRACEROUTE_DATA (START_TIME,\
@@ -943,9 +945,11 @@ char *hop_ip_addresses_to_string(traceroute *t)
 {
     char *s_buffer = malloc(sizeof(char) * 4096);
     char hop_addr[INET6_ADDRSTRLEN];
+    size_t s_len = 0;
 
     /* Insert opening string quotation mark */
-    strncat(s_buffer, "\"", 2);
+    s_buffer[0] = "\"";
+    // strncat(s_buffer, "\"", 2);
 
     for (int i = 0; i < t->hop_count; i++)
     {
@@ -953,14 +957,14 @@ char *hop_ip_addresses_to_string(traceroute *t)
         inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
         /* Add to large string buffer */
         strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
-        strncat(s_buffer, " ", 2);
+        strcat(s_buffer, " ");
+        // strncat(s_buffer, " ", 2);
     }
 
+    s_len = strlen(s_buffer);
     /* Replace final whitespace with closing string quotation mark */
-    s_buffer[strlen(s_buffer) - 1] = '\"';
-
-    /* Remove final whitespace */
-    // s_buffer[strlen(s_buffer) - 1] = '\0';
+    s_buffer[s_len - 1] = '\"';
+    s_buffer[s_len] = '\0';
     return s_buffer;
 }
 
