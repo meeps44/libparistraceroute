@@ -693,17 +693,17 @@ char *inet_addr_to_string(struct in6_addr *addr)
     char *addr_str = malloc(sizeof(char) * BUFFERSIZE);
 
     /* Insert opening string quotation mark */
-    strncat(addr_str, "\"", 2);
+    addr_str[0] = '\"';
 
     /* Convert address to string */
-    inet_ntop(AF_INET6, addr, (addr_str + 1), BUFFERSIZE);
+    inet_ntop(AF_INET6, addr, (addr_str + 1), INET6_ADDRSTRLEN);
+    // inet_ntop(AF_INET6, addr, (addr_str + 1), BUFFERSIZE);
 
     /* Insert closing string quotation mark */
-    strncat(addr_str, "\"", 2);
+    addr_str[BUFFERSIZE - 2] = '\"';
 
     /* Remove final whitespace */
     addr_str[BUFFERSIZE - 1] = '\0';
-    // memcpy(&addr_str[46], "\0", 1);
 
     return addr_str;
 }
