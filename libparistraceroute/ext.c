@@ -797,6 +797,8 @@ int db_close(sqlite3 *db)
     {
         fprintf(stderr, "Debug: DB connection closed successfully\n");
     }
+
+    fprintf(stderr, "Debug: db_close all done!\nresult_code: %d\n", result_code);
     return result_code;
 }
 
