@@ -953,21 +953,21 @@ char *hop_ip_addresses_to_string(traceroute *t)
     s_buffer[0] = '\"';
     // strncat(s_buffer, "\"", 2);
     // DEBUG
-    inet_ntop(AF_INET6, &t->hops[0].hop_address, hop_addr, sizeof(hop_addr));
-    strcat(s_buffer, hop_addr);
-    strcat(s_buffer, " ");
-    // END DEBUG
-
-    // for (int i = 0; i < t->hop_count; i++)
-    // {
-    // /* Convert address to string */
-    // inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
-    // /* Add to large string buffer */
-    // // strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
-    // // strncat(s_buffer, " ", 2);
+    // inet_ntop(AF_INET6, &t->hops[0].hop_address, hop_addr, sizeof(hop_addr));
     // strcat(s_buffer, hop_addr);
     // strcat(s_buffer, " ");
-    // }
+    // END DEBUG
+
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        /* Convert address to string */
+        inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
+        /* Add to large string buffer */
+        // strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
+        // strncat(s_buffer, " ", 2);
+        strcat(s_buffer, hop_addr);
+        strcat(s_buffer, " ");
+    }
 
     s_len = strlen(s_buffer);
     /* Replace final whitespace with closing string quotation mark */
