@@ -945,7 +945,7 @@ char *path_id_to_string(char *path_id)
 
 char *hop_ip_addresses_to_string(traceroute *t)
 {
-    char *s_buffer = malloc(sizeof(char) * INET6_ADDRSTRLEN * 36);
+    char *s_buffer = calloc(INET6_ADDRSTRLEN * 36, sizeof(char));
     char hop_addr[INET6_ADDRSTRLEN];
     size_t s_len = 0;
 
