@@ -46,13 +46,14 @@ traceroute *createTraceroute()
     return t;
 }
 
-int init_traceroute(char *src_ip, char *dst_ip)
+int init_traceroute(long start_time, char *src_ip, char *dst_ip)
 {
     if (t == NULL)
         return -1;
 
     /* Set timestamp */
-    t->timestamp = create_timestamp();
+    // t->timestamp = create_timestamp();
+    t->start_time = start_time;
 
     /* Set source ip */
     inet_pton(AF_INET6, src_ip, &t->source_ip);
@@ -585,9 +586,12 @@ int serialize_csv(char *fileName, traceroute *t)
         }
     }
 
-    /* Write to file */
-    static const char *HOP_FORMAT_OUT = "%d, %d, %s, %s, ";
-    static const char *HOP_FORMAT_LAST = "%d, %d, %s, %s";
+    /* Output format definitions */
+    static const char *STRING_FORMAT_OUT = "%s ";
+    static const char *NUMBER_FORMAT_OUT = "%d ";
+    static const char *STRING_FORMAT_LAST = "%s, ";
+    static const char *STRING_FORMAT_LAST_COLUMN = "%s";
+    static const char *NUMBER_FORMAT_LAST = "%d, ";
     static const char *TR_FORMAT_OUT = "%d, %d, %s, %s, %s, %s, %s, %s, %d, ";
 
     char src_addr[INET6_ADDRSTRLEN + 1];
@@ -614,6 +618,7 @@ int serialize_csv(char *fileName, traceroute *t)
             t->path_id,
             t->hop_count);
 
+    /* Write hop addresses */
     for (int i = 0; i < t->hop_count; i++)
     {
         /* Convert address to string before writing to file */
@@ -622,42 +627,416 @@ int serialize_csv(char *fileName, traceroute *t)
         if (i < t->hop_count - 1)
         {
             /* Write to file */
-            fprintf(file, HOP_FORMAT_OUT,
-                    t->hops[i].hopnumber,
-                    t->hops[i].returned_flowlabel,
-                    hop_addr,
-                    t->hops[i].hop_asn);
-#ifdef EXT_DEBUG
-            /* Write to stdout */
-            printf(HOP_FORMAT_OUT,
-                   t->hops[i].hopnumber,
-                   t->hops[i].returned_flowlabel,
-                   hop_addr,
-                   t->hops[i].hop_asn);
-#endif
+            fprintf(file, STRING_FORMAT_OUT, hop_addr);
         }
         else
         {
             /* Write to file */
-            fprintf(file, HOP_FORMAT_LAST,
-                    t->hops[i].hopnumber,
-                    t->hops[i].returned_flowlabel,
-                    hop_addr,
-                    t->hops[i].hop_asn);
-#ifdef EXT_DEBUG
-            /* Write to stdout */
-            printf(HOP_FORMAT_LAST,
-                   t->hops[i].hopnumber,
-                   t->hops[i].returned_flowlabel,
-                   hop_addr,
-                   t->hops[i].hop_asn);
-#endif
+            fprintf(file, STRING_FORMAT_LAST, hop_addr);
         }
     }
+
+    /* Write hop numbers */
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        if (i < t->hop_count - 1)
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_OUT, t->hops[i].hopnumber);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_LAST, t->hops[i].hopnumber);
+        }
+    }
+
+    /* Write returned flow labels*/
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        if (i < t->hop_count - 1)
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_OUT, t->hops[i].returned_flowlabel);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, NUMBER_FORMAT_LAST, t->hops[i].returned_flowlabel);
+        }
+    }
+
+    /* Write hop ASN */
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        if (i < t->hop_count - 1)
+        {
+            /* Write to file */
+            fprintf(file, STRING_FORMAT_OUT, t->hops[i].hop_asn);
+        }
+        else
+        {
+            /* Write to file */
+            fprintf(file, STRING_FORMAT_LAST_COLUMN, t->hops[i].hop_asn);
+        }
+    }
+
     fprintf(file, "\n");
     flock(fileno(file), LOCK_UN); // unlock file
     fclose(file);
     return 0;
+}
+
+char *inet_addr_to_string(struct in6_addr *addr)
+{
+    const size_t BUFFERSIZE = INET6_ADDRSTRLEN + 3;
+    char *addr_str = malloc(sizeof(char) * BUFFERSIZE);
+
+    /* Insert opening string quotation mark */
+    addr_str[0] = '\"';
+
+    /* Convert address to string */
+    inet_ntop(AF_INET6, addr, (addr_str + 1), INET6_ADDRSTRLEN);
+    fprintf(stderr, "Debug: inet_addr_to_string addr_str: %s\n", addr_str);
+    // inet_ntop(AF_INET6, addr, (addr_str + 1), BUFFERSIZE);
+
+    /* Insert closing string quotation mark */
+    addr_str[strlen(addr_str)] = '\"';
+
+    /* Remove final whitespace */
+    addr_str[strlen(addr_str) + 1] = '\0';
+
+    return addr_str;
+}
+
+sqlite3 *db_open_and_init(char *filename)
+{
+    sqlite3 *db;
+    int result_code;
+    result_code = sqlite3_open(filename, &db);
+    if (result_code)
+    {
+        fprintf(stderr, "Can't open database %s\n", sqlite3_errmsg(db));
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        fprintf(stderr, "Database opened successfully\n");
+    }
+
+    /*
+        From the documentation:
+        "This function registers an internal busy handler that keeps attempting to acquire a busy lock until the total specified time has passed.
+        Because this function registers an internal busy handler, any current busy handler is removed.
+        The timeout value can be explicitly removed by setting a timeout value of zero."
+    */
+    /* Set busy timeout */
+    sqlite3_busy_timeout(db, 120000); // 120 seconds
+
+    /* Create traceoute_data table */
+    db_create_table(db);
+
+    return db;
+}
+
+int db_create_table(sqlite3 *db)
+{
+    char *error_message;
+    int result_code;
+    char *sql;
+
+    /* Create table */
+    sql = "CREATE TABLE IF NOT EXISTS TRACEROUTE_DATA("
+          "START_TIME                INT      NOT NULL,"
+          "SOURCE_TCP_PORT           INT      NOT NULL,"
+          "SOURCE_FLOW_LABEL         INT      NOT NULL,"
+          "SOURCE_IP                 TEXT     NOT NULL,"
+          "SOURCE_ASN                TEXT     NOT NULL,"
+          "DESTINATION_IP            TEXT     NOT NULL,"
+          "DESTINATION_ASN           TEXT     NOT NULL,"
+          "PATH_HASH                 TEXT     NOT NULL,"
+          "HOP_COUNT                 INT      NOT NULL,"
+          "HOP_IP_ADDRESSES          TEXT     NOT NULL,"
+          "HOP_NUMBERS               TEXT     NOT NULL,"
+          "HOP_RETURNED_FLOW_LABELS  TEXT     NOT NULL,"
+          "HOP_ASNS                  TEXT     NOT NULL);";
+    fprintf(stderr, "Creating DB table\n");
+    if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &error_message)) != SQLITE_OK)
+    {
+        fprintf(stderr, "Debug: Create DB table error: %s\n", error_message);
+        return result_code;
+    }
+    else
+    {
+        fprintf(stderr, "Debug: DB table created successfully\n");
+    }
+
+    return result_code;
+}
+
+int db_callback(void *unused, int column_count, char **data, char **columns)
+{
+    int i;
+    for (i = 0; i < column_count; i++)
+    {
+        // For each column in the row, print its data
+        printf("%s = %s\n", columns[i], data[i] ? data[i] : "NULL");
+    }
+    printf("\n");
+    return 0;
+}
+
+void db_close(sqlite3 *db)
+{
+    /*
+    int result_code;
+    result_code = sqlite3_close(db);
+
+    if (result_code != SQLITE_OK)
+    {
+        fprintf(stderr, "Debug: DB connection failed to close successfully\n");
+    }
+    else
+    {
+        fprintf(stderr, "Debug: DB connection closed successfully\n");
+    }
+
+    fprintf(stderr, "Debug: db_close all done!\nresult_code: %d\n", result_code);
+    return result_code;
+    */
+    sqlite3_close(db);
+}
+
+int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in)
+{
+    char *error_message;
+    int result_code;
+    char sql[4096];
+    size_t s_len;
+
+    char src_ip[INET6_ADDRSTRLEN + 2];
+    char dst_ip[INET6_ADDRSTRLEN + 2];
+    src_ip[0] = '\"';
+    dst_ip[0] = '\"';
+    strcpy((src_ip + 1), src_ip_in);
+    strcpy((dst_ip + 1), dst_ip_in);
+    s_len = strlen(src_ip);
+    src_ip[s_len] = '\"';
+    src_ip[s_len + 1] = '\0';
+    s_len = strlen(dst_ip);
+    dst_ip[s_len] = '\"';
+    dst_ip[s_len + 1] = '\0';
+    /*
+    // char *src_ip = inet_addr_to_string(&t->source_ip);
+    // char *dst_ip = inet_addr_to_string(&t->destination_ip);
+    src_ip[0] = '\"';
+    dst_ip[0] = '\"';
+    inet_ntop(AF_INET6, &t->source_ip, (src_ip + 1), INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, &t->destination_ip, (dst_ip + 1), INET6_ADDRSTRLEN);
+    src_ip[strlen(src_ip)] = '\"';
+    // src_ip[strlen(src_ip) + 1] = '\0';
+    dst_ip[strlen(dst_ip)] = '\"';
+    // dst_ip[strlen(dst_ip) + 1] = '\0';
+    */
+    char *hiats = hop_ip_addresses_to_string(t);
+    char *hnts = hop_numbers_to_string(t);
+    char *hrfts = hop_returned_flowlabels_to_string(t);
+    char *hats = hop_asns_to_string(t);
+    char *hash = path_id_to_string(t->path_id);
+
+    // fprintf(stderr, "Debug: db_insert strings:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n",
+    // src_ip, dst_ip, hiats, hnts, hrfts, hats, hash);
+    fprintf(stderr, "Debug: db_insert strings hop addresses:\n%s\n",
+            hiats);
+    /*
+    fprintf(stderr,
+            "INSERT INTO TRACEROUTE_DATA (START_TIME,\
+    SOURCE_TCP_PORT,\
+    SOURCE_FLOW_LABEL,\
+    SOURCE_IP,\
+    SOURCE_ASN,\
+    DESTINATION_IP,\
+    DESTINATION_ASN,\
+    PATH_HASH,\
+    HOP_COUNT,\
+    HOP_IP_ADDRESSES,\
+    HOP_NUMBERS,\
+    HOP_RETURNED_FLOW_LABELS,\
+    HOP_ASNS) \
+    VALUES (%ld,%d,%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s);",
+            t->start_time,
+            t->outgoing_tcp_port,
+            t->outgoing_flow_label,
+            src_ip,
+            t->source_asn,
+            dst_ip,
+            t->destination_asn,
+            hash,
+            t->hop_count,
+            hiats,
+            hnts,
+            hrfts,
+            hats);
+    */
+
+    sprintf(sql,
+            "INSERT INTO TRACEROUTE_DATA (START_TIME,\
+    SOURCE_TCP_PORT,\
+    SOURCE_FLOW_LABEL,\
+    SOURCE_IP,\
+    SOURCE_ASN,\
+    DESTINATION_IP,\
+    DESTINATION_ASN,\
+    PATH_HASH,\
+    HOP_COUNT,\
+    HOP_IP_ADDRESSES,\
+    HOP_NUMBERS,\
+    HOP_RETURNED_FLOW_LABELS,\
+    HOP_ASNS) \
+    VALUES (%ld,%d,%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s);",
+            t->start_time,
+            t->outgoing_tcp_port,
+            t->outgoing_flow_label,
+            src_ip,
+            t->source_asn,
+            dst_ip,
+            t->destination_asn,
+            hash,
+            t->hop_count,
+            hiats,
+            hnts,
+            hrfts,
+            hats);
+    /* Insert into table */
+    if ((result_code = sqlite3_exec(db, sql, &db_callback, NULL, &error_message)) != SQLITE_OK)
+    {
+        // free(src_ip);
+        // free(dst_ip);
+        free(hiats);
+        free(hnts);
+        free(hrfts);
+        free(hats);
+        free(hash);
+        fprintf(stderr, "Debug: DB insert failed: %s\n", error_message);
+        return result_code;
+    }
+    // free(src_ip);
+    // free(dst_ip);
+    free(hiats);
+    free(hnts);
+    free(hrfts);
+    free(hats);
+    free(hash);
+
+    fprintf(stderr, "Debug: DB insert completed successfully\n");
+    return result_code;
+}
+
+char *path_id_to_string(char *path_id)
+{
+    const int BUFFERSIZE = 23;
+    char *s_buffer = malloc(sizeof(char) * BUFFERSIZE);
+    s_buffer[0] = '\"';
+    memcpy((s_buffer + 1), path_id, 20);
+    s_buffer[BUFFERSIZE - 2] = '\"';
+    s_buffer[BUFFERSIZE - 1] = '\0';
+    return s_buffer;
+}
+
+char *hop_ip_addresses_to_string(traceroute *t)
+{
+    char *s_buffer = calloc(INET6_ADDRSTRLEN * 36, sizeof(char));
+    char hop_addr[INET6_ADDRSTRLEN];
+    size_t s_len = 0;
+
+    /* Insert opening string quotation mark */
+    s_buffer[0] = '\"';
+    // strncat(s_buffer, "\"", 2);
+    // DEBUG
+    // inet_ntop(AF_INET6, &t->hops[0].hop_address, hop_addr, sizeof(hop_addr));
+    // strcat(s_buffer, hop_addr);
+    // strcat(s_buffer, " ");
+    // END DEBUG
+
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        /* Convert address to string */
+        inet_ntop(AF_INET6, &t->hops[i].hop_address, hop_addr, sizeof(hop_addr));
+        /* Add to large string buffer */
+        // strncat(s_buffer, hop_addr, INET6_ADDRSTRLEN);
+        // strncat(s_buffer, " ", 2);
+        strcat(s_buffer, hop_addr);
+        strcat(s_buffer, " ");
+    }
+
+    s_len = strlen(s_buffer);
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[s_len - 1] = '\"';
+    s_buffer[s_len] = '\0';
+    fprintf(stderr, "Debug: hop_ip_addresses_to_string: full string:\n%s\n", s_buffer);
+    return s_buffer;
+}
+
+char *hop_numbers_to_string(traceroute *t)
+{
+    char *s_buffer = malloc(sizeof(char) * 4096);
+    char i_buffer[100];
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        /* Convert hop number to string */
+        sprintf(i_buffer, "%d", t->hops[i].hopnumber);
+        /* Concat hop number with string buffer */
+        strncat(s_buffer, i_buffer, 2048);
+        strncat(s_buffer, " ", 2);
+    }
+
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
+    return s_buffer;
+}
+
+char *hop_returned_flowlabels_to_string(traceroute *t)
+{
+    char *s_buffer = malloc(sizeof(char) * 4096);
+    char i_buffer[100];
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        /* Convert hop number to string */
+        sprintf(i_buffer, "%d", t->hops[i].returned_flowlabel);
+        /* Concat hop number with string buffer */
+        strncat(s_buffer, i_buffer, 2048);
+        strncat(s_buffer, " ", 2);
+    }
+
+    /* Insert closing string quotation mark */
+    // strncat(s_buffer, "\"", 2);
+
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
+    return s_buffer;
+}
+
+char *hop_asns_to_string(traceroute *t)
+{
+    char *s_buffer = malloc(sizeof(char) * 4096);
+
+    /* Insert opening string quotation mark */
+    strncat(s_buffer, "\"", 2);
+    for (int i = 0; i < t->hop_count; i++)
+    {
+        strncat(s_buffer, t->hops[i].hop_asn, 2048);
+        strncat(s_buffer, " ", 2);
+    }
+
+    /* Replace final whitespace with closing string quotation mark */
+    s_buffer[strlen(s_buffer) - 1] = '\"';
+    return s_buffer;
 }
 
 int serialize_bytes(char *fileName, traceroute *t)

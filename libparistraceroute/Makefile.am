@@ -175,7 +175,7 @@ libparistraceroute_@LIBRARY_VERSION@_la_SOURCES =    \
 ## that all version information is kept in one place.
 #libparistraceroute_@LIBRARY_VERSION@_la_LDFLAGS = -lm -version-info @API_VERSION@
 # Erlend:
-libparistraceroute_@LIBRARY_VERSION@_la_LDFLAGS = -lcrypto -lssl -lm -version-info @API_VERSION@
+libparistraceroute_@LIBRARY_VERSION@_la_LDFLAGS = -lsqlite3 -lcrypto -lssl -lm -version-info @API_VERSION@
 
 ## Define the list of public header files and their install location.  The
 ## nobase_ prefix instructs Automake to not strip the directory part from each

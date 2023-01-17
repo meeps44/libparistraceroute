@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <openssl/sha.h> // SHA1
 #include <netinet/in.h>  //in6_addr
+#include <sqlite3.h>
 #include "packet.h"
 
 #define HOP_MAX 35
@@ -93,6 +94,7 @@ typedef struct hop
 
 typedef struct traceroute
 {
+    long start_time;
     uint16_t outgoing_tcp_port;
     int outgoing_flow_label;
     char *timestamp;
@@ -138,7 +140,7 @@ traceroute *createTraceroute(void);
  *
  * @return int 0 if successful, -1 on error.
  */
-int init_traceroute(char *src_ip, char *dst_ip);
+int init_traceroute(long start_time, char *src_ip, char *dst_ip);
 
 /**
  * @brief Create a Hop object initalized to zero
@@ -448,4 +450,29 @@ const char *printAddress(struct in6_addr *i6);
  * Linkage example: gcc sha1-in-c.c -lcrypto
  */
 uint8_t *hashPathTuple(addr_tuple arr[], int arraySize);
+
+char *inet_addr_to_string(struct in6_addr *addr);
+
+sqlite3 *db_open_and_init(char *filename);
+
+int db_create_table(sqlite3 *db);
+
+int db_callback(void *unused, int column_count, char **data, char **columns);
+
+int db_insert(sqlite3 *db, traceroute *t, char *src_ip_in, char *dst_ip_in);
+
+char *hop_ip_addresses_to_string(traceroute *t);
+
+char *hop_numbers_to_string(traceroute *t);
+
+char *hop_returned_flowlabels_to_string(traceroute *t);
+
+char *hop_asns_to_string(traceroute *t);
+
+char *path_id_to_string(char *path_id);
+
+void db_close(sqlite3 *db);
+
+int serialize_bytes(char *fileName, traceroute *t);
+
 #endif

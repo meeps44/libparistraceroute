@@ -27,7 +27,8 @@ paris_traceroute_CFLAGS = \
 paris_traceroute_LDADD = \
 	../libparistraceroute/libparistraceroute-@LIBRARY_VERSION@.la \
 	-lcrypto \
-	-lssl
+	-lssl \
+	-lsqlite3
 
 # Erlend:
 #paris_traceroute_LDFLAGS = \ 

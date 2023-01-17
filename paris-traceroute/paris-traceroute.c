@@ -1,6 +1,7 @@
 #include "config.h"
 #include "ext.h" // erlend
 #include <openssl/sha.h>
+#include <sqlite3.h>
 
 #include <stdlib.h>     // malloc...
 #include <stdio.h>      // perror, printf
@@ -341,10 +342,12 @@ int main(int argc, char **argv)
     bool use_icmp, use_udp, use_tcp;
     // BEGIN ERLEND //
     int flow_label;
-    char *csv_file;
+    // char *csv_file;
+    char *db_file;
     uint16_t dport_tmp = 0;
     traceroute *t;
     char *src_ip;
+    long start_time; // the current date as a Unix timestamp (seconds since the Unix epoch) $(date +%s)
     // END ERLEND //
 
     // Prepare the commande line options
@@ -367,9 +370,12 @@ int main(int argc, char **argv)
     // BEGIN ERLEND //
     // We assume that the flow-label is always the second-to-last argument
     flow_label = atoi(argv[argc - 2]);
-    csv_file = argv[argc - 3];
+    db_file = argv[argc - 3];
+    // csv_file = argv[argc - 3];
     src_ip = argv[argc - 4];
+    start_time = atoi(argv[argc - 5]);
     set_flow_label(flow_label);
+    sqlite3 *db = db_open_and_init(db_file);
     // END ERLEND //
 
     // We assume that the target IP address is always the last argument
@@ -505,7 +511,7 @@ int main(int argc, char **argv)
     t->outgoing_flow_label = flow_label;
     t->outgoing_tcp_port = dport_tmp;
 
-    init_traceroute(src_ip, dst_ip);
+    init_traceroute(start_time, src_ip, dst_ip);
     //  END ERLEND //
 
     // Create libparistraceroute loop
@@ -561,7 +567,12 @@ int main(int argc, char **argv)
     strcpy(t->path_id, output_buffer);
 
     /* Traceroute all done. Saving results to disk. */
-    serialize_csv(csv_file, t);
+    // serialize_csv(csv_file, t);
+    db_insert(db, t, src_ip, dst_ip);
+    fprintf(stderr, "Debug: Closing DB connection\n");
+    // sqlite3_close(db);
+    db_close(db);
+    fprintf(stderr, "Debug: All done! Freeing memory and calling exit()\n");
     //  END ERLEND //
 
     // Leave the program
