@@ -190,7 +190,6 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
 #endif
 
         uint8_t nh = ip6h->next_header;
-        /*
         switch (nh)
         {
         case NH_ICMPv6:
@@ -215,8 +214,10 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
             }
         default:
             return NULL;
-        } */
+        }
 
+        /*
+        // Parsing extension headers
         uint8_t *nh_first_byte = first_byte + IPV6_HEADER_LENGTH;
         uint8_t h_len = 0;
         bool quit = false;
@@ -290,7 +291,7 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
 #endif
                 return NULL;
             };
-        }
+        }*/
     }
 #ifdef EXT_DEBUG
     fprintf(stderr, "get_inner_ipv6_header: Error: packet is not an IPv6-packet.");
