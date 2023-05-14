@@ -190,25 +190,51 @@ ipv6_header *get_inner_ipv6_header(uint8_t *first_byte)
 #endif
 
         uint8_t nh = ip6h->next_header;
+        /*
+        switch (nh)
+        {
+        case NH_ICMPv6:
+            icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
+            switch (icmp6->type)
+            {
+            case ICMP_TIME_EXCEEDED:
+                inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+                return inner_ipv6;
+            case ICMP_DESTINATION_UNREACHABLE:
+                if (icmp6->code == 4)
+                {
+                    inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+                    return inner_ipv6;
+                }
+                else
+                {
+                    return NULL;
+                }
+            default:
+                return NULL;
+            }
+        default:
+            return NULL;
+        } */
+
         uint8_t *nh_first_byte = first_byte + IPV6_HEADER_LENGTH;
         uint8_t h_len = 0;
-
         bool quit = false;
         while (!quit)
         {
             switch (nh)
             {
             case NH_ICMPv6:
-                icmp6 = parse_icmp6(first_byte + IPV6_HEADER_LENGTH);
+                icmp6 = parse_icmp6(nh_first_byte);
                 switch (icmp6->type)
                 {
                 case ICMP_TIME_EXCEEDED:
-                    inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+                    inner_ipv6 = parse_ipv6(nh_first_byte + ICMPV6_HEADER_LENGTH);
                     return inner_ipv6;
                 case ICMP_DESTINATION_UNREACHABLE:
                     if (icmp6->code == 4)
                     {
-                        inner_ipv6 = parse_ipv6(first_byte + IPV6_HEADER_LENGTH + ICMPV6_HEADER_LENGTH);
+                        inner_ipv6 = parse_ipv6(nh_first_byte + ICMPV6_HEADER_LENGTH);
                         return inner_ipv6;
                     }
                     else
